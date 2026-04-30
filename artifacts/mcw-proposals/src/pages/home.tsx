@@ -22,7 +22,7 @@ export default function Home() {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Link href="/sign-in" className="inline-flex h-14 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
+          <Link href="/admin" className="inline-flex h-14 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
             Access Portal
           </Link>
         </div>
