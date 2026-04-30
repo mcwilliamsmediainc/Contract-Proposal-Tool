@@ -10,6 +10,12 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: proposals
+    description: Proposal management
+  - name: admin
+    description: Admin dashboard analytics
+  - name: gemini
+    description: Gemini AI chat and image operations
 paths:
   /healthz:
     get:
@@ -24,6 +30,332 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /proposals:
+    get:
+      operationId: listProposals
+      tags: [proposals]
+      summary: List all proposals
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [draft, sent, accepted, archived]
+      responses:
+        "200":
+          description: List of proposals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Proposal"
+    post:
+      operationId: createProposal
+      tags: [proposals]
+      summary: Create a new proposal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProposalBody"
+      responses:
+        "201":
+          description: Created proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+
+  /proposals/{id}:
+    get:
+      operationId: getProposal
+      tags: [proposals]
+      summary: Get a proposal by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Proposal details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    patch:
+      operationId: updateProposal
+      tags: [proposals]
+      summary: Update a proposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProposalBody"
+      responses:
+        "200":
+          description: Updated proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteProposal
+      tags: [proposals]
+      summary: Delete a proposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /proposals/{id}/accept:
+    post:
+      operationId: acceptProposal
+      tags: [proposals]
+      summary: Accept a proposal with digital signature
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptProposalBody"
+      responses:
+        "200":
+          description: Accepted proposal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /proposals/{id}/view:
+    post:
+      operationId: recordProposalView
+      tags: [proposals]
+      summary: Record a view event for a proposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: View recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
+
+  /proposals/generate:
+    post:
+      operationId: generateProposalContent
+      tags: [proposals]
+      summary: Generate proposal content using Gemini AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateProposalBody"
+      responses:
+        "200":
+          description: Generated proposal content
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeneratedProposalContent"
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Get admin dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /gemini/conversations:
+    get:
+      operationId: listGeminiConversations
+      tags: [gemini]
+      summary: List all conversations
+      responses:
+        "200":
+          description: List of conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeminiConversation"
+    post:
+      operationId: createGeminiConversation
+      tags: [gemini]
+      summary: Create a new conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateGeminiConversationBody"
+      responses:
+        "201":
+          description: Created conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiConversation"
+
+  /gemini/conversations/{id}:
+    get:
+      operationId: getGeminiConversation
+      tags: [gemini]
+      summary: Get conversation with messages
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversation with messages
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiConversationWithMessages"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiError"
+    delete:
+      operationId: deleteGeminiConversation
+      tags: [gemini]
+      summary: Delete a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiError"
+
+  /gemini/conversations/{id}/messages:
+    get:
+      operationId: listGeminiMessages
+      tags: [gemini]
+      summary: List messages in a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeminiMessage"
+    post:
+      operationId: sendGeminiMessage
+      tags: [gemini]
+      summary: Send a message and receive an AI response (SSE stream)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendGeminiMessageBody"
+      responses:
+        "200":
+          description: SSE stream of assistant response chunks
+          content:
+            text/event-stream: {}
+
+  /gemini/generate-image:
+    post:
+      operationId: generateGeminiImage
+      tags: [gemini]
+      summary: Generate an image from a text prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GenerateGeminiImageBody"
+      responses:
+        "200":
+          description: Generated image data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GenerateGeminiImageResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +366,286 @@ components:
       required:
         - status
 
+    Proposal:
+      type: object
+      properties:
+        id:
+          type: string
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        projectType:
+          type: string
+          enum: [web, marketing, print]
+        status:
+          type: string
+          enum: [draft, sent, accepted, archived]
+        totalAmount:
+          type: number
+        content:
+          type: string
+          nullable: true
+        specialContext:
+          type: string
+          nullable: true
+        loomVideoUrl:
+          type: string
+          nullable: true
+        calendlyUrl:
+          type: string
+          nullable: true
+        signatureData:
+          type: string
+          nullable: true
+        signedAt:
+          type: string
+          format: date-time
+          nullable: true
+        viewCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clientName
+        - businessName
+        - clientEmail
+        - projectType
+        - status
+        - totalAmount
+        - viewCount
+        - createdAt
+        - updatedAt
+
+    CreateProposalBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        projectType:
+          type: string
+          enum: [web, marketing, print]
+        totalAmount:
+          type: number
+        specialContext:
+          type: string
+          nullable: true
+        content:
+          type: string
+          nullable: true
+        loomVideoUrl:
+          type: string
+          nullable: true
+        calendlyUrl:
+          type: string
+          nullable: true
+      required:
+        - clientName
+        - businessName
+        - clientEmail
+        - projectType
+        - totalAmount
+
+    UpdateProposalBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        projectType:
+          type: string
+          enum: [web, marketing, print]
+        totalAmount:
+          type: number
+        status:
+          type: string
+          enum: [draft, sent, accepted, archived]
+        content:
+          type: string
+          nullable: true
+        specialContext:
+          type: string
+          nullable: true
+        loomVideoUrl:
+          type: string
+          nullable: true
+        calendlyUrl:
+          type: string
+          nullable: true
+
+    AcceptProposalBody:
+      type: object
+      properties:
+        signatureData:
+          type: string
+      required:
+        - signatureData
+
+    GenerateProposalBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        businessName:
+          type: string
+        projectType:
+          type: string
+          enum: [web, marketing, print]
+        totalAmount:
+          type: number
+        specialContext:
+          type: string
+          nullable: true
+      required:
+        - clientName
+        - businessName
+        - projectType
+        - totalAmount
+
+    GeneratedProposalContent:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+
+    AdminStats:
+      type: object
+      properties:
+        totalEngagement:
+          type: integer
+        activePipeline:
+          type: integer
+        conversionRate:
+          type: number
+        totalProposals:
+          type: integer
+        draftCount:
+          type: integer
+        sentCount:
+          type: integer
+        acceptedCount:
+          type: integer
+      required:
+        - totalEngagement
+        - activePipeline
+        - conversionRate
+        - totalProposals
+        - draftCount
+        - sentCount
+        - acceptedCount
+
+    ApiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    GeminiConversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - createdAt
+    GeminiMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+    CreateGeminiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
+    SendGeminiMessageBody:
+      type: object
+      properties:
+        content:
+          type: string
+      required:
+        - content
+    GeminiConversationWithMessages:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/GeminiMessage"
+      required:
+        - id
+        - title
+        - createdAt
+        - messages
+    GenerateGeminiImageBody:
+      type: object
+      properties:
+        prompt:
+          type: string
+      required:
+        - prompt
+    GenerateGeminiImageResponse:
+      type: object
+      properties:
+        b64_json:
+          type: string
+        mimeType:
+          type: string
+      required:
+        - b64_json
+        - mimeType
+    GeminiError:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error

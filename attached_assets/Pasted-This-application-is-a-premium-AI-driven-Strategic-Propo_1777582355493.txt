@@ -1,0 +1,47 @@
+This application is a premium, AI-driven Strategic Proposal & Onboarding Ecosystem designed for a high-end digital agency. It bridges the gap between initial sales contact and client activation through a sophisticated, high-performance interface.
+
+Core Architectural Prompt for AI Builder:
+Build a React-based (Vite) full-stack application using Tailwind CSS, Motion (Framer Motion) for luxury animations, and Firebase (Firestore + Google Auth) for an encrypted data layer. The app must integrate the Google Gemini API for strategic content generation.
+
+1. The Aesthetic DNA:
+Mood: "Architectural Excellence." High-contrast, minimalist, technical, and premium.
+
+Color Palette: Slate-900/950 for depth, pure white for clarity, and a signature Blue-600 for strategic accents.
+
+Typography: A precise mix of Inter (Sans) for readability and JetBrains Mono for technical metadata and branding elements.
+
+Branding: A monospaced "M" icon inside a rounded square, representing "McWilliams Media."
+
+2. The Strategic Proposal Engine:
+The Builder (Admin side): A streamlined, vertically-scrolling single-column interface.
+
+Client Info Section: Captures name, business, email, and project type (Web, Marketing, Print) with dynamic fee/scope inputs based on selection.
+
+AI Context Brain: A dedicated high-priority input field for "Special Context & Notes" where the user provides background info for the AI.
+
+Generation Hub: A prominent "Execute Strategic Generation" button that calls Gemini to draft a complete proposal (Overview, Process, Deliverables, Investment).
+
+Inline Portal Preview: On generation, a shadow-boxed, scrollable iframe-style preview of the actual client portal renders directly on the page for instant auditing.
+
+3. The Client Portal (Proposal View):
+Hero Section: A cinematic, dark-themed experience with large-scale typography (8xl+), ambient "noise" gradients, and luxury motion effects. It must display the Client Name and "Strategic Project Proposal" prominently.
+
+Interactive Components: Integrated support for embedding Loom/YouTube video greetings and Calendly booking widgets.
+
+Content Sections: Staggered entrance animations for Discovery, Design, and Development phases.
+
+Activation: A professional digital signature pad and "Accept Strategy" workflow that triggers a terminal state change in the database.
+
+4. Admin Control & Onboarding:
+Admin Dashboard: A high-density grid showing current engagement (view counts, status: Sent/Accepted/Draft).
+
+Onboarding Pipeline: A specialized portal specifically for "Signed" contracts. It tracks the "Phase 1: Discovery" health, providing a roadmap for growth for newly activated accounts.
+
+Role-Based Security: Strict admin-only access for creation and management, with public access only for specific proposal UUIDs.
+
+5. Technical Requirements:
+State Management: Real-time listeners (onSnapshot) for live dashboard updates.
+
+Intelligence: Gemini API prompt engineering designed to focus on "Strategic Vision" and "Business Outcomes" rather than just technical features.
+
+Responsive: Desktop-first precision for the builder, mobile-optimized for the client portal.

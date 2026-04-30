@@ -14,3 +14,290 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all proposals
+ */
+export const ListProposalsQueryParams = zod.object({
+  status: zod.enum(["draft", "sent", "accepted", "archived"]).optional(),
+});
+
+export const ListProposalsResponseItem = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  status: zod.enum(["draft", "sent", "accepted", "archived"]),
+  totalAmount: zod.number(),
+  content: zod.string().nullish(),
+  specialContext: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  viewCount: zod.number(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListProposalsResponse = zod.array(ListProposalsResponseItem);
+
+/**
+ * @summary Create a new proposal
+ */
+export const CreateProposalBody = zod.object({
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  totalAmount: zod.number(),
+  specialContext: zod.string().nullish(),
+  content: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+});
+
+/**
+ * @summary Get a proposal by ID
+ */
+export const GetProposalParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetProposalResponse = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  status: zod.enum(["draft", "sent", "accepted", "archived"]),
+  totalAmount: zod.number(),
+  content: zod.string().nullish(),
+  specialContext: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  viewCount: zod.number(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update a proposal
+ */
+export const UpdateProposalParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateProposalBody = zod.object({
+  clientName: zod.string().optional(),
+  businessName: zod.string().optional(),
+  clientEmail: zod.string().optional(),
+  projectType: zod.enum(["web", "marketing", "print"]).optional(),
+  totalAmount: zod.number().optional(),
+  status: zod.enum(["draft", "sent", "accepted", "archived"]).optional(),
+  content: zod.string().nullish(),
+  specialContext: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+});
+
+export const UpdateProposalResponse = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  status: zod.enum(["draft", "sent", "accepted", "archived"]),
+  totalAmount: zod.number(),
+  content: zod.string().nullish(),
+  specialContext: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  viewCount: zod.number(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a proposal
+ */
+export const DeleteProposalParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Accept a proposal with digital signature
+ */
+export const AcceptProposalParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AcceptProposalBody = zod.object({
+  signatureData: zod.string(),
+});
+
+export const AcceptProposalResponse = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  status: zod.enum(["draft", "sent", "accepted", "archived"]),
+  totalAmount: zod.number(),
+  content: zod.string().nullish(),
+  specialContext: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  viewCount: zod.number(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Record a view event for a proposal
+ */
+export const RecordProposalViewParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const RecordProposalViewResponse = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  status: zod.enum(["draft", "sent", "accepted", "archived"]),
+  totalAmount: zod.number(),
+  content: zod.string().nullish(),
+  specialContext: zod.string().nullish(),
+  loomVideoUrl: zod.string().nullish(),
+  calendlyUrl: zod.string().nullish(),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  viewCount: zod.number(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Generate proposal content using Gemini AI
+ */
+export const GenerateProposalContentBody = zod.object({
+  clientName: zod.string(),
+  businessName: zod.string(),
+  projectType: zod.enum(["web", "marketing", "print"]),
+  totalAmount: zod.number(),
+  specialContext: zod.string().nullish(),
+});
+
+export const GenerateProposalContentResponse = zod.object({
+  content: zod.string(),
+});
+
+/**
+ * @summary Get admin dashboard statistics
+ */
+export const GetAdminStatsResponse = zod.object({
+  totalEngagement: zod.number(),
+  activePipeline: zod.number(),
+  conversionRate: zod.number(),
+  totalProposals: zod.number(),
+  draftCount: zod.number(),
+  sentCount: zod.number(),
+  acceptedCount: zod.number(),
+});
+
+/**
+ * @summary List all conversations
+ */
+export const ListGeminiConversationsResponseItem = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListGeminiConversationsResponse = zod.array(
+  ListGeminiConversationsResponseItem,
+);
+
+/**
+ * @summary Create a new conversation
+ */
+export const CreateGeminiConversationBody = zod.object({
+  title: zod.string(),
+});
+
+/**
+ * @summary Get conversation with messages
+ */
+export const GetGeminiConversationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetGeminiConversationResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  createdAt: zod.coerce.date(),
+  messages: zod.array(
+    zod.object({
+      id: zod.number(),
+      conversationId: zod.number(),
+      role: zod.string(),
+      content: zod.string(),
+      createdAt: zod.coerce.date(),
+    }),
+  ),
+});
+
+/**
+ * @summary Delete a conversation
+ */
+export const DeleteGeminiConversationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary List messages in a conversation
+ */
+export const ListGeminiMessagesParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const ListGeminiMessagesResponseItem = zod.object({
+  id: zod.number(),
+  conversationId: zod.number(),
+  role: zod.string(),
+  content: zod.string(),
+  createdAt: zod.coerce.date(),
+});
+export const ListGeminiMessagesResponse = zod.array(
+  ListGeminiMessagesResponseItem,
+);
+
+/**
+ * @summary Send a message and receive an AI response (SSE stream)
+ */
+export const SendGeminiMessageParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const SendGeminiMessageBody = zod.object({
+  content: zod.string(),
+});
+
+/**
+ * @summary Generate an image from a text prompt
+ */
+export const GenerateGeminiImageBody = zod.object({
+  prompt: zod.string(),
+});
+
+export const GenerateGeminiImageResponse = zod.object({
+  b64_json: zod.string(),
+  mimeType: zod.string(),
+});

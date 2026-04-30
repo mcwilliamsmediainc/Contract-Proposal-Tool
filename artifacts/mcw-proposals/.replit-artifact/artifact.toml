@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "McWilliams Media Proposals"
+version = "1.0.0"
+id = "artifacts/mcw-proposals"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23919
+
+[services.development]
+run = "pnpm --filter @workspace/mcw-proposals run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mcw-proposals", "run", "build" ]
+publicDir = "artifacts/mcw-proposals/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23919"
+BASE_PATH = "/"

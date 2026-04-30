@@ -1,27 +1,102 @@
-# Workspace
+# McWilliams Media — Strategic Proposal & Onboarding Ecosystem
 
-## Overview
+## Project Overview
 
-pnpm workspace monorepo using TypeScript. Each package manages its own dependencies.
+A premium AI-driven proposal and client onboarding platform for McWilliams Media, a high-end digital agency. The system allows admins to create cinematic proposals with Gemini AI content generation, and clients to view and digitally sign those proposals through an immersive portal.
 
-## Stack
+## Architecture
 
-- **Monorepo tool**: pnpm workspaces
-- **Node.js version**: 24
-- **Package manager**: pnpm
-- **TypeScript version**: 5.9
-- **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
-- **Validation**: Zod (`zod/v4`), `drizzle-zod`
-- **API codegen**: Orval (from OpenAPI spec)
-- **Build**: esbuild (CJS bundle)
+### Monorepo Structure
 
-## Key Commands
+```
+artifacts/
+  api-server/       — Express API server (port 8080, proxied at /api)
+  mcw-proposals/    — React+Vite frontend (port 23919, proxied at /)
+lib/
+  api-spec/         — OpenAPI spec + codegen config
+  api-client-react/ — Generated React Query hooks (from codegen)
+  api-zod/          — Generated Zod validation schemas (from codegen)
+  db/               — Drizzle ORM schema + migrations (PostgreSQL)
+  integrations-gemini-ai/ — Gemini AI client wrapper
+```
 
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- `pnpm --filter @workspace/api-server run dev` — run API server locally
+### Tech Stack
 
-See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details.
+- **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Framer Motion
+- **Auth**: Clerk (Google Sign-in) — admin routes protected, client portal is public
+- **Backend**: Express.js, TypeScript, Drizzle ORM
+- **Database**: PostgreSQL (Replit-managed)
+- **AI**: Google Gemini via Replit AI Integrations (`gemini-2.5-flash`)
+- **API Contract**: OpenAPI 3.0 spec → codegen → Zod schemas + React Query hooks
+
+## Key Features
+
+1. **Landing Page** (`/`) — Cinematic dark hero with "Access Portal" CTA
+2. **Admin Dashboard** (`/admin`) — Protected by Clerk; stats grid + searchable proposals table
+3. **Proposal Builder** (`/admin/proposals/new`) — AI-assisted content generation via Gemini
+4. **Proposal Editor** (`/admin/proposals/:id/edit`) — Edit existing proposals
+5. **Client Portal** (`/proposal/:uuid`) — Immersive, unauthenticated cinematic experience
+   - Digital signature pad (signature_pad library)
+   - Markdown content rendering (react-markdown + remark-gfm)
+   - Loom/YouTube and Calendly embed support
+6. **Onboarding Pipeline** (`/admin/onboarding`) — Post-signature onboarding steps
+
+## API Endpoints
+
+- `GET /api/healthz` — Health check
+- `GET /api/proposals` — List proposals (admin auth required)
+- `POST /api/proposals` — Create proposal (admin auth required)
+- `GET /api/proposals/:uuid` — Get proposal by UUID (public)
+- `PATCH /api/proposals/:uuid` — Update proposal (admin auth required)
+- `DELETE /api/proposals/:uuid` — Delete proposal (admin auth required)
+- `POST /api/proposals/generate` — AI content generation via Gemini
+- `POST /api/proposals/:uuid/accept` — Accept/sign proposal (public)
+- `POST /api/proposals/:uuid/view` — Record view event (public)
+- `GET /api/admin/stats` — Dashboard stats (admin auth required)
+- `POST /api/gemini/chat` — Gemini chat endpoint
+- `POST /api/gemini/image` — Gemini image analysis endpoint
+
+## Database Schema
+
+### `proposals` table
+- `id` (serial PK), `uuid` (public-facing), `clientName`, `clientEmail`
+- `title`, `content` (markdown), `status` (draft/sent/viewed/accepted)
+- `signatureDataUrl`, `signedAt`, `viewedAt`, `sentAt`
+- `loomUrl`, `calendlyUrl`, `value` (numeric)
+- `createdAt`, `updatedAt`
+
+### `conversations` table
+- `id`, `proposalId` (FK), `createdAt`
+
+### `messages` table
+- `id`, `conversationId` (FK), `role` (user/assistant), `content`, `createdAt`
+
+## Environment Variables
+
+- `DATABASE_URL` — PostgreSQL connection string (Replit-managed)
+- `SESSION_SECRET` — Express session secret
+- `CLERK_SECRET_KEY` — Clerk backend key
+- `CLERK_PUBLISHABLE_KEY` — Clerk publishable key
+- `VITE_CLERK_PUBLISHABLE_KEY` — Clerk key for frontend
+- `AI_INTEGRATIONS_GEMINI_BASE_URL` — Gemini AI proxy base URL
+- `AI_INTEGRATIONS_GEMINI_API_KEY` — Gemini AI proxy key
+
+## Codegen
+
+To regenerate API client code after editing `lib/api-spec/openapi.yaml`:
+
+```bash
+pnpm --filter @workspace/api-spec run codegen
+```
+
+## Development
+
+Workflows are managed by Replit:
+- **API Server**: `pnpm --filter @workspace/api-server run dev`
+- **Web Frontend**: `pnpm --filter @workspace/mcw-proposals run dev`
+
+## Notes
+
+- The `@google/genai` package is intentionally NOT in the esbuild externals list — it bundles fine and is only installed in `lib/integrations-gemini-ai`
+- Proposals use a `uuid` column as the public-facing identifier (not the serial `id`)
+- Clerk proxy middleware handles auth header forwarding from frontend to API

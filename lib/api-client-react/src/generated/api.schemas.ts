@@ -8,3 +8,189 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type ProposalProjectType =
+  (typeof ProposalProjectType)[keyof typeof ProposalProjectType];
+
+export const ProposalProjectType = {
+  web: "web",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export type ProposalStatus =
+  (typeof ProposalStatus)[keyof typeof ProposalStatus];
+
+export const ProposalStatus = {
+  draft: "draft",
+  sent: "sent",
+  accepted: "accepted",
+  archived: "archived",
+} as const;
+
+export interface Proposal {
+  id: string;
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  projectType: ProposalProjectType;
+  status: ProposalStatus;
+  totalAmount: number;
+  content?: string | null;
+  specialContext?: string | null;
+  loomVideoUrl?: string | null;
+  calendlyUrl?: string | null;
+  signatureData?: string | null;
+  signedAt?: string | null;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateProposalBodyProjectType =
+  (typeof CreateProposalBodyProjectType)[keyof typeof CreateProposalBodyProjectType];
+
+export const CreateProposalBodyProjectType = {
+  web: "web",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export interface CreateProposalBody {
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  projectType: CreateProposalBodyProjectType;
+  totalAmount: number;
+  specialContext?: string | null;
+  content?: string | null;
+  loomVideoUrl?: string | null;
+  calendlyUrl?: string | null;
+}
+
+export type UpdateProposalBodyProjectType =
+  (typeof UpdateProposalBodyProjectType)[keyof typeof UpdateProposalBodyProjectType];
+
+export const UpdateProposalBodyProjectType = {
+  web: "web",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export type UpdateProposalBodyStatus =
+  (typeof UpdateProposalBodyStatus)[keyof typeof UpdateProposalBodyStatus];
+
+export const UpdateProposalBodyStatus = {
+  draft: "draft",
+  sent: "sent",
+  accepted: "accepted",
+  archived: "archived",
+} as const;
+
+export interface UpdateProposalBody {
+  clientName?: string;
+  businessName?: string;
+  clientEmail?: string;
+  projectType?: UpdateProposalBodyProjectType;
+  totalAmount?: number;
+  status?: UpdateProposalBodyStatus;
+  content?: string | null;
+  specialContext?: string | null;
+  loomVideoUrl?: string | null;
+  calendlyUrl?: string | null;
+}
+
+export interface AcceptProposalBody {
+  signatureData: string;
+}
+
+export type GenerateProposalBodyProjectType =
+  (typeof GenerateProposalBodyProjectType)[keyof typeof GenerateProposalBodyProjectType];
+
+export const GenerateProposalBodyProjectType = {
+  web: "web",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export interface GenerateProposalBody {
+  clientName: string;
+  businessName: string;
+  projectType: GenerateProposalBodyProjectType;
+  totalAmount: number;
+  specialContext?: string | null;
+}
+
+export interface GeneratedProposalContent {
+  content: string;
+}
+
+export interface AdminStats {
+  totalEngagement: number;
+  activePipeline: number;
+  conversionRate: number;
+  totalProposals: number;
+  draftCount: number;
+  sentCount: number;
+  acceptedCount: number;
+}
+
+export interface ApiError {
+  error: string;
+}
+
+export interface GeminiConversation {
+  id: number;
+  title: string;
+  createdAt: string;
+}
+
+export interface GeminiMessage {
+  id: number;
+  conversationId: number;
+  role: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface CreateGeminiConversationBody {
+  title: string;
+}
+
+export interface SendGeminiMessageBody {
+  content: string;
+}
+
+export interface GeminiConversationWithMessages {
+  id: number;
+  title: string;
+  createdAt: string;
+  messages: GeminiMessage[];
+}
+
+export interface GenerateGeminiImageBody {
+  prompt: string;
+}
+
+export interface GenerateGeminiImageResponse {
+  b64_json: string;
+  mimeType: string;
+}
+
+export interface GeminiError {
+  error: string;
+}
+
+export type ListProposalsParams = {
+  status?: ListProposalsStatus;
+};
+
+export type ListProposalsStatus =
+  (typeof ListProposalsStatus)[keyof typeof ListProposalsStatus];
+
+export const ListProposalsStatus = {
+  draft: "draft",
+  sent: "sent",
+  accepted: "accepted",
+  archived: "archived",
+} as const;
