@@ -1,0 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap');
+
+.warm-sand-theme {
+  --bg-main: #FAFAF7;
+  --bg-sidebar: #F5EFE6;
+  --border-subtle: #E8DDD0;
+  --accent-amber: #B45309;
+  --accent-amber-hover: #92400E;
+  --text-muted: #78716C;
+  --text-dark: #1C1917;
+  --card-bg: #FFFFFF;
+}
+
+.font-playfair {
+  font-family: 'Playfair Display', serif;
+}
