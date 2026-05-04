@@ -50,7 +50,7 @@ router.post("/proposals/generate", async (req, res) => {
     return;
   }
 
-  const { clientName, businessName, projectType, totalAmount, specialContext } = parsed.data;
+  const { clientName, businessName, projectType, specialContext } = parsed.data;
 
   const systemPrompt = `You are a senior strategist at McWilliams Media, a premium digital marketing agency. 
 You craft high-stakes, cinematic proposal documents that close deals.
@@ -58,10 +58,11 @@ Your writing is authoritative, specific, and vision-focused.
 Write in flowing paragraphs, not bullet points. Use strategic language that speaks to business outcomes.
 Format your response in Markdown with clear sections.`;
 
+  const projectLabel = projectType === "web" || projectType === "website" ? "website" : projectType === "marketing" ? "marketing strategy" : "print materials";
+
   const userPrompt = `Create a complete strategic proposal for ${clientName} at ${businessName}.
 
 Project Type: ${projectType}
-Investment: $${totalAmount.toLocaleString()}
 ${specialContext ? `Special Context & Notes: ${specialContext}` : ""}
 
 Write a full proposal with these sections:
@@ -72,13 +73,13 @@ A compelling 2-3 paragraph overview of the transformation we'll achieve together
 How we'll uncover deep insights about their business, audience, and competitive landscape.
 
 ## Design & Development Framework
-Our approach to building their ${projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : "print materials"} — methodology, tools, quality standards.
+Our approach to building their ${projectLabel} — methodology, tools, quality standards.
 
 ## Deliverables
 Specific outcomes and deliverables they can expect from this engagement.
 
-## Investment & Timeline
-How the $${totalAmount.toLocaleString()} investment breaks down and what timeline they can expect.
+## Timeline & Next Steps
+What the timeline looks like and what happens after they sign.
 
 ## Why McWilliams Media
 A closing paragraph on why we're the right partner for this specific vision.
@@ -131,7 +132,7 @@ router.post("/proposals", async (req, res) => {
       businessName: data.businessName,
       clientEmail: data.clientEmail,
       projectType: data.projectType,
-      totalAmount: String(data.totalAmount),
+      totalAmount: String(data.totalAmount ?? 0),
       content: data.content ?? null,
       specialContext: data.specialContext ?? null,
       loomVideoUrl: data.loomVideoUrl ?? null,

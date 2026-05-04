@@ -61,7 +61,7 @@ export interface CreateProposalBody {
   businessName: string;
   clientEmail: string;
   projectType: CreateProposalBodyProjectType;
-  totalAmount: number;
+  totalAmount?: number;
   specialContext?: string | null;
   content?: string | null;
   loomVideoUrl?: string | null;
@@ -117,7 +117,7 @@ export interface GenerateProposalBody {
   clientName: string;
   businessName: string;
   projectType: GenerateProposalBodyProjectType;
-  totalAmount: number;
+  totalAmount?: number;
   specialContext?: string | null;
 }
 

@@ -23,7 +23,6 @@ const formSchema = z.object({
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "marketing", "print"]),
-  totalAmount: z.coerce.number().min(1, "Amount must be greater than 0"),
   specialContext: z.string().optional(),
   content: z.string().optional(),
   loomVideoUrl: z.string().optional(),
@@ -48,7 +47,6 @@ export default function EditProposal() {
       businessName: "",
       clientEmail: "",
       projectType: "web",
-      totalAmount: 0,
       specialContext: "",
       content: "",
       loomVideoUrl: "",
@@ -66,7 +64,6 @@ export default function EditProposal() {
         businessName: proposal.businessName,
         clientEmail: proposal.clientEmail,
         projectType: proposal.projectType,
-        totalAmount: proposal.totalAmount,
         specialContext: proposal.specialContext || "",
         content: proposal.content || "",
         loomVideoUrl: proposal.loomVideoUrl || "",
@@ -80,7 +77,7 @@ export default function EditProposal() {
 
   const handleGenerate = async () => {
     const data = form.getValues();
-    if (!data.clientName || !data.businessName || !data.projectType || !data.totalAmount) {
+    if (!data.clientName || !data.businessName || !data.projectType) {
       toast({ title: "Missing details", description: "Fill out client details first.", variant: "destructive" });
       return;
     }
@@ -91,7 +88,6 @@ export default function EditProposal() {
           clientName: data.clientName,
           businessName: data.businessName,
           projectType: data.projectType,
-          totalAmount: data.totalAmount,
           specialContext: data.specialContext,
         }
       });
@@ -171,24 +167,19 @@ export default function EditProposal() {
                       <FormItem><FormLabel>Client Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl></FormItem>
                     )} />
                   
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField control={form.control} name="projectType" render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Project Category</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>
-                              <SelectItem value="web">Web Ecosystem</SelectItem>
-                              <SelectItem value="marketing">Growth Marketing</SelectItem>
-                              <SelectItem value="print">Print & Brand</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </FormItem>
-                      )} />
-                    <FormField control={form.control} name="totalAmount" render={({ field }) => (
-                        <FormItem><FormLabel>Investment ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl></FormItem>
-                      )} />
-                  </div>
+                  <FormField control={form.control} name="projectType" render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project Category</FormLabel>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                          <SelectContent>
+                            <SelectItem value="web">Website</SelectItem>
+                            <SelectItem value="marketing">Marketing</SelectItem>
+                            <SelectItem value="print">Print</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </FormItem>
+                    )} />
 
                   <FormField control={form.control} name="specialContext" render={({ field }) => (
                       <FormItem><FormLabel>Strategic Context</FormLabel><FormControl><Textarea className="min-h-[80px]" {...field} /></FormControl></FormItem>

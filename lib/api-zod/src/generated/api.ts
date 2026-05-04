@@ -50,7 +50,7 @@ export const CreateProposalBody = zod.object({
   businessName: zod.string(),
   clientEmail: zod.string(),
   projectType: zod.enum(["web", "marketing", "print"]),
-  totalAmount: zod.number(),
+  totalAmount: zod.number().optional(),
   specialContext: zod.string().nullish(),
   content: zod.string().nullish(),
   loomVideoUrl: zod.string().nullish(),
@@ -192,7 +192,7 @@ export const GenerateProposalContentBody = zod.object({
   clientName: zod.string(),
   businessName: zod.string(),
   projectType: zod.enum(["web", "marketing", "print"]),
-  totalAmount: zod.number(),
+  totalAmount: zod.number().optional(),
   specialContext: zod.string().nullish(),
 });
 

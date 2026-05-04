@@ -455,7 +455,6 @@ components:
         - businessName
         - clientEmail
         - projectType
-        - totalAmount
 
     UpdateProposalBody:
       type: object
@@ -514,7 +513,6 @@ components:
         - clientName
         - businessName
         - projectType
-        - totalAmount
 
     GeneratedProposalContent:
       type: object

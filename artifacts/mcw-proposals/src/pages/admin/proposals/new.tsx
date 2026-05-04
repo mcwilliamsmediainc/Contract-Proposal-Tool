@@ -20,7 +20,6 @@ const formSchema = z.object({
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "marketing", "print"]),
-  totalAmount: z.coerce.number().min(1, "Amount must be greater than 0"),
   specialContext: z.string().optional(),
   content: z.string().optional(),
 });
@@ -38,7 +37,6 @@ export default function NewProposal() {
       businessName: "",
       clientEmail: "",
       projectType: "web",
-      totalAmount: 0,
       specialContext: "",
       content: "",
     },
@@ -49,7 +47,7 @@ export default function NewProposal() {
 
   const handleGenerate = async () => {
     const data = form.getValues();
-    if (!data.clientName || !data.businessName || !data.projectType || !data.totalAmount) {
+    if (!data.clientName || !data.businessName || !data.projectType) {
       toast({ title: "Missing details", description: "Fill out client details first to generate strategy.", variant: "destructive" });
       return;
     }
@@ -60,7 +58,6 @@ export default function NewProposal() {
           clientName: data.clientName,
           businessName: data.businessName,
           projectType: data.projectType,
-          totalAmount: data.totalAmount,
           specialContext: data.specialContext,
         }
       });
@@ -135,8 +132,7 @@ export default function NewProposal() {
                   )}
                 />
                 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
+                <FormField
                     control={form.control}
                     name="projectType"
                     render={({ field }) => (
@@ -147,27 +143,15 @@ export default function NewProposal() {
                             <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="web">Web Ecosystem</SelectItem>
-                            <SelectItem value="marketing">Growth Marketing</SelectItem>
-                            <SelectItem value="print">Print & Brand</SelectItem>
+                            <SelectItem value="web">Website</SelectItem>
+                            <SelectItem value="marketing">Marketing</SelectItem>
+                            <SelectItem value="print">Print</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="totalAmount"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Total Investment ($)</FormLabel>
-                        <FormControl><Input type="number" placeholder="15000" {...field} /></FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
 
                 <FormField
                   control={form.control}
