@@ -12,6 +12,8 @@ tags:
     description: Health operations
   - name: proposals
     description: Proposal management
+  - name: contracts
+    description: Contract management
   - name: admin
     description: Admin dashboard analytics
   - name: gemini
@@ -206,6 +208,168 @@ paths:
               schema:
                 $ref: "#/components/schemas/GeneratedProposalContent"
 
+  /contracts:
+    get:
+      operationId: listContracts
+      tags: [contracts]
+      summary: List all contracts
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [draft, sent, signed]
+      responses:
+        "200":
+          description: List of contracts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contract"
+    post:
+      operationId: createContract
+      tags: [contracts]
+      summary: Create a new contract
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateContractBody"
+      responses:
+        "201":
+          description: Created contract
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+
+  /contracts/{id}:
+    get:
+      operationId: getContract
+      tags: [contracts]
+      summary: Get a contract by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Contract
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    patch:
+      operationId: updateContract
+      tags: [contracts]
+      summary: Update a contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateContractBody"
+      responses:
+        "200":
+          description: Updated contract
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteContract
+      tags: [contracts]
+      summary: Delete a contract
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /contracts/{id}/send:
+    post:
+      operationId: sendContract
+      tags: [contracts]
+      summary: Mark a contract as sent to client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Updated contract
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /contracts/{id}/sign:
+    post:
+      operationId: signContract
+      tags: [contracts]
+      summary: Client signs the contract (public endpoint)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignContractBody"
+      responses:
+        "200":
+          description: Signed contract
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contract"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
   /admin/stats:
     get:
       operationId: getAdminStats
@@ -365,6 +529,176 @@ components:
           type: string
       required:
         - status
+
+    Contract:
+      type: object
+      properties:
+        id:
+          type: string
+        proposalId:
+          type: string
+          nullable: true
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        contractType:
+          type: string
+          enum: [website, marketing, print]
+        totalCost:
+          type: number
+        depositAmount:
+          type: number
+        remainingBalance:
+          type: number
+        hostingOption:
+          type: string
+          enum: [none, basic, platinum]
+        status:
+          type: string
+          enum: [draft, sent, signed]
+        signatureData:
+          type: string
+          nullable: true
+        signedAt:
+          type: string
+          format: date-time
+          nullable: true
+        referralSource:
+          type: string
+          nullable: true
+        teamMember:
+          type: string
+          nullable: true
+        companyAddress:
+          type: string
+          nullable: true
+        companyAddressLine2:
+          type: string
+          nullable: true
+        companyCity:
+          type: string
+          nullable: true
+        companyState:
+          type: string
+          nullable: true
+        companyZip:
+          type: string
+          nullable: true
+        scheduleA:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clientName
+        - businessName
+        - clientEmail
+        - contractType
+        - totalCost
+        - depositAmount
+        - remainingBalance
+        - hostingOption
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateContractBody:
+      type: object
+      properties:
+        proposalId:
+          type: string
+          nullable: true
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        contractType:
+          type: string
+          enum: [website, marketing, print]
+        totalCost:
+          type: number
+        depositAmount:
+          type: number
+        remainingBalance:
+          type: number
+        hostingOption:
+          type: string
+          enum: [none, basic, platinum]
+        scheduleA:
+          type: string
+          nullable: true
+      required:
+        - clientName
+        - businessName
+        - clientEmail
+        - contractType
+
+    UpdateContractBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        contractType:
+          type: string
+          enum: [website, marketing, print]
+        totalCost:
+          type: number
+        depositAmount:
+          type: number
+        remainingBalance:
+          type: number
+        hostingOption:
+          type: string
+          enum: [none, basic, platinum]
+        status:
+          type: string
+          enum: [draft, sent, signed]
+        scheduleA:
+          type: string
+          nullable: true
+
+    SignContractBody:
+      type: object
+      properties:
+        signatureData:
+          type: string
+        referralSource:
+          type: string
+          nullable: true
+        teamMember:
+          type: string
+          nullable: true
+        companyAddress:
+          type: string
+          nullable: true
+        companyAddressLine2:
+          type: string
+          nullable: true
+        companyCity:
+          type: string
+          nullable: true
+        companyState:
+          type: string
+          nullable: true
+        companyZip:
+          type: string
+          nullable: true
+      required:
+        - signatureData
 
     Proposal:
       type: object

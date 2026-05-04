@@ -1,0 +1,153 @@
+import { AdminLayout } from "@/components/layout/admin-layout";
+import { useListContracts, getListContractsQueryKey } from "@workspace/api-client-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { FileSignature, Plus } from "lucide-react";
+import { format } from "date-fns";
+import { Link } from "wouter";
+import { Badge } from "@/components/ui/badge";
+
+function statusVariant(status: string) {
+  if (status === "signed") return "default";
+  if (status === "sent") return "secondary";
+  return "outline";
+}
+
+function contractTypeLabel(type: string) {
+  if (type === "website") return "Website";
+  if (type === "marketing") return "Marketing";
+  if (type === "print") return "Print";
+  return type;
+}
+
+export default function ContractsList() {
+  const { data: contracts, isLoading } = useListContracts(undefined, {
+    query: { queryKey: getListContractsQueryKey() },
+  });
+
+  return (
+    <AdminLayout>
+      <div className="flex justify-between items-end mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">Contracts</h1>
+          <p className="text-muted-foreground font-mono text-sm">CONTRACT MANAGEMENT</p>
+        </div>
+        <Link
+          href="/admin/contracts/new"
+          className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          New Contract
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <Card className="border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-mono">TOTAL CONTRACTS</CardTitle>
+            <FileSignature className="w-4 h-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{contracts?.length ?? 0}</div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-mono">AWAITING SIGNATURE</CardTitle>
+            <FileSignature className="w-4 h-4 text-yellow-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {contracts?.filter((c) => c.status === "sent").length ?? 0}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground font-mono">SIGNED</CardTitle>
+            <FileSignature className="w-4 h-4 text-green-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">
+              {contracts?.filter((c) => c.status === "signed").length ?? 0}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="border border-border/50 rounded-lg overflow-hidden bg-card/30">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-muted/50 border-b border-border/50 font-mono text-xs uppercase text-muted-foreground">
+              <tr>
+                <th className="px-6 py-4 font-medium">Client</th>
+                <th className="px-6 py-4 font-medium">Business</th>
+                <th className="px-6 py-4 font-medium">Type</th>
+                <th className="px-6 py-4 font-medium">Total</th>
+                <th className="px-6 py-4 font-medium">Status</th>
+                <th className="px-6 py-4 font-medium">Date</th>
+                <th className="px-6 py-4 font-medium text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/50">
+              {isLoading ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">
+                    Loading contracts...
+                  </td>
+                </tr>
+              ) : contracts?.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                    <FileSignature className="w-8 h-8 mx-auto mb-3 opacity-30" />
+                    <p>No contracts yet.</p>
+                    <Link href="/admin/contracts/new" className="text-primary text-xs mt-1 inline-block hover:underline">
+                      Create your first contract →
+                    </Link>
+                  </td>
+                </tr>
+              ) : (
+                contracts?.map((contract) => (
+                  <tr key={contract.id} className="hover:bg-accent/50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-foreground">{contract.clientName}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{contract.businessName}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{contractTypeLabel(contract.contractType)}</td>
+                    <td className="px-6 py-4 font-mono text-foreground">
+                      ${contract.totalCost.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Badge
+                        variant={statusVariant(contract.status)}
+                        className="font-mono uppercase text-[10px] tracking-wider"
+                      >
+                        {contract.status}
+                      </Badge>
+                    </td>
+                    <td className="px-6 py-4 font-mono text-muted-foreground text-xs">
+                      {format(new Date(contract.createdAt), "MMM dd, yyyy")}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <Link
+                        href={`/admin/contracts/${contract.id}/edit`}
+                        className="text-primary hover:text-primary/80 font-medium text-xs font-mono mr-4"
+                      >
+                        EDIT
+                      </Link>
+                      <a
+                        href={`/contract/${contract.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono"
+                      >
+                        VIEW
+                      </a>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </AdminLayout>
+  );
+}

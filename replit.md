@@ -32,7 +32,7 @@ lib/
 ## Key Features
 
 1. **Landing Page** (`/`) — Cinematic dark hero with "Access Portal" CTA
-2. **Admin Dashboard** (`/admin`) — Protected by Clerk; stats grid + searchable proposals table
+2. **Admin Dashboard** (`/admin`) — Stats grid + searchable proposals table
 3. **Proposal Builder** (`/admin/proposals/new`) — AI-assisted content generation via Gemini
 4. **Proposal Editor** (`/admin/proposals/:id/edit`) — Edit existing proposals
 5. **Client Portal** (`/proposal/:uuid`) — Immersive, unauthenticated cinematic experience
@@ -40,23 +40,53 @@ lib/
    - Markdown content rendering (react-markdown + remark-gfm)
    - Loom/YouTube and Calendly embed support
 6. **Onboarding Pipeline** (`/admin/onboarding`) — Post-signature onboarding steps
+7. **Contract Management** (`/admin/contracts`) — Full contract lifecycle system
+   - Contracts list with stats (total, awaiting, signed)
+   - New contract form with optional proposal linking
+   - Edit contract with "Send to Client" action
+   - Public 3-step signing flow (`/contract/:uuid`):
+     - Step 1: Full Development Agreement text with fee breakdown + signature pad
+     - Step 2: Referral details (how they met, who they worked with)
+     - Step 3: Business address information
+   - Schedule A (scope of work) per contract
+   - Hosting options: None / Basic ($50/mo) / Platinum ($100/mo)
 
 ## API Endpoints
 
 - `GET /api/healthz` — Health check
-- `GET /api/proposals` — List proposals (admin auth required)
-- `POST /api/proposals` — Create proposal (admin auth required)
+- `GET /api/proposals` — List proposals
+- `POST /api/proposals` — Create proposal
 - `GET /api/proposals/:uuid` — Get proposal by UUID (public)
-- `PATCH /api/proposals/:uuid` — Update proposal (admin auth required)
-- `DELETE /api/proposals/:uuid` — Delete proposal (admin auth required)
+- `PATCH /api/proposals/:uuid` — Update proposal
+- `DELETE /api/proposals/:uuid` — Delete proposal
 - `POST /api/proposals/generate` — AI content generation via Gemini
 - `POST /api/proposals/:uuid/accept` — Accept/sign proposal (public)
 - `POST /api/proposals/:uuid/view` — Record view event (public)
-- `GET /api/admin/stats` — Dashboard stats (admin auth required)
+- `GET /api/admin/stats` — Dashboard stats
 - `POST /api/gemini/chat` — Gemini chat endpoint
 - `POST /api/gemini/image` — Gemini image analysis endpoint
+- `GET /api/contracts` — List contracts (filter by status)
+- `POST /api/contracts` — Create contract
+- `GET /api/contracts/:uuid` — Get contract by UUID (public)
+- `PATCH /api/contracts/:uuid` — Update contract
+- `DELETE /api/contracts/:uuid` — Delete contract
+- `POST /api/contracts/:uuid/send` — Mark contract as sent
+- `POST /api/contracts/:uuid/sign` — Client signs contract (public)
 
 ## Database Schema
+
+### `contracts` table
+- `id` (serial PK), `uuid` (public-facing)
+- `proposalId` (optional FK to proposal UUID), `clientName`, `businessName`, `clientEmail`
+- `contractType` (website/marketing/print)
+- `totalCost`, `depositAmount`, `remainingBalance` (numeric)
+- `hostingOption` (none/basic/platinum)
+- `status` (draft/sent/signed)
+- `signatureData` (base64 PNG), `signedAt`
+- `referralSource`, `teamMember` — collected during signing
+- `companyAddress`, `companyAddressLine2`, `companyCity`, `companyState`, `companyZip`
+- `scheduleA` (scope of work text)
+- `createdAt`, `updatedAt`
 
 ### `proposals` table
 - `id` (serial PK), `uuid` (public-facing), `clientName`, `clientEmail`

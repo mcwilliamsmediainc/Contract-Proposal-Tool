@@ -9,6 +9,141 @@ export interface HealthStatus {
   status: string;
 }
 
+export type ContractContractType =
+  (typeof ContractContractType)[keyof typeof ContractContractType];
+
+export const ContractContractType = {
+  website: "website",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export type ContractHostingOption =
+  (typeof ContractHostingOption)[keyof typeof ContractHostingOption];
+
+export const ContractHostingOption = {
+  none: "none",
+  basic: "basic",
+  platinum: "platinum",
+} as const;
+
+export type ContractStatus =
+  (typeof ContractStatus)[keyof typeof ContractStatus];
+
+export const ContractStatus = {
+  draft: "draft",
+  sent: "sent",
+  signed: "signed",
+} as const;
+
+export interface Contract {
+  id: string;
+  proposalId?: string | null;
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  contractType: ContractContractType;
+  totalCost: number;
+  depositAmount: number;
+  remainingBalance: number;
+  hostingOption: ContractHostingOption;
+  status: ContractStatus;
+  signatureData?: string | null;
+  signedAt?: string | null;
+  referralSource?: string | null;
+  teamMember?: string | null;
+  companyAddress?: string | null;
+  companyAddressLine2?: string | null;
+  companyCity?: string | null;
+  companyState?: string | null;
+  companyZip?: string | null;
+  scheduleA?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type CreateContractBodyContractType =
+  (typeof CreateContractBodyContractType)[keyof typeof CreateContractBodyContractType];
+
+export const CreateContractBodyContractType = {
+  website: "website",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export type CreateContractBodyHostingOption =
+  (typeof CreateContractBodyHostingOption)[keyof typeof CreateContractBodyHostingOption];
+
+export const CreateContractBodyHostingOption = {
+  none: "none",
+  basic: "basic",
+  platinum: "platinum",
+} as const;
+
+export interface CreateContractBody {
+  proposalId?: string | null;
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  contractType: CreateContractBodyContractType;
+  totalCost?: number;
+  depositAmount?: number;
+  remainingBalance?: number;
+  hostingOption?: CreateContractBodyHostingOption;
+  scheduleA?: string | null;
+}
+
+export type UpdateContractBodyContractType =
+  (typeof UpdateContractBodyContractType)[keyof typeof UpdateContractBodyContractType];
+
+export const UpdateContractBodyContractType = {
+  website: "website",
+  marketing: "marketing",
+  print: "print",
+} as const;
+
+export type UpdateContractBodyHostingOption =
+  (typeof UpdateContractBodyHostingOption)[keyof typeof UpdateContractBodyHostingOption];
+
+export const UpdateContractBodyHostingOption = {
+  none: "none",
+  basic: "basic",
+  platinum: "platinum",
+} as const;
+
+export type UpdateContractBodyStatus =
+  (typeof UpdateContractBodyStatus)[keyof typeof UpdateContractBodyStatus];
+
+export const UpdateContractBodyStatus = {
+  draft: "draft",
+  sent: "sent",
+  signed: "signed",
+} as const;
+
+export interface UpdateContractBody {
+  clientName?: string;
+  businessName?: string;
+  clientEmail?: string;
+  contractType?: UpdateContractBodyContractType;
+  totalCost?: number;
+  depositAmount?: number;
+  remainingBalance?: number;
+  hostingOption?: UpdateContractBodyHostingOption;
+  status?: UpdateContractBodyStatus;
+  scheduleA?: string | null;
+}
+
+export interface SignContractBody {
+  signatureData: string;
+  referralSource?: string | null;
+  teamMember?: string | null;
+  companyAddress?: string | null;
+  companyAddressLine2?: string | null;
+  companyCity?: string | null;
+  companyState?: string | null;
+  companyZip?: string | null;
+}
+
 export type ProposalProjectType =
   (typeof ProposalProjectType)[keyof typeof ProposalProjectType];
 
@@ -193,4 +328,17 @@ export const ListProposalsStatus = {
   sent: "sent",
   accepted: "accepted",
   archived: "archived",
+} as const;
+
+export type ListContractsParams = {
+  status?: ListContractsStatus;
+};
+
+export type ListContractsStatus =
+  (typeof ListContractsStatus)[keyof typeof ListContractsStatus];
+
+export const ListContractsStatus = {
+  draft: "draft",
+  sent: "sent",
+  signed: "signed",
 } as const;

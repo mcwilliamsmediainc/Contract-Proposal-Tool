@@ -201,6 +201,219 @@ export const GenerateProposalContentResponse = zod.object({
 });
 
 /**
+ * @summary List all contracts
+ */
+export const ListContractsQueryParams = zod.object({
+  status: zod.enum(["draft", "sent", "signed"]).optional(),
+});
+
+export const ListContractsResponseItem = zod.object({
+  id: zod.string(),
+  proposalId: zod.string().nullish(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  contractType: zod.enum(["website", "marketing", "print"]),
+  totalCost: zod.number(),
+  depositAmount: zod.number(),
+  remainingBalance: zod.number(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]),
+  status: zod.enum(["draft", "sent", "signed"]),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  referralSource: zod.string().nullish(),
+  teamMember: zod.string().nullish(),
+  companyAddress: zod.string().nullish(),
+  companyAddressLine2: zod.string().nullish(),
+  companyCity: zod.string().nullish(),
+  companyState: zod.string().nullish(),
+  companyZip: zod.string().nullish(),
+  scheduleA: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListContractsResponse = zod.array(ListContractsResponseItem);
+
+/**
+ * @summary Create a new contract
+ */
+export const CreateContractBody = zod.object({
+  proposalId: zod.string().nullish(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  contractType: zod.enum(["website", "marketing", "print"]),
+  totalCost: zod.number().optional(),
+  depositAmount: zod.number().optional(),
+  remainingBalance: zod.number().optional(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]).optional(),
+  scheduleA: zod.string().nullish(),
+});
+
+/**
+ * @summary Get a contract by ID
+ */
+export const GetContractParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetContractResponse = zod.object({
+  id: zod.string(),
+  proposalId: zod.string().nullish(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  contractType: zod.enum(["website", "marketing", "print"]),
+  totalCost: zod.number(),
+  depositAmount: zod.number(),
+  remainingBalance: zod.number(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]),
+  status: zod.enum(["draft", "sent", "signed"]),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  referralSource: zod.string().nullish(),
+  teamMember: zod.string().nullish(),
+  companyAddress: zod.string().nullish(),
+  companyAddressLine2: zod.string().nullish(),
+  companyCity: zod.string().nullish(),
+  companyState: zod.string().nullish(),
+  companyZip: zod.string().nullish(),
+  scheduleA: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update a contract
+ */
+export const UpdateContractParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const UpdateContractBody = zod.object({
+  clientName: zod.string().optional(),
+  businessName: zod.string().optional(),
+  clientEmail: zod.string().optional(),
+  contractType: zod.enum(["website", "marketing", "print"]).optional(),
+  totalCost: zod.number().optional(),
+  depositAmount: zod.number().optional(),
+  remainingBalance: zod.number().optional(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]).optional(),
+  status: zod.enum(["draft", "sent", "signed"]).optional(),
+  scheduleA: zod.string().nullish(),
+});
+
+export const UpdateContractResponse = zod.object({
+  id: zod.string(),
+  proposalId: zod.string().nullish(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  contractType: zod.enum(["website", "marketing", "print"]),
+  totalCost: zod.number(),
+  depositAmount: zod.number(),
+  remainingBalance: zod.number(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]),
+  status: zod.enum(["draft", "sent", "signed"]),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  referralSource: zod.string().nullish(),
+  teamMember: zod.string().nullish(),
+  companyAddress: zod.string().nullish(),
+  companyAddressLine2: zod.string().nullish(),
+  companyCity: zod.string().nullish(),
+  companyState: zod.string().nullish(),
+  companyZip: zod.string().nullish(),
+  scheduleA: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a contract
+ */
+export const DeleteContractParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
+ * @summary Mark a contract as sent to client
+ */
+export const SendContractParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const SendContractResponse = zod.object({
+  id: zod.string(),
+  proposalId: zod.string().nullish(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  contractType: zod.enum(["website", "marketing", "print"]),
+  totalCost: zod.number(),
+  depositAmount: zod.number(),
+  remainingBalance: zod.number(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]),
+  status: zod.enum(["draft", "sent", "signed"]),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  referralSource: zod.string().nullish(),
+  teamMember: zod.string().nullish(),
+  companyAddress: zod.string().nullish(),
+  companyAddressLine2: zod.string().nullish(),
+  companyCity: zod.string().nullish(),
+  companyState: zod.string().nullish(),
+  companyZip: zod.string().nullish(),
+  scheduleA: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Client signs the contract (public endpoint)
+ */
+export const SignContractParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const SignContractBody = zod.object({
+  signatureData: zod.string(),
+  referralSource: zod.string().nullish(),
+  teamMember: zod.string().nullish(),
+  companyAddress: zod.string().nullish(),
+  companyAddressLine2: zod.string().nullish(),
+  companyCity: zod.string().nullish(),
+  companyState: zod.string().nullish(),
+  companyZip: zod.string().nullish(),
+});
+
+export const SignContractResponse = zod.object({
+  id: zod.string(),
+  proposalId: zod.string().nullish(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  contractType: zod.enum(["website", "marketing", "print"]),
+  totalCost: zod.number(),
+  depositAmount: zod.number(),
+  remainingBalance: zod.number(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]),
+  status: zod.enum(["draft", "sent", "signed"]),
+  signatureData: zod.string().nullish(),
+  signedAt: zod.coerce.date().nullish(),
+  referralSource: zod.string().nullish(),
+  teamMember: zod.string().nullish(),
+  companyAddress: zod.string().nullish(),
+  companyAddressLine2: zod.string().nullish(),
+  companyCity: zod.string().nullish(),
+  companyState: zod.string().nullish(),
+  companyZip: zod.string().nullish(),
+  scheduleA: zod.string().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
  * @summary Get admin dashboard statistics
  */
 export const GetAdminStatsResponse = zod.object({

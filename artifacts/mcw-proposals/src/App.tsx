@@ -8,7 +8,11 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import NewProposal from "@/pages/admin/proposals/new";
 import EditProposal from "@/pages/admin/proposals/edit";
 import Onboarding from "@/pages/admin/onboarding";
+import ContractsList from "@/pages/admin/contracts/list";
+import NewContract from "@/pages/admin/contracts/new";
+import EditContract from "@/pages/admin/contracts/edit";
 import ClientPortal from "@/pages/portal/proposal";
+import ContractPortal from "@/pages/portal/contract";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -25,7 +29,11 @@ export default function App() {
             <Route path="/admin/proposals/new" component={NewProposal} />
             <Route path="/admin/proposals/:id/edit" component={EditProposal} />
             <Route path="/admin/onboarding" component={Onboarding} />
+            <Route path="/admin/contracts" component={ContractsList} />
+            <Route path="/admin/contracts/new" component={NewContract} />
+            <Route path="/admin/contracts/:id/edit" component={EditContract} />
             <Route path="/proposal/:id" component={ClientPortal} />
+            <Route path="/contract/:id" component={ContractPortal} />
             <Route component={NotFound} />
           </Switch>
           <Toaster />
