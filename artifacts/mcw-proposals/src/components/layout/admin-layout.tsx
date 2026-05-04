@@ -12,7 +12,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground selection:bg-primary/30 dark">
+    <div className="flex min-h-screen bg-background text-foreground selection:bg-primary/30">
       <aside className="w-64 border-r border-border bg-card flex-col hidden md:flex">
         <div className="p-6 flex items-center gap-3 border-b border-border h-[72px]">
           <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-mono font-bold text-lg">

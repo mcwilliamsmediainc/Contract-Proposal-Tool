@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center selection:bg-primary/30 dark">
+    <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center selection:bg-primary/30">
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] opacity-5 bg-cover bg-center" />
       <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/50 pointer-events-none" />
       
