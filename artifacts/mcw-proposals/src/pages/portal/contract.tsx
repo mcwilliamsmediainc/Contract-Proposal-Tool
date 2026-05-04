@@ -50,6 +50,7 @@ export default function ContractPortal() {
   const sigPadRef = useRef<SignatureCanvas | null>(null);
 
   const [step, setStep] = useState(1);
+  const [savedSignatureData, setSavedSignatureData] = useState("");
   const [sigError, setSigError] = useState(false);
   const [referralSource, setReferralSource] = useState("");
   const [teamMember, setTeamMember] = useState("");
@@ -95,12 +96,13 @@ export default function ContractPortal() {
   const dateStr = `${today.getDate()}th day of ${today.toLocaleString("default", { month: "long" })}, ${today.getFullYear()}`;
 
   const handleSign = async () => {
-    if (!sigPadRef.current || sigPadRef.current.isEmpty()) {
+    if (!savedSignatureData) {
+      // Signature wasn't captured — send user back to step 1
+      setStep(1);
       setSigError(true);
       return;
     }
-    setSigError(false);
-    const signatureData = sigPadRef.current.getTrimmedCanvas().toDataURL("image/png");
+    const signatureData = savedSignatureData;
 
     try {
       const updated = await signContract.mutateAsync({
@@ -253,6 +255,9 @@ export default function ContractPortal() {
                       return;
                     }
                     setSigError(false);
+                    setSavedSignatureData(
+                      sigPadRef.current.getTrimmedCanvas().toDataURL("image/png")
+                    );
                     setStep(2);
                   }}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-8"
