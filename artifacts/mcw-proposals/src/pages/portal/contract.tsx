@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle2, ChevronRight, ChevronLeft, FileSignature } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import SignatureCanvas from "react-signature-canvas";
+import { PublicHeader } from "@/components/layout/public-header";
 
 const US_STATES = [
   "Alabama","Alaska","Arizona","Arkansas","California","Colorado","Connecticut",
@@ -126,12 +127,7 @@ export default function ContractPortal() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3">
-        <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold text-sm">M</div>
-        <span className="font-semibold text-gray-900">McWilliams Media</span>
-        <span className="text-gray-400 mx-2">·</span>
-        <span className="text-sm text-gray-500">{contractTypeLabel(contract.contractType)} Agreement</span>
-      </div>
+      <PublicHeader variant="light" subtitle={`${contractTypeLabel(contract.contractType)} Agreement`} />
 
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center justify-center mb-8">

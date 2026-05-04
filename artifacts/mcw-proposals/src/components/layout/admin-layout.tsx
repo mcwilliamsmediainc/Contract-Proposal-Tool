@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Plus, Users, FileSignature, FileText } from "lucide-react";
+import { LayoutDashboard, Plus, Users, FileSignature } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
@@ -51,10 +51,30 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        <header className="md:hidden h-16 border-b border-border bg-card flex items-center px-4">
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-mono font-bold text-lg">
-            M
+        {/* Mobile top bar */}
+        <header className="md:hidden h-14 border-b border-border bg-card flex items-center justify-between px-4 sticky top-0 z-30">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-mono font-bold text-base">
+              M
+            </div>
+            <span className="font-bold text-sm tracking-tight">McWilliams Media</span>
           </div>
+        </header>
+
+        {/* Desktop top bar */}
+        <header className="hidden md:flex h-14 border-b border-border bg-card items-center justify-between px-8 sticky top-0 z-30">
+          <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground uppercase tracking-widest">
+            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            McWilliams Media · Strategic Portal
+          </div>
+          <a
+            href="https://mcwilliamsmedia.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
+          >
+            mcwilliamsmedia.com
+          </a>
         </header>
 
         <div className="flex-1 overflow-auto bg-background p-6 md:p-8">

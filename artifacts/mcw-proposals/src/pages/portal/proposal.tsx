@@ -7,6 +7,7 @@ import { SignaturePad } from "@/components/ui/signature-pad";
 import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, ArrowRight } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { PublicHeader } from "@/components/layout/public-header";
 
 export default function ClientPortal() {
   const params = useParams<{ id: string }>();
@@ -97,15 +98,11 @@ export default function ClientPortal() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-300 selection:bg-primary/30">
       <div className="fixed inset-0 pointer-events-none opacity-20 mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
-      
-      {/* Hero Section */}
-      <header className="relative pt-32 pb-24 px-6 md:px-12 lg:px-24 overflow-hidden border-b border-zinc-900">
-        <div className="absolute top-0 right-0 p-8 flex justify-end w-full">
-           <div className="w-12 h-12 bg-white rounded flex items-center justify-center text-black font-mono font-bold text-2xl shadow-lg">
-            M
-          </div>
-        </div>
 
+      <PublicHeader variant="dark" subtitle="Strategic Proposal" />
+
+      {/* Hero Section */}
+      <header className="relative pt-24 pb-24 px-6 md:px-12 lg:px-24 overflow-hidden border-b border-zinc-900">
         <div className="max-w-5xl mx-auto relative z-10">
           <div className="font-mono text-primary text-sm tracking-[0.2em] mb-6 flex items-center gap-4">
             <span className="w-8 h-px bg-primary" />
