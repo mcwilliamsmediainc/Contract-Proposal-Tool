@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProposal, useGenerateProposalContent } from "@workspace/api-client-react";
+import { useCreateProposal } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,25 +11,32 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Sparkles } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "marketing", "print"]),
+  numberOfPages: z.coerce.number().int().min(1).optional(),
+  pageNames: z.string().optional(),
   specialContext: z.string().optional(),
   content: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
+const projectTypeLabel = (type: string) => {
+  if (type === "web") return "Website";
+  if (type === "marketing") return "Marketing";
+  if (type === "print") return "Print";
+  return "Website";
+};
+
 export default function NewProposal() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -37,64 +44,56 @@ export default function NewProposal() {
       businessName: "",
       clientEmail: "",
       projectType: "web",
+      numberOfPages: undefined,
+      pageNames: "",
       specialContext: "",
       content: "",
     },
   });
 
   const createProposal = useCreateProposal();
-  const generateContent = useGenerateProposalContent();
 
-  const handleGenerate = async () => {
-    const data = form.getValues();
-    if (!data.clientName || !data.businessName || !data.projectType) {
-      toast({ title: "Missing details", description: "Fill out client details first to generate strategy.", variant: "destructive" });
-      return;
-    }
-    
-    try {
-      const res = await generateContent.mutateAsync({
-        data: {
-          clientName: data.clientName,
-          businessName: data.businessName,
-          projectType: data.projectType,
-          specialContext: data.specialContext,
-        }
-      });
-      form.setValue("content", res.content);
-      toast({ title: "Strategic Generation Complete", description: "AI strategy has been generated successfully." });
-    } catch (err) {
-      toast({ title: "Generation failed", description: "Could not generate strategy.", variant: "destructive" });
-    }
-  };
+  const watched = form.watch();
 
   const onSubmit = async (values: FormValues) => {
     try {
-      const proposal = await createProposal.mutateAsync({ data: values });
-      toast({ title: "Proposal Initialized", description: "Successfully created strategic proposal." });
+      const proposal = await createProposal.mutateAsync({
+        data: {
+          ...values,
+          numberOfPages: values.numberOfPages ?? null,
+          pageNames: values.pageNames || null,
+          specialContext: values.specialContext || null,
+          content: values.content || null,
+        },
+      });
+      toast({ title: "Draft Saved", description: "Proposal draft created successfully." });
       setLocation(`/admin/proposals/${proposal.id}/edit`);
     } catch (err) {
-      toast({ title: "Error", description: "Failed to initialize proposal.", variant: "destructive" });
+      toast({ title: "Error", description: "Failed to save draft.", variant: "destructive" });
     }
   };
+
+  const today = new Date();
+  const dateStr = today.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
   return (
     <AdminLayout>
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-1">Initialize Strategy</h1>
-          <p className="text-muted-foreground font-mono text-sm">NEW PROPOSAL CREATION</p>
+          <h1 className="text-3xl font-bold tracking-tight mb-1">New Proposal</h1>
+          <p className="text-muted-foreground font-mono text-sm">CREATE PROPOSAL DRAFT</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        {/* Left: Form */}
         <Card className="bg-card/50 backdrop-blur border-border/50">
           <CardHeader>
-            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Client Intelligence</CardTitle>
+            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Client Details</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -119,7 +118,7 @@ export default function NewProposal() {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="clientEmail"
@@ -131,39 +130,64 @@ export default function NewProposal() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
+                  control={form.control}
+                  name="projectType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Project Type</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="web">Website</SelectItem>
+                          <SelectItem value="marketing">Marketing</SelectItem>
+                          <SelectItem value="print">Print</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
                     control={form.control}
-                    name="projectType"
+                    name="numberOfPages"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Project Category</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="web">Website</SelectItem>
-                            <SelectItem value="marketing">Marketing</SelectItem>
-                            <SelectItem value="print">Print</SelectItem>
-                          </SelectContent>
-                        </Select>
+                        <FormLabel>Number of Pages</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min={1}
+                            placeholder="e.g. 5"
+                            {...field}
+                            value={field.value ?? ""}
+                            onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                          />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+                  <div className="flex items-end">
+                    <p className="text-xs text-muted-foreground pb-2">Enter the total number of web pages included in the project.</p>
+                  </div>
+                </div>
 
                 <FormField
                   control={form.control}
-                  name="specialContext"
+                  name="pageNames"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Strategic Context</FormLabel>
+                      <FormLabel>Page Names</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          placeholder="Key pain points, specific deliverables requested, or competitive analysis..." 
-                          className="min-h-[100px] resize-y" 
-                          {...field} 
+                        <Input
+                          placeholder="Home | About | Services | Contact"
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -171,47 +195,87 @@ export default function NewProposal() {
                   )}
                 />
 
-                <div className="flex gap-4 pt-4 border-t border-border/50">
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    className="flex-1 border-primary/50 text-primary hover:bg-primary/10" 
-                    onClick={handleGenerate}
-                    disabled={generateContent.isPending}
-                  >
-                    {generateContent.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-                    Execute Strategic Generation
-                  </Button>
-                  <Button type="submit" className="flex-1" disabled={createProposal.isPending}>
+                <FormField
+                  control={form.control}
+                  name="specialContext"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Additional Context</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Key details, deliverables, or notes about this project..."
+                          className="min-h-[80px] resize-y"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <div className="pt-2 border-t border-border/50">
+                  <Button type="submit" className="w-full" disabled={createProposal.isPending}>
                     {createProposal.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    Save Proposal
+                    Save Draft
                   </Button>
                 </div>
               </form>
             </Form>
           </CardContent>
         </Card>
-        
-        <div>
-          <Card className="bg-card/50 backdrop-blur border-border/50 h-full flex flex-col">
-            <CardHeader className="border-b border-border/50 pb-4">
-              <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground flex justify-between items-center">
-                <span>Live Strategy Preview</span>
-                {generateContent.isPending && <span className="text-primary animate-pulse text-xs">Generating...</span>}
-              </CardTitle>
+
+        {/* Right: Preview + Content Editor */}
+        <div className="space-y-4">
+          {/* Cover preview */}
+          <div
+            className="rounded-xl overflow-hidden shadow-xl"
+            style={{ background: "linear-gradient(135deg, #0b2c6e 0%, #1a4fa3 50%, #0f3580 100%)" }}
+          >
+            <div className="px-8 py-10 text-center text-white">
+              <img
+                src="/mcwilliams-logo.png"
+                alt="McWilliams Media"
+                className="h-12 mx-auto mb-6 brightness-0 invert opacity-90"
+              />
+              <h2 className="text-3xl md:text-4xl font-bold mb-5 tracking-tight">
+                {projectTypeLabel(watched.projectType || "web")} Proposal
+              </h2>
+              <p className="text-lg font-semibold mb-1 opacity-95">
+                Prepared for {watched.clientName || "[Client Name]"}
+              </p>
+              <p className="text-base mb-1 opacity-80">
+                {watched.businessName || "[Business Name]"}
+              </p>
+              <p className="text-sm italic opacity-60 mb-1">{dateStr}, {today.getFullYear()}</p>
+
+              <p className="text-sm italic opacity-50">This quote is valid for 30 days</p>
+            </div>
+          </div>
+
+          {/* Content editor */}
+          <Card className="bg-card/50 backdrop-blur border-border/50">
+            <CardHeader className="pb-3">
+              <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Proposal Content</CardTitle>
             </CardHeader>
-            <CardContent className="flex-1 overflow-auto p-0">
-              <div className="p-6 prose prose-invert max-w-none">
-                {form.watch("content") ? (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {form.watch("content") || ""}
-                  </ReactMarkdown>
-                ) : (
-                  <div className="h-full flex items-center justify-center text-muted-foreground text-sm font-mono opacity-50 pt-20">
-                    AWAITING AI GENERATION
-                  </div>
-                )}
-              </div>
+            <CardContent>
+              <Form {...form}>
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Write the proposal content here. You can edit this further after saving the draft..."
+                          className="min-h-[220px] resize-y font-mono text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </Form>
             </CardContent>
           </Card>
         </div>

@@ -23,6 +23,8 @@ const formSchema = z.object({
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "marketing", "print"]),
+  numberOfPages: z.coerce.number().int().min(1).optional(),
+  pageNames: z.string().optional(),
   specialContext: z.string().optional(),
   content: z.string().optional(),
   loomVideoUrl: z.string().optional(),
@@ -64,6 +66,8 @@ export default function EditProposal() {
         businessName: proposal.businessName,
         clientEmail: proposal.clientEmail,
         projectType: proposal.projectType,
+        numberOfPages: proposal.numberOfPages ?? undefined,
+        pageNames: proposal.pageNames || "",
         specialContext: proposal.specialContext || "",
         content: proposal.content || "",
         loomVideoUrl: proposal.loomVideoUrl || "",
@@ -181,8 +185,32 @@ export default function EditProposal() {
                       </FormItem>
                     )} />
 
+                  <div className="grid grid-cols-2 gap-4">
+                    <FormField control={form.control} name="numberOfPages" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Number of Pages</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={1}
+                              placeholder="e.g. 5"
+                              {...field}
+                              value={field.value ?? ""}
+                              onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )} />
+                    <FormField control={form.control} name="pageNames" render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Page Names</FormLabel>
+                          <FormControl><Input placeholder="Home | About | Services" {...field} /></FormControl>
+                        </FormItem>
+                      )} />
+                  </div>
+
                   <FormField control={form.control} name="specialContext" render={({ field }) => (
-                      <FormItem><FormLabel>Strategic Context</FormLabel><FormControl><Textarea className="min-h-[80px]" {...field} /></FormControl></FormItem>
+                      <FormItem><FormLabel>Additional Context</FormLabel><FormControl><Textarea className="min-h-[80px]" {...field} /></FormControl></FormItem>
                     )} />
 
                   <div className="grid grid-cols-2 gap-4 pt-4 border-t border-border/50">

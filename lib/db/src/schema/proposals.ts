@@ -24,6 +24,8 @@ export const proposalsTable = pgTable("proposals", {
   calendlyUrl: text("calendly_url"),
   signatureData: text("signature_data"),
   signedAt: timestamp("signed_at"),
+  numberOfPages: integer("number_of_pages"),
+  pageNames: text("page_names"),
   viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

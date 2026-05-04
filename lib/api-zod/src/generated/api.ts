@@ -36,6 +36,8 @@ export const ListProposalsResponseItem = zod.object({
   calendlyUrl: zod.string().nullish(),
   signatureData: zod.string().nullish(),
   signedAt: zod.coerce.date().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -55,6 +57,8 @@ export const CreateProposalBody = zod.object({
   content: zod.string().nullish(),
   loomVideoUrl: zod.string().nullish(),
   calendlyUrl: zod.string().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
 });
 
 /**
@@ -78,6 +82,8 @@ export const GetProposalResponse = zod.object({
   calendlyUrl: zod.string().nullish(),
   signatureData: zod.string().nullish(),
   signedAt: zod.coerce.date().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -101,6 +107,8 @@ export const UpdateProposalBody = zod.object({
   specialContext: zod.string().nullish(),
   loomVideoUrl: zod.string().nullish(),
   calendlyUrl: zod.string().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
 });
 
 export const UpdateProposalResponse = zod.object({
@@ -117,6 +125,8 @@ export const UpdateProposalResponse = zod.object({
   calendlyUrl: zod.string().nullish(),
   signatureData: zod.string().nullish(),
   signedAt: zod.coerce.date().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -154,6 +164,8 @@ export const AcceptProposalResponse = zod.object({
   calendlyUrl: zod.string().nullish(),
   signatureData: zod.string().nullish(),
   signedAt: zod.coerce.date().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -180,6 +192,8 @@ export const RecordProposalViewResponse = zod.object({
   calendlyUrl: zod.string().nullish(),
   signatureData: zod.string().nullish(),
   signedAt: zod.coerce.date().nullish(),
+  numberOfPages: zod.number().nullish(),
+  pageNames: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),

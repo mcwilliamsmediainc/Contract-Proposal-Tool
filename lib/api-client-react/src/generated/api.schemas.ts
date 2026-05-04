@@ -177,6 +177,8 @@ export interface Proposal {
   calendlyUrl?: string | null;
   signatureData?: string | null;
   signedAt?: string | null;
+  numberOfPages?: number | null;
+  pageNames?: string | null;
   viewCount: number;
   createdAt: string;
   updatedAt: string;
@@ -201,6 +203,8 @@ export interface CreateProposalBody {
   content?: string | null;
   loomVideoUrl?: string | null;
   calendlyUrl?: string | null;
+  numberOfPages?: number | null;
+  pageNames?: string | null;
 }
 
 export type UpdateProposalBodyProjectType =
@@ -233,6 +237,8 @@ export interface UpdateProposalBody {
   specialContext?: string | null;
   loomVideoUrl?: string | null;
   calendlyUrl?: string | null;
+  numberOfPages?: number | null;
+  pageNames?: string | null;
 }
 
 export interface AcceptProposalBody {

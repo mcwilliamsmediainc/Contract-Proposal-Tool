@@ -95,37 +95,45 @@ export default function ClientPortal() {
     );
   }
 
+  const projectTypeLabel = (type: string) => {
+    if (type === "web") return "Website";
+    if (type === "marketing") return "Marketing";
+    if (type === "print") return "Print";
+    return "Website";
+  };
+
+  const proposalDate = new Date(proposal.createdAt);
+  const dateStr = proposalDate.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-300 selection:bg-primary/30">
       <div className="fixed inset-0 pointer-events-none opacity-20 mix-blend-overlay bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
-      <PublicHeader variant="dark" subtitle="Strategic Proposal" />
-
-      {/* Hero Section */}
-      <header className="relative pt-24 pb-24 px-6 md:px-12 lg:px-24 overflow-hidden border-b border-zinc-900">
-        <div className="max-w-5xl mx-auto relative z-10">
-          <div className="font-mono text-primary text-sm tracking-[0.2em] mb-6 flex items-center gap-4">
-            <span className="w-8 h-px bg-primary" />
-            STRATEGIC PROPOSAL / FOR {proposal.businessName.toUpperCase()}
-          </div>
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] mb-8 font-sans uppercase">
-            {proposal.clientName}
-          </h1>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 pt-8 border-t border-zinc-800/50 mt-12">
-            <div>
-              <div className="text-[10px] text-zinc-500 font-mono tracking-widest mb-1">DATE</div>
-              <div className="text-sm text-white font-mono">{new Date(proposal.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-zinc-500 font-mono tracking-widest mb-1">PREPARED BY</div>
-              <div className="text-sm text-white font-mono">Matt McWilliams</div>
-            </div>
-            <div>
-              <div className="text-[10px] text-zinc-500 font-mono tracking-widest mb-1">INVESTMENT</div>
-              <div className="text-sm text-white font-mono">${proposal.totalAmount.toLocaleString()}</div>
-            </div>
-          </div>
-        </div>
+      {/* Hero Cover Section */}
+      <header
+        className="relative w-full flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #0b2c6e 0%, #1a4fa3 50%, #0f3580 100%)" }}
+      >
+        <img
+          src="/mcwilliams-logo.png"
+          alt="McWilliams Media"
+          className="h-14 md:h-16 mx-auto mb-8 brightness-0 invert opacity-95"
+        />
+        <h1 className="text-5xl md:text-7xl font-bold text-white tracking-tight mb-6 leading-tight">
+          {projectTypeLabel(proposal.projectType)} Proposal
+        </h1>
+        <p className="text-xl md:text-2xl font-semibold text-white/90 mb-2">
+          Prepared for {proposal.clientName}
+        </p>
+        <p className="text-base md:text-lg text-white/70 font-medium mb-3">
+          {proposal.businessName}
+        </p>
+        <p className="text-sm italic text-white/50 mb-1">
+          {dateStr}, {proposalDate.getFullYear()}
+        </p>
+        <p className="text-sm italic text-white/40">
+          This quote is valid for 30 days
+        </p>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 md:px-12 lg:px-24 py-24 space-y-32">

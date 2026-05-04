@@ -738,6 +738,12 @@ components:
           type: string
           format: date-time
           nullable: true
+        numberOfPages:
+          type: integer
+          nullable: true
+        pageNames:
+          type: string
+          nullable: true
         viewCount:
           type: integer
         createdAt:
@@ -784,6 +790,12 @@ components:
         calendlyUrl:
           type: string
           nullable: true
+        numberOfPages:
+          type: integer
+          nullable: true
+        pageNames:
+          type: string
+          nullable: true
       required:
         - clientName
         - businessName
@@ -817,6 +829,12 @@ components:
           type: string
           nullable: true
         calendlyUrl:
+          type: string
+          nullable: true
+        numberOfPages:
+          type: integer
+          nullable: true
+        pageNames:
           type: string
           nullable: true
 
