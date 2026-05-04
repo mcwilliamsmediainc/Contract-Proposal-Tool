@@ -6,6 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle, ArrowRight, Check } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
+import mattDarkPhoto from "@assets/zj0kyaxW9l74GCgxlzzXkaDxz0Ggj2HMsLjWxg_1777926199475.png";
+import gregPhoto from "@assets/9Ck9VAmLnITFDc_jFHA09eU-RAq_szIcJpoejQ_1777926192978.jpeg";
+import evolutionSiteImg from "@assets/NEI3MhrMfmShoMZsOZJruWpd9ira_S9b2agJCw_1777926196317.png";
+import pettyFloorsSiteImg from "@assets/Z0auiieOtmw1H7Lb48JDsfz4yiTvsB7zwbyQQw_1777926188109.png";
+import hobbsSiteImg from "@assets/VGwy2OPrarRYUvgoS689exgbBia2wMZ3dCVPcg_1777926766032.png";
+import processImg from "@assets/n9ACw4Ae1EGYkg9JntHo0idxabtJBKR8hBfvRQ_1777926763423.png";
+import lindsayPhoto from "@assets/IdR0Q_YLLfwgxCAZdUawGXKlzULvbUjTBiKdyQ_1777926203020.png";
+import tiffanyPhoto from "@assets/hICsrvVhBWveCy-DzcjqEjB6kOHMJHF6KdDJpQ_1777926751626.png";
+import rachellePhoto from "@assets/ssMoAw74pdhyxd7r-DQT0dFCZPwoP-UOcOJhbQ_1777926746603.jpeg";
+import elisePhoto from "@assets/2lJSuNP-9GC_cdugrSxCkqbLTDWLIG9f7UHeVA_1777926754493.png";
+import christelPhoto from "@assets/8qEx0RVlV0ihSnsIyAmQEToz5xBp4QDBGSrBnQ_1777926757399.png";
+import chloePhoto from "@assets/6F8LcZ4mEOUe8ZWZUfuiyUFa_FnvPAHdDzjrHQ_1777926760382.png";
+
 function ProposalCover({ clientName, businessName, projectType, date }: {
   clientName: string; businessName: string; projectType: string; date: string;
 }) {
@@ -48,24 +61,39 @@ function SectionIntro({ content }: { content?: string | null }) {
             </>
           )}
         </div>
-        <div className="mt-10 pt-8 border-t border-gray-200">
-          <p className="text-gray-500 italic mb-3">Best Wishes,</p>
-          <p className="text-gray-800 font-semibold text-lg">Matt McWilliams, Founder &amp; CEO</p>
+        <div className="mt-10 pt-8 border-t border-gray-200 flex items-center gap-5">
+          <img src={mattDarkPhoto} alt="Matt McWilliams" className="w-16 h-16 rounded-full object-cover object-top flex-shrink-0 border-2 border-blue-100 shadow-md" />
+          <div>
+            <p className="text-gray-500 italic mb-1 text-sm">Best Wishes,</p>
+            <p className="text-gray-800 font-semibold text-lg">Matt McWilliams</p>
+            <p className="text-gray-500 text-sm">Founder &amp; CEO, McWilliams Media</p>
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
-function TestimonialSection({ quote, author, dark = true }: { quote: string; author: string; dark?: boolean }) {
+function TestimonialSection({ quote, author, websiteImg, websiteAlt, dark = true }: {
+  quote: string; author: string; websiteImg?: string; websiteAlt?: string; dark?: boolean;
+}) {
   return (
     <section className={`py-20 px-6 ${dark ? "bg-[#0a1f5c]" : "bg-[#f8f9fc]"}`}>
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <p className={`text-sm font-bold tracking-widest uppercase mb-8 ${dark ? "text-blue-300" : "text-blue-600"}`}>Client Success</p>
-        <blockquote className={`text-xl md:text-2xl leading-relaxed font-medium ${dark ? "text-white" : "text-gray-800"}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-          "{quote}"
-        </blockquote>
-        <p className={`mt-6 text-base font-medium ${dark ? "text-blue-200" : "text-blue-700"}`}>— {author}</p>
+        <div className={`grid gap-12 items-center ${websiteImg ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
+          <div>
+            <blockquote className={`text-xl md:text-2xl leading-relaxed font-medium ${dark ? "text-white" : "text-gray-800"}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+              "{quote}"
+            </blockquote>
+            <p className={`mt-6 text-base font-medium ${dark ? "text-blue-200" : "text-blue-700"}`}>— {author}</p>
+          </div>
+          {websiteImg && (
+            <div className="rounded-xl overflow-hidden shadow-2xl border border-white/10">
+              <img src={websiteImg} alt={websiteAlt || "Client website"} className="w-full h-auto object-cover" />
+            </div>
+          )}
+        </div>
       </div>
     </section>
   );
@@ -154,7 +182,13 @@ function CustomWebsiteSection({ numberOfPages, pageNames }: { numberOfPages?: nu
 function TimelineSection() {
   return (
     <section className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
-      <div className="max-w-3xl mx-auto space-y-12">
+      <div className="max-w-3xl mx-auto space-y-14">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Website Design Process</h2>
+          <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white p-4">
+            <img src={processImg} alt="Website Design Process" className="w-full h-auto" />
+          </div>
+        </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Timeline Deposit</h2>
           <p className="text-gray-600 leading-relaxed">To ensure your project gets completed in a timely manner, we have implemented a timeline deposit. This deposit is fully refundable if we receive adequate communication to complete the project within the allotted 90 days. Our website design turnaround is typically 45 days. If the buildout lasts longer than 90 days, the deposit is no longer refundable.</p>
@@ -163,7 +197,7 @@ function TimelineSection() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Add-On: SEO Google Business Profile Set-Up + Optimization</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {[["$547", "Set-Up + Optimization"], ["$347", "Set-Up Only"], ["$247", "Optimization Only"]].map(([price, label]) => (
-              <div key={label} className="bg-white rounded-lg border border-gray-200 p-4 text-center">
+              <div key={label} className="bg-white rounded-lg border border-gray-200 p-4 text-center shadow-sm">
                 <p className="text-2xl font-bold text-blue-700">{price}</p>
                 <p className="text-sm text-gray-600 mt-1">one-time · {label}</p>
               </div>
@@ -300,28 +334,29 @@ function PricingSection({ numberOfPages, totalAmount }: { numberOfPages?: number
 
 function TeamSection() {
   const team = [
-    { name: "Matt McWilliams", title: "Owner & CEO", bio: "We've been helping businesses like yours succeed through thoughtful web design since 2011. With a deep commitment to our clients, I'm here to ensure that our team not only delivers results, but also becomes a trusted partner in your business journey." },
-    { name: "Lindsay McWilliams", title: "Owner & CFO", bio: "I help create a strong foundation that allows our team to focus on delivering exceptional design solutions tailored to your needs. Building relationships with our team and clients, my goal is to create a supportive environment where success thrives." },
-    { name: "Tiffany King", title: "Owner & COO", bio: "My passion for marketing and design, personable approach and creative ideas continue to earn the trust of business leaders. My goal is to bring a hands-on, collaborative approach to each project, ensuring that every detail aligns with your vision." },
-    { name: "Rachelle Hoover", title: "Marketing Director", bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts. I focus on crafting messages that reflect your brand and support SEO research." },
-    { name: "Elise Johnson", title: "Client Strategist", bio: "With a collaborative approach, I work closely with you to guide strategy and keep initiatives moving forward. My goal is to ensure your brand shows up online with purpose." },
-    { name: "Christel Moser", title: "Billing Manager", bio: "My goal is to make every step of your experience with us simple, smooth, and stress-free. From onboarding paperwork to billing, I'm here to keep things organized and running efficiently." },
+    { name: "Matt McWilliams", title: "Owner & CEO", photo: mattDarkPhoto, bio: "We've been helping businesses like yours succeed through thoughtful web design since 2011. With a deep commitment to our clients, I'm here to ensure that our team not only delivers results, but also becomes a trusted partner in your business journey." },
+    { name: "Lindsay McWilliams", title: "Owner & CFO", photo: lindsayPhoto, bio: "I help create a strong foundation that allows our team to focus on delivering exceptional design solutions tailored to your needs. Building relationships with our team and clients, my goal is to create a supportive environment where success thrives." },
+    { name: "Tiffany King", title: "Owner & COO", photo: tiffanyPhoto, bio: "My passion for marketing and design, personable approach and creative ideas continue to earn the trust of business leaders. My goal is to bring a hands-on, collaborative approach to each project, ensuring that every detail aligns with your vision." },
+    { name: "Rachelle Hoover", title: "Marketing Director", photo: rachellePhoto, bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts. I focus on crafting messages that reflect your brand and support SEO research." },
+    { name: "Elise Johnson", title: "Client Strategist", photo: elisePhoto, bio: "With a collaborative approach, I work closely with you to guide strategy and keep initiatives moving forward. My goal is to ensure your brand shows up online with purpose and creative direction that reflects your vision." },
+    { name: "Christel Moser", title: "Billing Manager", photo: christelPhoto, bio: "My goal is to make every step of your experience with us simple, smooth, and stress-free. From onboarding paperwork to billing, I'm here to keep things organized and running efficiently behind the scenes." },
+    { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I care about creating a website that not only looks great, but also feels aligned with your brand and is easy for your target audience to use. My goal is to build something you're proud to share." },
   ];
   return (
     <section className="bg-[#0a1f5c] py-20 px-6">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Meet Our Team</h2>
-        <p className="text-blue-200 mb-12 italic">Professional, Knowledgeable, Collaborative, Passionate</p>
-        <p className="text-blue-100 mb-12 leading-relaxed">At the heart of our success is a talented team committed to helping you achieve your business goals. We have weekly all-team meetings where we go through each project, client-by-client to create a collaborative environment that ensures a comprehensive and effective approach to your project success.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <p className="text-blue-200 mb-6 italic">Professional, Knowledgeable, Collaborative, Passionate</p>
+        <p className="text-blue-100 mb-12 leading-relaxed max-w-2xl">At the heart of our success is a talented team committed to helping you achieve your business goals. We have weekly all-team meetings where we go through each project, client-by-client to create a collaborative environment that ensures a comprehensive and effective approach to your project success.</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {team.map((member) => (
-            <div key={member.name} className="bg-white/10 backdrop-blur rounded-xl p-5 border border-white/10">
-              <div className="w-10 h-10 rounded-full bg-blue-400/30 flex items-center justify-center mb-3">
-                <span className="text-white font-bold text-sm">{member.name.split(" ").map(n => n[0]).join("").slice(0, 2)}</span>
+            <div key={member.name} className="bg-white/10 backdrop-blur rounded-xl p-5 border border-white/10 flex gap-4">
+              <img src={member.photo} alt={member.name} className="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border-2 border-blue-300/30" />
+              <div>
+                <p className="text-white font-bold">{member.name}</p>
+                <p className="text-blue-300 text-xs mb-2 font-medium">{member.title}</p>
+                <p className="text-blue-100 text-sm leading-relaxed">{member.bio}</p>
               </div>
-              <p className="text-white font-bold">{member.name}</p>
-              <p className="text-blue-300 text-xs mb-3 font-medium">{member.title}</p>
-              <p className="text-blue-100 text-sm leading-relaxed">{member.bio}</p>
             </div>
           ))}
         </div>
@@ -405,7 +440,7 @@ export default function ClientPortal() {
       const data = await acceptProposal.mutateAsync({ id, data: { signatureData } });
       queryClient.setQueryData(getGetProposalQueryKey(id), data);
       setAccepted(true);
-    } catch (err) { /* handled below */ }
+    } catch {}
   };
 
   if (isLoading) return (
@@ -453,6 +488,8 @@ export default function ClientPortal() {
       <TestimonialSection
         quote="I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!"
         author="Greg Sutmiller, Evolution Mental Health"
+        websiteImg={evolutionSiteImg}
+        websiteAlt="Evolution Mental Health website"
       />
 
       <StrategySection />
@@ -460,6 +497,9 @@ export default function ClientPortal() {
       <TestimonialSection
         quote="I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well."
         author="Sunni Petty, Petty Family Floors"
+        websiteImg={pettyFloorsSiteImg}
+        websiteAlt="Petty Family Floors website"
+        dark={false}
       />
 
       <CustomWebsiteSection numberOfPages={proposal.numberOfPages} pageNames={proposal.pageNames} />
@@ -473,6 +513,13 @@ export default function ClientPortal() {
       <PricingSection numberOfPages={proposal.numberOfPages} totalAmount={Number(proposal.totalAmount)} />
 
       <TeamSection />
+
+      <TestimonialSection
+        quote="They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!"
+        author="Alyssa Hobbs, Hobbs Salon + Med Spa"
+        websiteImg={hobbsSiteImg}
+        websiteAlt="Hobbs Salon + Med Spa website"
+      />
 
       <WhatsNextSection />
 
