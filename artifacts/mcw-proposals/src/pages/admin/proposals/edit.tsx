@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Controller } from "react-hook-form";
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
@@ -215,13 +216,13 @@ export default function EditProposal() {
               </Button>
             </CardHeader>
             <CardContent>
-              <FormField control={form.control} name="content" render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Textarea className="min-h-[400px] font-mono text-xs leading-relaxed" {...field} />
-                  </FormControl>
-                </FormItem>
-              )} />
+              <Controller
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <Textarea className="min-h-[400px] font-mono text-xs leading-relaxed" {...field} />
+                )}
+              />
             </CardContent>
           </Card>
 
