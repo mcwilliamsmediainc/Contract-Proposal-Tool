@@ -243,7 +243,8 @@ export const ToggleOnboardingTaskParams = zod.object({
 });
 
 export const ToggleOnboardingTaskBody = zod.object({
-  completed: zod.boolean(),
+  completed: zod.boolean().optional(),
+  sortOrder: zod.number().optional(),
 });
 
 export const ToggleOnboardingTaskResponse = zod.object({

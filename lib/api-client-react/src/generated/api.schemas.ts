@@ -365,7 +365,8 @@ export interface OnboardingTask {
 }
 
 export interface ToggleOnboardingTaskBody {
-  completed: boolean;
+  completed?: boolean;
+  sortOrder?: number;
 }
 
 export interface AddOnboardingTaskBody {

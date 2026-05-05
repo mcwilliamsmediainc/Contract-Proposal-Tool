@@ -9,8 +9,9 @@ import {
   useDeleteOnboardingTask,
   getListOnboardingClientsQueryKey,
   getListOnboardingTasksQueryKey,
+  type OnboardingTask,
 } from "@workspace/api-client-react";
-import type { OnboardingClient } from "@workspace/api-client-react";
+import type { OnboardingClient, OnboardingTask } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,12 +38,91 @@ import {
   X,
   Link2,
   ClipboardCheck,
+  GripVertical,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useState, KeyboardEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+function SortableTaskItem({
+  task,
+  onToggle,
+  onDelete,
+}: {
+  task: OnboardingTask;
+  onToggle: (id: number, completed: boolean) => void;
+  onDelete: (id: number) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-2.5 group/task py-0.5"
+    >
+      <button
+        {...attributes}
+        {...listeners}
+        className="flex-shrink-0 text-muted-foreground/30 hover:text-muted-foreground/70 cursor-grab active:cursor-grabbing transition-colors touch-none"
+        aria-label="Drag to reorder"
+      >
+        <GripVertical className="w-3.5 h-3.5" />
+      </button>
+      <button
+        onClick={() => onToggle(task.id, task.completed)}
+        className="flex-shrink-0 text-muted-foreground hover:text-primary transition-colors"
+      >
+        {task.completed
+          ? <CheckCircle2 className="w-4 h-4 text-green-600" />
+          : <Circle className="w-4 h-4" />
+        }
+      </button>
+      <span className={cn(
+        "flex-1 text-sm transition-colors",
+        task.completed ? "line-through text-muted-foreground/50" : "text-foreground"
+      )}>
+        {task.label}
+      </span>
+      <button
+        onClick={() => onDelete(task.id)}
+        className="opacity-0 group-hover/task:opacity-100 text-muted-foreground/40 hover:text-red-500 transition-all flex-shrink-0"
+      >
+        <Trash2 className="w-3 h-3" />
+      </button>
+    </div>
+  );
+}
 
 // ── Service definitions ────────────────────────────────────────────────────────
 
@@ -389,6 +469,7 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
   const { toast } = useToast();
   const [newTaskLabel, setNewTaskLabel] = useState("");
   const [adding, setAdding] = useState(false);
+  const [localOrder, setLocalOrder] = useState<number[] | null>(null);
 
   const { data: tasks, isLoading: loadingTasks } = useListOnboardingTasks(client.id, {
     query: { queryKey: getListOnboardingTasksQueryKey(client.id) },
@@ -398,6 +479,41 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
   const addTask = useAddOnboardingTask();
   const deleteTask = useDeleteOnboardingTask();
   const deleteClient = useDeleteOnboardingClient();
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
+
+  const orderedTasks: OnboardingTask[] = (() => {
+    if (!tasks) return [];
+    if (!localOrder) return tasks;
+    const taskMap = new Map(tasks.map(t => [t.id, t]));
+    return localOrder.map(id => taskMap.get(id)).filter((t): t is OnboardingTask => t !== undefined);
+  })();
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const currentIds = orderedTasks.map(t => t.id);
+    const oldIndex = currentIds.indexOf(active.id as number);
+    const newIndex = currentIds.indexOf(over.id as number);
+    const newOrder = arrayMove(currentIds, oldIndex, newIndex);
+
+    setLocalOrder(newOrder);
+
+    try {
+      await Promise.all(
+        newOrder.map((id, idx) =>
+          toggleTask.mutateAsync({ taskId: id, data: { sortOrder: idx } })
+        )
+      );
+      queryClient.invalidateQueries({ queryKey: getListOnboardingTasksQueryKey(client.id) });
+    } catch {
+      setLocalOrder(null);
+      toast({ title: "Error", description: "Could not save new task order.", variant: "destructive" });
+    }
+  };
 
   const handleToggle = async (taskId: number, completed: boolean) => {
     try {
@@ -414,6 +530,7 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
     setAdding(true);
     try {
       await addTask.mutateAsync({ id: client.id, data: { label } });
+      setLocalOrder(null);
       queryClient.invalidateQueries({ queryKey: getListOnboardingTasksQueryKey(client.id) });
       setNewTaskLabel("");
     } catch {
@@ -426,6 +543,7 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
   const handleDeleteTask = async (taskId: number) => {
     try {
       await deleteTask.mutateAsync({ taskId });
+      setLocalOrder(prev => prev ? prev.filter(id => id !== taskId) : null);
       queryClient.invalidateQueries({ queryKey: getListOnboardingTasksQueryKey(client.id) });
     } catch {
       toast({ title: "Error", description: "Could not delete task.", variant: "destructive" });
@@ -446,8 +564,8 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
     if (e.key === "Enter") { e.preventDefault(); handleAddTask(); }
   };
 
-  const completed = tasks?.filter((t) => t.completed).length ?? 0;
-  const total = tasks?.length ?? 0;
+  const completed = orderedTasks.filter(t => t.completed).length;
+  const total = orderedTasks.length;
   const progress = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const sourceLabel = client.proposalId
@@ -532,37 +650,36 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
       </div>
 
       {/* Checklist */}
-      <div className="px-5 py-3 space-y-1 min-h-[100px]">
+      <div className="px-5 py-3 min-h-[120px]">
         {loadingTasks ? (
           <div className="flex items-center justify-center py-4">
             <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
           </div>
         ) : total === 0 ? (
           <p className="text-xs text-muted-foreground/60 py-2 text-center">No tasks yet.</p>
-        ) : tasks?.map((task) => (
-          <div key={task.id} className="flex items-center gap-2.5 group/task py-0.5">
-            <button
-              onClick={() => handleToggle(task.id, task.completed)}
-              className="flex-shrink-0 text-muted-foreground hover:text-primary transition-colors"
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={orderedTasks.map(t => t.id)}
+              strategy={verticalListSortingStrategy}
             >
-              {task.completed
-                ? <CheckCircle2 className="w-4 h-4 text-green-600" />
-                : <Circle className="w-4 h-4" />}
-            </button>
-            <span className={cn(
-              "flex-1 text-sm transition-colors",
-              task.completed ? "line-through text-muted-foreground/50" : "text-foreground"
-            )}>
-              {task.label}
-            </span>
-            <button
-              onClick={() => handleDeleteTask(task.id)}
-              className="opacity-0 group-hover/task:opacity-100 text-muted-foreground/40 hover:text-red-500 transition-all flex-shrink-0"
-            >
-              <Trash2 className="w-3 h-3" />
-            </button>
-          </div>
-        ))}
+              <div className="space-y-1">
+                {orderedTasks.map(task => (
+                  <SortableTaskItem
+                    key={task.id}
+                    task={task}
+                    onToggle={handleToggle}
+                    onDelete={handleDeleteTask}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        )}
       </div>
 
       {/* Add task input */}

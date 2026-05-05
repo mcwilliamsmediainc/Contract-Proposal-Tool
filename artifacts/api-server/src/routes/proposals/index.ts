@@ -545,16 +545,25 @@ router.patch("/onboarding-tasks/:taskId", async (req, res) => {
 
   const bodyParsed = ToggleOnboardingTaskBody.safeParse(req.body);
   if (!bodyParsed.success) {
-    res.status(400).json({ error: "completed (boolean) is required" });
+    res.status(400).json({ error: "Invalid request body" });
     return;
   }
 
   const { taskId } = paramsParsed.data;
-  const { completed } = bodyParsed.data;
+  const { completed, sortOrder } = bodyParsed.data;
+
+  const updateFields: Partial<typeof onboardingTasksTable.$inferInsert> = {};
+  if (completed !== undefined) updateFields.completed = completed;
+  if (sortOrder !== undefined) updateFields.sortOrder = sortOrder;
+
+  if (Object.keys(updateFields).length === 0) {
+    res.status(400).json({ error: "At least one of completed or sortOrder must be provided" });
+    return;
+  }
 
   const [updated] = await db
     .update(onboardingTasksTable)
-    .set({ completed })
+    .set(updateFields)
     .where(eq(onboardingTasksTable.id, taskId))
     .returning();
 

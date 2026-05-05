@@ -1315,8 +1315,8 @@ components:
       properties:
         completed:
           type: boolean
-      required:
-        - completed
+        sortOrder:
+          type: integer
 
     AddOnboardingTaskBody:
       type: object
