@@ -189,7 +189,7 @@ export default function EditProposal() {
     }
   };
 
-  const savePanel = async () => {
+  const doSave = async () => {
     setSaving(true);
     try {
       const values = form.getValues();
@@ -199,12 +199,18 @@ export default function EditProposal() {
       });
       queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
       toast({ title: "Saved", description: "Changes saved to draft." });
-      setActivePanel(null);
+      return true;
     } catch {
       toast({ title: "Error", description: "Failed to save.", variant: "destructive" });
+      return false;
     } finally {
       setSaving(false);
     }
+  };
+
+  const savePanel = async () => {
+    const ok = await doSave();
+    if (ok) setActivePanel(null);
   };
 
   const [linkCopied, setLinkCopied] = useState(false);
@@ -299,6 +305,14 @@ export default function EditProposal() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={doSave}
+              disabled={saving}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide bg-green-700 hover:bg-green-800 text-white transition-all disabled:opacity-60"
+            >
+              {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ClipboardCheck className="w-3.5 h-3.5" />}
+              Save
+            </button>
             <a
               href={`/proposal/${id}`}
               target="_blank"
@@ -518,7 +532,20 @@ export default function EditProposal() {
                     </div>
                   ))}
                 </div>
-                <p className="text-xs text-gray-400">+ $500 one-time setup fee applies to all plans</p>
+                <p className="text-xs text-gray-400 mb-4">+ $500 one-time setup fee applies to all plans</p>
+                <FormField control={form.control} name="specialContext" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Custom Notes / Amendments</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Add any custom amendments, special terms, discounts, or notes about this pricing arrangement..."
+                        className="h-28 resize-none"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
               </>
             ) : (
               <>

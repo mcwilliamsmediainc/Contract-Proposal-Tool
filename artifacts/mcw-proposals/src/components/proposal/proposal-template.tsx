@@ -386,7 +386,10 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
         <p className="text-blue-200 mb-2">Click below to accept this proposal.</p>
         <p className="text-blue-300 text-sm mb-10">Our team will follow up with a contract.</p>
         <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
-          <p className="text-gray-600 text-sm mb-8"><strong>{clientName || "the client"}</strong> agrees to the strategic roadmap and investment of <strong>${(totalAmount || 0).toLocaleString()}</strong>.</p>
+          <p className="text-gray-600 text-sm mb-8">
+            <strong>{clientName || "the client"}</strong> agrees to the strategic roadmap
+            {totalAmount > 0 ? <> and investment of <strong>${totalAmount.toLocaleString()}</strong></> : null}.
+          </p>
           {onAccept && (
             <Button
               onClick={onAccept}
