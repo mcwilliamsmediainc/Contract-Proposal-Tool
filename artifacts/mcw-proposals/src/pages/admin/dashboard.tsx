@@ -172,12 +172,12 @@ export default function AdminDashboard() {
                         <Link href={`/admin/proposals/${proposal.id}/edit`} className="text-primary hover:text-primary/80 font-medium text-xs font-mono">EDIT</Link>
                         <a href={`/proposal/${proposal.id}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono">PREVIEW</a>
                         {proposal.status === "accepted" && (
-                          <a
+                          <Link
                             href={`/admin/contracts/new?proposalId=${proposal.id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(proposal.totalAmount)}`}
                             className="text-green-600 hover:text-green-700 font-bold text-xs font-mono whitespace-nowrap"
                           >
                             CONTRACT →
-                          </a>
+                          </Link>
                         )}
                         <button onClick={() => setConfirmProposal(proposal.id)} className="text-muted-foreground hover:text-red-500 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />

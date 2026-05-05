@@ -334,12 +334,12 @@ export default function EditProposal() {
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <span className="text-sm font-semibold text-green-800">This proposal was accepted — ready to create a contract?</span>
           </div>
-          <a
+          <Link
             href={`/admin/contracts/new?proposalId=${id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(Number(proposal.totalAmount))}`}
             className="flex items-center gap-1.5 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
           >
             Create Contract →
-          </a>
+          </Link>
         </div>
       )}
 

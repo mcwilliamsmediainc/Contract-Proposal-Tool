@@ -62,7 +62,8 @@ export default function NewContract() {
   const prefillClientName = searchParams.get("clientName") || "";
   const prefillBusinessName = searchParams.get("businessName") || "";
   const prefillClientEmail = searchParams.get("clientEmail") || "";
-  const prefillTotalCost = Number(searchParams.get("totalCost") || 0);
+  const rawTotal = Number(searchParams.get("totalCost") || 0);
+  const prefillTotalCost = Number.isFinite(rawTotal) ? rawTotal : 0;
   const prefillProposalId = searchParams.get("proposalId") || "none";
   const hasPrefill = !!prefillClientName;
 
