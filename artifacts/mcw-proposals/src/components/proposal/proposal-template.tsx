@@ -239,8 +239,8 @@ export function EssentialsSection() {
             <h3 className="text-xl font-bold text-gray-900 mb-6">Website Hosting</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { name: "Gold", price: "$65/mo", features: ["Dedicated server", "High speed server", "Software updates", "Free SSL certificate", "Monthly backups", "Advanced security", "Basic site maintenance"], highlight: true },
-                { name: "Platinum", price: "$90/mo", features: ["Everything in Gold", "1 hour of Monthly Updates"] },
+                { name: "Gold", price: "$60/mo", features: ["Dedicated server", "High speed server", "Software updates", "Free SSL certificate", "Monthly backups", "Advanced security", "Basic site maintenance"], highlight: true },
+                { name: "Platinum", price: "$100/mo", features: ["Everything in Gold", "1 hour of Monthly Updates"] },
               ].map((plan) => (
                 <div key={plan.name} className={`rounded-xl border p-5 ${plan.highlight ? "border-blue-400 bg-blue-50 shadow-md" : "border-gray-200 bg-white"}`}>
                   <p className={`font-bold text-lg mb-1 ${plan.highlight ? "text-blue-700" : "text-gray-900"}`}>{plan.name}</p>
