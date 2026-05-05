@@ -75,7 +75,7 @@ export const CreateProposalBody = zod.object({
 });
 
 /**
- * @summary Get a proposal by ID
+ * @summary Get a proposal by ID (public — excludes internal notes)
  */
 export const GetProposalParams = zod.object({
   id: zod.coerce.string(),
@@ -106,13 +106,7 @@ export const GetProposalResponse = zod
   })
   .describe(
     "Public-facing proposal shape — excludes internal notes (safe for client portal)",
-  )
-  .and(
-    zod.object({
-      notes: zod.string().nullish(),
-    }),
-  )
-  .describe("Full proposal shape including internal admin-only fields");
+  );
 
 /**
  * @summary Update a proposal
@@ -591,6 +585,46 @@ export const CreateOnboardingClientBody = zod.object({
 export const DeleteOnboardingClientParams = zod.object({
   id: zod.coerce.string(),
 });
+
+/**
+ * @summary Get full proposal details including internal notes (admin only)
+ */
+export const GetAdminProposalParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetAdminProposalResponse = zod
+  .object({
+    id: zod.string(),
+    clientName: zod.string(),
+    businessName: zod.string(),
+    clientEmail: zod.string(),
+    projectType: zod.enum(["web", "marketing", "print"]),
+    status: zod.enum(["draft", "sent", "accepted", "archived"]),
+    totalAmount: zod.number(),
+    content: zod.string().nullish(),
+    specialContext: zod.string().nullish(),
+    loomVideoUrl: zod.string().nullish(),
+    calendlyUrl: zod.string().nullish(),
+    signatureData: zod.string().nullish(),
+    signedAt: zod.coerce.date().nullish(),
+    numberOfPages: zod.number().nullish(),
+    pageNames: zod.string().nullish(),
+    clientStrategist: zod.string().nullish(),
+    viewCount: zod.number(),
+    lastViewedAt: zod.coerce.date().nullish(),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "Public-facing proposal shape — excludes internal notes (safe for client portal)",
+  )
+  .and(
+    zod.object({
+      notes: zod.string().nullish(),
+    }),
+  )
+  .describe("Full proposal shape including internal admin-only fields");
 
 /**
  * @summary Get admin dashboard statistics

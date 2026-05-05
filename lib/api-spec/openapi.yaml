@@ -76,7 +76,7 @@ paths:
     get:
       operationId: getProposal
       tags: [proposals]
-      summary: Get a proposal by ID
+      summary: Get a proposal by ID (public — excludes internal notes)
       parameters:
         - name: id
           in: path
@@ -85,11 +85,11 @@ paths:
             type: string
       responses:
         "200":
-          description: Proposal details
+          description: Proposal details (no internal notes)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Proposal"
+                $ref: "#/components/schemas/PublicProposal"
         "404":
           description: Not found
           content:
@@ -543,6 +543,31 @@ paths:
       responses:
         "204":
           description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /admin/proposals/{id}:
+    get:
+      operationId: getAdminProposal
+      tags: [admin]
+      summary: Get full proposal details including internal notes (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Full proposal with notes
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Proposal"
         "404":
           description: Not found
           content:

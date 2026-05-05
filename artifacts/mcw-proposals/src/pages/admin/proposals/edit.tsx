@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetProposal, useUpdateProposal, useDeleteProposal, useGenerateProposalContent, getGetProposalQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
+import { useGetAdminProposal, useUpdateProposal, useDeleteProposal, useGenerateProposalContent, getGetAdminProposalQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -136,8 +136,8 @@ export default function EditProposal() {
   const [activePanel, setActivePanel] = useState<Panel>(null);
   const [saving, setSaving] = useState(false);
 
-  const { data: proposal, isLoading } = useGetProposal(id, {
-    query: { enabled: !!id, queryKey: getGetProposalQueryKey(id) }
+  const { data: proposal, isLoading } = useGetAdminProposal(id, {
+    query: { enabled: !!id, queryKey: getGetAdminProposalQueryKey(id) }
   });
 
   const form = useForm<FormValues>({
@@ -196,7 +196,7 @@ export default function EditProposal() {
         id,
         data: { ...values, totalAmount: values.totalAmount ?? 0 }
       });
-      queryClient.setQueryData(getGetProposalQueryKey(id), data);
+      queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
       toast({ title: "Saved", description: "Changes saved to draft." });
       setActivePanel(null);
     } catch {
@@ -209,7 +209,7 @@ export default function EditProposal() {
   const handleSend = async () => {
     try {
       const data = await updateProposal.mutateAsync({ id, data: { status: "sent" } });
-      queryClient.setQueryData(getGetProposalQueryKey(id), data);
+      queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
       toast({ title: "Sent!", description: "Proposal is now visible to the client." });
     } catch {
       toast({ title: "Error", description: "Failed to send.", variant: "destructive" });
@@ -564,7 +564,7 @@ export default function EditProposal() {
                             id,
                             data: { notes: field.value },
                           });
-                          queryClient.invalidateQueries({ queryKey: getGetProposalQueryKey(id) });
+                          queryClient.invalidateQueries({ queryKey: getGetAdminProposalQueryKey(id) });
                           toast({ title: "Notes saved", duration: 1500 });
                         } catch {
                           toast({ title: "Error saving notes", variant: "destructive" });

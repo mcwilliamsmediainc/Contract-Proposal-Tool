@@ -301,8 +301,8 @@ router.get("/proposals/:id", async (req, res) => {
     return;
   }
 
-  // Return full proposal including notes — admin editor reads notes from here
-  res.json(formatProposal(proposal[0]));
+  // Public route — portal consumes this, never include notes
+  res.json(formatProposalPublic(proposal[0]));
 });
 
 // Admin-only endpoint — returns internal notes; not included in the public portal response.
@@ -369,14 +369,33 @@ router.patch("/proposals/:id", async (req, res) => {
     return;
   }
 
-  // Seed default onboarding tasks when proposal first transitions to accepted
+  // When transitioning to accepted via PATCH, ensure onboarding_client exists
   if (data.status === "accepted") {
-    const existing = await db
+    const services = updated.projectType === "web"
+      ? ["website"]
+      : updated.projectType === "marketing"
+        ? ["marketing"]
+        : updated.projectType === "print"
+          ? ["print"]
+          : [];
+
+    const existingClient = await db
       .select()
-      .from(onboardingTasksTable)
-      .where(eq(onboardingTasksTable.proposalUuid, id))
+      .from(onboardingClientsTable)
+      .where(eq(onboardingClientsTable.proposalId, id))
       .limit(1);
-    if (existing.length === 0) {
+
+    if (existingClient.length === 0) {
+      await db.insert(onboardingClientsTable).values({
+        uuid: id,
+        clientName: updated.clientName,
+        businessName: updated.businessName,
+        clientEmail: updated.clientEmail,
+        clientStrategist: updated.clientStrategist ?? null,
+        services: JSON.stringify(services),
+        proposalId: id,
+        status: "active",
+      });
       await seedDefaultTasks(id);
     }
   }

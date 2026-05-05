@@ -315,7 +315,7 @@ export const useCreateProposal = <
 };
 
 /**
- * @summary Get a proposal by ID
+ * @summary Get a proposal by ID (public — excludes internal notes)
  */
 export const getGetProposalUrl = (id: string) => {
   return `/api/proposals/${id}`;
@@ -324,8 +324,8 @@ export const getGetProposalUrl = (id: string) => {
 export const getProposal = async (
   id: string,
   options?: RequestInit,
-): Promise<Proposal> => {
-  return customFetch<Proposal>(getGetProposalUrl(id), {
+): Promise<PublicProposal> => {
+  return customFetch<PublicProposal>(getGetProposalUrl(id), {
     ...options,
     method: "GET",
   });
@@ -375,7 +375,7 @@ export type GetProposalQueryResult = NonNullable<
 export type GetProposalQueryError = ErrorType<ApiError>;
 
 /**
- * @summary Get a proposal by ID
+ * @summary Get a proposal by ID (public — excludes internal notes)
  */
 
 export function useGetProposal<
@@ -2120,6 +2120,93 @@ export const useDeleteOnboardingClient = <
 > => {
   return useMutation(getDeleteOnboardingClientMutationOptions(options));
 };
+
+/**
+ * @summary Get full proposal details including internal notes (admin only)
+ */
+export const getGetAdminProposalUrl = (id: string) => {
+  return `/api/admin/proposals/${id}`;
+};
+
+export const getAdminProposal = async (
+  id: string,
+  options?: RequestInit,
+): Promise<Proposal> => {
+  return customFetch<Proposal>(getGetAdminProposalUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAdminProposalQueryKey = (id: string) => {
+  return [`/api/admin/proposals/${id}`] as const;
+};
+
+export const getGetAdminProposalQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAdminProposal>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminProposal>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAdminProposalQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getAdminProposal>>
+  > = ({ signal }) => getAdminProposal(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAdminProposal>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAdminProposalQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAdminProposal>>
+>;
+export type GetAdminProposalQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Get full proposal details including internal notes (admin only)
+ */
+
+export function useGetAdminProposal<
+  TData = Awaited<ReturnType<typeof getAdminProposal>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAdminProposal>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAdminProposalQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Get admin dashboard statistics
