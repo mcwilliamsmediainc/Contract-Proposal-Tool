@@ -497,6 +497,59 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
+  /onboarding-clients:
+    get:
+      operationId: listOnboardingClients
+      tags: [proposals]
+      summary: List all onboarding clients
+      responses:
+        "200":
+          description: List of onboarding clients
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OnboardingClient"
+    post:
+      operationId: createOnboardingClient
+      tags: [proposals]
+      summary: Create a standalone onboarding client (no proposal or contract required)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOnboardingClientBody"
+      responses:
+        "201":
+          description: Created onboarding client
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingClient"
+
+  /onboarding-clients/{id}:
+    delete:
+      operationId: deleteOnboardingClient
+      tags: [proposals]
+      summary: Delete an onboarding client record
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
   /admin/stats:
     get:
       operationId: getAdminStats
@@ -1103,6 +1156,70 @@ components:
           type: string
       required:
         - label
+
+    OnboardingClient:
+      type: object
+      properties:
+        id:
+          type: string
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+          nullable: true
+        clientStrategist:
+          type: string
+          nullable: true
+        services:
+          type: array
+          items:
+            type: string
+        proposalId:
+          type: string
+          nullable: true
+        contractId:
+          type: string
+          nullable: true
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clientName
+        - businessName
+        - services
+        - status
+        - createdAt
+        - updatedAt
+
+    CreateOnboardingClientBody:
+      type: object
+      properties:
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+          nullable: true
+        clientStrategist:
+          type: string
+          nullable: true
+        services:
+          type: array
+          items:
+            type: string
+      required:
+        - clientName
+        - businessName
+        - services
 
     ApiError:
       type: object

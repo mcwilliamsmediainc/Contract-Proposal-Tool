@@ -24,6 +24,7 @@ import type {
   Contract,
   CreateContractBody,
   CreateGeminiConversationBody,
+  CreateOnboardingClientBody,
   CreateProposalBody,
   GeminiConversation,
   GeminiConversationWithMessages,
@@ -36,6 +37,7 @@ import type {
   HealthStatus,
   ListContractsParams,
   ListProposalsParams,
+  OnboardingClient,
   OnboardingTask,
   Proposal,
   ProposalNotes,
@@ -1871,6 +1873,252 @@ export const useSignContract = <
   TContext
 > => {
   return useMutation(getSignContractMutationOptions(options));
+};
+
+/**
+ * @summary List all onboarding clients
+ */
+export const getListOnboardingClientsUrl = () => {
+  return `/api/onboarding-clients`;
+};
+
+export const listOnboardingClients = async (
+  options?: RequestInit,
+): Promise<OnboardingClient[]> => {
+  return customFetch<OnboardingClient[]>(getListOnboardingClientsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListOnboardingClientsQueryKey = () => {
+  return [`/api/onboarding-clients`] as const;
+};
+
+export const getListOnboardingClientsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listOnboardingClients>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listOnboardingClients>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListOnboardingClientsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listOnboardingClients>>
+  > = ({ signal }) => listOnboardingClients({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listOnboardingClients>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListOnboardingClientsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listOnboardingClients>>
+>;
+export type ListOnboardingClientsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all onboarding clients
+ */
+
+export function useListOnboardingClients<
+  TData = Awaited<ReturnType<typeof listOnboardingClients>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listOnboardingClients>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListOnboardingClientsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Create a standalone onboarding client (no proposal or contract required)
+ */
+export const getCreateOnboardingClientUrl = () => {
+  return `/api/onboarding-clients`;
+};
+
+export const createOnboardingClient = async (
+  createOnboardingClientBody: CreateOnboardingClientBody,
+  options?: RequestInit,
+): Promise<OnboardingClient> => {
+  return customFetch<OnboardingClient>(getCreateOnboardingClientUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createOnboardingClientBody),
+  });
+};
+
+export const getCreateOnboardingClientMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createOnboardingClient>>,
+    TError,
+    { data: BodyType<CreateOnboardingClientBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createOnboardingClient>>,
+  TError,
+  { data: BodyType<CreateOnboardingClientBody> },
+  TContext
+> => {
+  const mutationKey = ["createOnboardingClient"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createOnboardingClient>>,
+    { data: BodyType<CreateOnboardingClientBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createOnboardingClient(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateOnboardingClientMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createOnboardingClient>>
+>;
+export type CreateOnboardingClientMutationBody =
+  BodyType<CreateOnboardingClientBody>;
+export type CreateOnboardingClientMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create a standalone onboarding client (no proposal or contract required)
+ */
+export const useCreateOnboardingClient = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createOnboardingClient>>,
+    TError,
+    { data: BodyType<CreateOnboardingClientBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createOnboardingClient>>,
+  TError,
+  { data: BodyType<CreateOnboardingClientBody> },
+  TContext
+> => {
+  return useMutation(getCreateOnboardingClientMutationOptions(options));
+};
+
+/**
+ * @summary Delete an onboarding client record
+ */
+export const getDeleteOnboardingClientUrl = (id: string) => {
+  return `/api/onboarding-clients/${id}`;
+};
+
+export const deleteOnboardingClient = async (
+  id: string,
+  options?: RequestInit,
+): Promise<void> => {
+  return customFetch<void>(getDeleteOnboardingClientUrl(id), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteOnboardingClientMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteOnboardingClient>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteOnboardingClient>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  const mutationKey = ["deleteOnboardingClient"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteOnboardingClient>>,
+    { id: string }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return deleteOnboardingClient(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteOnboardingClientMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteOnboardingClient>>
+>;
+
+export type DeleteOnboardingClientMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Delete an onboarding client record
+ */
+export const useDeleteOnboardingClient = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteOnboardingClient>>,
+    TError,
+    { id: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteOnboardingClient>>,
+  TError,
+  { id: string },
+  TContext
+> => {
+  return useMutation(getDeleteOnboardingClientMutationOptions(options));
 };
 
 /**

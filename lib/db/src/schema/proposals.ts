@@ -35,6 +35,21 @@ export const proposalsTable = pgTable("proposals", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const onboardingClientsTable = pgTable("onboarding_clients", {
+  id: serial("id").primaryKey(),
+  uuid: text("uuid").notNull().unique(),
+  clientName: text("client_name").notNull(),
+  businessName: text("business_name").notNull(),
+  clientEmail: text("client_email"),
+  clientStrategist: text("client_strategist"),
+  services: text("services").notNull().default("[]"),
+  proposalId: text("proposal_id"),
+  contractId: text("contract_id"),
+  status: text("status").notNull().default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const onboardingTasksTable = pgTable("onboarding_tasks", {
   id: serial("id").primaryKey(),
   proposalUuid: text("proposal_uuid").notNull(),
@@ -42,6 +57,12 @@ export const onboardingTasksTable = pgTable("onboarding_tasks", {
   completed: boolean("completed").notNull().default(false),
   sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertOnboardingClientSchema = createInsertSchema(onboardingClientsTable).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertProposalSchema = createInsertSchema(proposalsTable).omit({

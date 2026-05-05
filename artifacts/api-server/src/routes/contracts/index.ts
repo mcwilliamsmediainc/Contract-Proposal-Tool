@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, contractsTable } from "@workspace/db";
+import { db, contractsTable, onboardingClientsTable, onboardingTasksTable } from "@workspace/db";
 import {
   CreateContractBody,
   UpdateContractBody,
@@ -233,6 +233,51 @@ router.post("/contracts/:id/sign", async (req, res) => {
   if (!updated) {
     res.status(404).json({ error: "Contract not found" });
     return;
+  }
+
+  // Auto-create onboarding_client on signing (idempotent — keyed by contractId)
+  const existingOb = await db
+    .select()
+    .from(onboardingClientsTable)
+    .where(eq(onboardingClientsTable.contractId, id))
+    .limit(1);
+
+  if (existingOb.length === 0) {
+    const services = updated.contractType === "website"
+      ? ["website"]
+      : updated.contractType === "marketing"
+        ? ["marketing"]
+        : updated.contractType === "print"
+          ? ["print"]
+          : [updated.contractType];
+
+    const obUuid = randomUUID();
+    await db.insert(onboardingClientsTable).values({
+      uuid: obUuid,
+      clientName: updated.clientName,
+      businessName: updated.businessName,
+      clientEmail: updated.clientEmail,
+      services: JSON.stringify(services),
+      contractId: id,
+      proposalId: updated.proposalId ?? null,
+      status: "active",
+    });
+
+    const DEFAULT_TASKS = [
+      "Send welcome email",
+      "Schedule kickoff call",
+      "Collect brand assets",
+      "Set up client portal access",
+      "Deliver first milestone",
+    ];
+    await db.insert(onboardingTasksTable).values(
+      DEFAULT_TASKS.map((label, idx) => ({
+        proposalUuid: obUuid,
+        label,
+        sortOrder: idx,
+        completed: false,
+      }))
+    );
   }
 
   res.json(formatContract(updated));

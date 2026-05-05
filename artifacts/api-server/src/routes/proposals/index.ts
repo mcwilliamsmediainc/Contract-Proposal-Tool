@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, desc, asc } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, proposalsTable, onboardingTasksTable } from "@workspace/db";
+import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable } from "@workspace/db";
 import {
   CreateProposalBody,
   UpdateProposalBody,
@@ -19,6 +19,7 @@ import {
   DeleteOnboardingTaskParams,
   AddOnboardingTaskParams,
   AddOnboardingTaskBody,
+  CreateOnboardingClientBody,
 } from "@workspace/api-zod";
 import { ai } from "@workspace/integrations-gemini-ai";
 
@@ -65,6 +66,24 @@ function formatProposal(p: typeof proposalsTable.$inferSelect) {
   return {
     ...formatProposalPublic(p),
     notes: p.notes ?? null,
+  };
+}
+
+function formatOnboardingClient(c: typeof onboardingClientsTable.$inferSelect) {
+  let services: string[] = [];
+  try { services = JSON.parse(c.services) as string[]; } catch { services = []; }
+  return {
+    id: c.uuid,
+    clientName: c.clientName,
+    businessName: c.businessName,
+    clientEmail: c.clientEmail ?? null,
+    clientStrategist: c.clientStrategist ?? null,
+    services,
+    proposalId: c.proposalId ?? null,
+    contractId: c.contractId ?? null,
+    status: c.status,
+    createdAt: c.createdAt.toISOString(),
+    updatedAt: c.updatedAt.toISOString(),
   };
 }
 
@@ -408,14 +427,45 @@ router.post("/proposals/:id/accept", async (req, res) => {
     return;
   }
 
+  // Create onboarding_client record (idempotent — keyed by proposalId)
+  const existingClient = await db
+    .select()
+    .from(onboardingClientsTable)
+    .where(eq(onboardingClientsTable.proposalId, id))
+    .limit(1);
+
+  let onboardingId = id; // default: use proposal UUID so existing tasks still link
+  if (existingClient.length === 0) {
+    const services = updated.projectType === "web"
+      ? ["website"]
+      : updated.projectType === "marketing"
+        ? ["marketing"]
+        : updated.projectType === "print"
+          ? ["print"]
+          : [];
+    const [newClient] = await db.insert(onboardingClientsTable).values({
+      uuid: id, // use proposal UUID for backward compat with existing tasks
+      clientName: updated.clientName,
+      businessName: updated.businessName,
+      clientEmail: updated.clientEmail,
+      clientStrategist: updated.clientStrategist ?? null,
+      services: JSON.stringify(services),
+      proposalId: id,
+      status: "active",
+    }).returning();
+    onboardingId = newClient.uuid;
+  } else {
+    onboardingId = existingClient[0].uuid;
+  }
+
   // Seed default onboarding tasks (only if not already seeded)
-  const existing = await db
+  const existingTasks = await db
     .select()
     .from(onboardingTasksTable)
-    .where(eq(onboardingTasksTable.proposalUuid, id))
+    .where(eq(onboardingTasksTable.proposalUuid, onboardingId))
     .limit(1);
-  if (existing.length === 0) {
-    await seedDefaultTasks(id);
+  if (existingTasks.length === 0) {
+    await seedDefaultTasks(onboardingId);
   }
 
   res.json(formatProposal(updated));
@@ -506,6 +556,65 @@ router.delete("/onboarding-tasks/:taskId", async (req, res) => {
     res.status(404).json({ error: "Task not found" });
     return;
   }
+
+  res.status(204).send();
+});
+
+// ── Onboarding Clients (standalone onboarding entities) ───────────────────────
+
+router.get("/onboarding-clients", async (_req, res) => {
+  const clients = await db
+    .select()
+    .from(onboardingClientsTable)
+    .orderBy(desc(onboardingClientsTable.createdAt));
+  res.json(clients.map(formatOnboardingClient));
+});
+
+router.post("/onboarding-clients", async (req, res) => {
+  const parsed = CreateOnboardingClientBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body" });
+    return;
+  }
+
+  const data = parsed.data;
+  const uuid = randomUUID();
+
+  const [client] = await db.insert(onboardingClientsTable).values({
+    uuid,
+    clientName: data.clientName,
+    businessName: data.businessName,
+    clientEmail: data.clientEmail ?? null,
+    clientStrategist: data.clientStrategist ?? null,
+    services: JSON.stringify(data.services),
+    status: "active",
+  }).returning();
+
+  // Seed default onboarding tasks for the new client
+  await seedDefaultTasks(uuid);
+
+  res.status(201).json(formatOnboardingClient(client));
+});
+
+router.delete("/onboarding-clients/:id", async (req, res) => {
+  const id = req.params.id;
+  if (!id) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  const deleted = await db
+    .delete(onboardingClientsTable)
+    .where(eq(onboardingClientsTable.uuid, id))
+    .returning();
+
+  if (!deleted[0]) {
+    res.status(404).json({ error: "Onboarding client not found" });
+    return;
+  }
+
+  // Also remove associated tasks
+  await db.delete(onboardingTasksTable).where(eq(onboardingTasksTable.proposalUuid, id));
 
   res.status(204).send();
 });

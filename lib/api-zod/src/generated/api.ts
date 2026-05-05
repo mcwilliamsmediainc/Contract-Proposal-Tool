@@ -549,6 +549,44 @@ export const SignContractResponse = zod.object({
 });
 
 /**
+ * @summary List all onboarding clients
+ */
+export const ListOnboardingClientsResponseItem = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
+  services: zod.array(zod.string()),
+  proposalId: zod.string().nullish(),
+  contractId: zod.string().nullish(),
+  status: zod.string(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListOnboardingClientsResponse = zod.array(
+  ListOnboardingClientsResponseItem,
+);
+
+/**
+ * @summary Create a standalone onboarding client (no proposal or contract required)
+ */
+export const CreateOnboardingClientBody = zod.object({
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
+  services: zod.array(zod.string()),
+});
+
+/**
+ * @summary Delete an onboarding client record
+ */
+export const DeleteOnboardingClientParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+/**
  * @summary Get admin dashboard statistics
  */
 export const GetAdminStatsResponse = zod.object({

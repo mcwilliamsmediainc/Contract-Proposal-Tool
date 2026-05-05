@@ -315,6 +315,28 @@ export interface AddOnboardingTaskBody {
   label: string;
 }
 
+export interface OnboardingClient {
+  id: string;
+  clientName: string;
+  businessName: string;
+  clientEmail?: string | null;
+  clientStrategist?: string | null;
+  services: string[];
+  proposalId?: string | null;
+  contractId?: string | null;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateOnboardingClientBody {
+  clientName: string;
+  businessName: string;
+  clientEmail?: string | null;
+  clientStrategist?: string | null;
+  services: string[];
+}
+
 export interface ApiError {
   error: string;
 }
