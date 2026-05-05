@@ -13,6 +13,7 @@ import rachellePhoto from "@assets/ssMoAw74pdhyxd7r-DQT0dFCZPwoP-UOcOJhbQ_177792
 import elisePhoto from "@assets/2lJSuNP-9GC_cdugrSxCkqbLTDWLIG9f7UHeVA_1777926754493.png";
 import chloePhoto from "@assets/8qEx0RVlV0ihSnsIyAmQEToz5xBp4QDBGSrBnQ_1778025305362.png";
 import ashleaPhoto from "@assets/HacE0LLtzDS7OCF1sXGRoSpS_arILyutApWN-Q_1778025402133.png";
+import nataleePhoto from "@assets/6F8LcZ4mEOUe8ZWZUfuiyUFa_FnvPAHdDzjrHQ_1778025455383.png";
 
 export interface PricingLineItem {
   desc: string;
@@ -333,6 +334,7 @@ export function TeamSection() {
     { name: "Rachelle Hoover", title: "Marketing Director", photo: tiffanyPhoto, bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts." },
     { name: "Elise Johnson", title: "Client Strategist", photo: elisePhoto, bio: "With a collaborative approach, I work closely with you to guide strategy and keep initiatives moving forward." },
     { name: "Ashlea Calhoon", title: "Social Media Director", photo: ashleaPhoto, bio: "As your Social Media Strategist, I'm here to craft compelling content, spark meaningful conversations, and grow your online community. Seeing your business thrive and knowing I've helped turn followers into loyal customers is what drives me every day." },
+    { name: "Natalee Groves", title: "Designer", photo: nataleePhoto, bio: "I'm passionate about creating websites that are both functional and beautifully designed. I focus on creating an experience that stays true to your brand's goals. It's incredibly rewarding to know that the websites I design help businesses grow and stand out in their industries." },
     { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I design websites that are both beautiful and built to perform — staying true to your brand every step of the way." },
   ];
   return (
