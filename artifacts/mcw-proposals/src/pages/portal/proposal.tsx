@@ -5,6 +5,7 @@ import { Loader2, CheckCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
 import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
+import { AlaCarteMarketingTemplate } from "@/components/proposal/ala-carte-marketing-template";
 import type { Tier } from "@/components/proposal/tiered-marketing-template";
 
 export default function ClientPortal() {
@@ -87,6 +88,35 @@ export default function ClientPortal() {
         selectedTier={selectedTier}
         onSelectTier={setSelectedTier}
         onAccept={handleAccept}
+        isPending={acceptProposal.isPending}
+      />
+    );
+  }
+
+  if (proposal.projectType === "ala-carte") {
+    return (
+      <AlaCarteMarketingTemplate
+        data={{
+          clientName: proposal.clientName,
+          businessName: proposal.businessName,
+          projectType: proposal.projectType,
+          content: proposal.content,
+          loomVideoUrl: proposal.loomVideoUrl,
+          createdAt: proposal.createdAt,
+        }}
+        onAccept={async (selectedServiceIds) => {
+          try {
+            const data = await acceptProposal.mutateAsync({
+              id,
+              data: {
+                signatureData: "",
+                selectedTier: JSON.stringify(selectedServiceIds),
+              } as { signatureData: string },
+            });
+            queryClient.setQueryData(getGetProposalQueryKey(id), data);
+            setAccepted(true);
+          } catch {}
+        }}
         isPending={acceptProposal.isPending}
       />
     );

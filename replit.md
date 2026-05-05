@@ -40,6 +40,7 @@ lib/
    - Markdown content rendering (react-markdown + remark-gfm)
    - Loom/YouTube and Calendly embed support
    - **Tiered Marketing Proposal** (`projectType: "tiered"`): interactive 3-tier plan selection (Pro $1,500/mo · Plus $2,500/mo · Platinum $4,000/mo + $500 setup); accept button gated on tier selection; selected tier saved to `proposals.selected_tier`
+   - **Ala Carte Marketing Proposal** (`projectType: "ala-carte"`): interactive service picker across 6 categories (SEO, Google Ads, Social Media Ads, Social Media Posting, Email Marketing, Brand Shoot); floating total bar; selected service IDs stored as JSON in `proposals.selected_tier` on accept
 6. **Onboarding Pipeline** (`/admin/onboarding`) — Post-signature onboarding steps
 7. **Contract Management** (`/admin/contracts`) — Full contract lifecycle system
    - Contracts list with stats (total, awaiting, signed)

@@ -18,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Controller } from "react-hook-form";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
 import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
+import { AlaCarteMarketingTemplate } from "@/components/proposal/ala-carte-marketing-template";
 import { cn } from "@/lib/utils";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
@@ -26,7 +27,7 @@ const formSchema = z.object({
   clientName: z.string().min(1),
   businessName: z.string().min(1),
   clientEmail: z.string().email(),
-  projectType: z.enum(["web", "marketing", "print", "tiered"]),
+  projectType: z.enum(["web", "marketing", "print", "tiered", "ala-carte"]),
   clientStrategist: z.string().optional(),
   totalAmount: z.coerce.number().min(0).optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
@@ -159,7 +160,7 @@ export default function EditProposal() {
         clientName: proposal.clientName,
         businessName: proposal.businessName,
         clientEmail: proposal.clientEmail,
-        projectType: proposal.projectType as "web" | "marketing" | "print" | "tiered",
+        projectType: proposal.projectType as "web" | "marketing" | "print" | "tiered" | "ala-carte",
         clientStrategist: proposal.clientStrategist || "",
         totalAmount: Number(proposal.totalAmount) || undefined,
         numberOfPages: proposal.numberOfPages ?? undefined,
@@ -260,9 +261,10 @@ export default function EditProposal() {
 
   const isSent = proposal.status === "sent" || proposal.status === "accepted";
   const isTiered = watched.projectType === "tiered";
+  const isAlaCarte = watched.projectType === "ala-carte";
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
-    ...(!isTiered ? [{ panel: "pages" as Panel, label: "Edit Pages", icon: Layout }] : []),
+    ...(!isTiered && !isAlaCarte ? [{ panel: "pages" as Panel, label: "Edit Pages", icon: Layout }] : []),
     { panel: "content", label: "Intro Text", icon: FileText },
     { panel: "pricing", label: "Investment", icon: DollarSign },
     { panel: "settings", label: "Settings", icon: ExternalLink },
@@ -399,6 +401,18 @@ export default function EditProposal() {
             createdAt: proposal.createdAt,
           }}
         />
+      ) : isAlaCarte ? (
+        <AlaCarteMarketingTemplate
+          data={{
+            clientName: watched.clientName || proposal.clientName,
+            businessName: watched.businessName || proposal.businessName,
+            projectType: "ala-carte",
+            content: watched.content,
+            loomVideoUrl: watched.loomVideoUrl,
+            createdAt: proposal.createdAt,
+          }}
+          readOnly
+        />
       ) : (
         <FullProposalTemplate
           data={{
@@ -440,6 +454,7 @@ export default function EditProposal() {
                     <SelectItem value="marketing">Marketing</SelectItem>
                     <SelectItem value="print">Print</SelectItem>
                     <SelectItem value="tiered">Tiered Marketing</SelectItem>
+                    <SelectItem value="ala-carte">Ala Carte Marketing</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>

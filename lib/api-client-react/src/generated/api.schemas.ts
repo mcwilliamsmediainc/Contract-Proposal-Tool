@@ -152,6 +152,7 @@ export const PublicProposalProjectType = {
   marketing: "marketing",
   print: "print",
   tiered: "tiered",
+  "ala-carte": "ala-carte",
 } as const;
 
 export type PublicProposalStatus =
@@ -215,6 +216,7 @@ export const CreateProposalBodyProjectType = {
   marketing: "marketing",
   print: "print",
   tiered: "tiered",
+  "ala-carte": "ala-carte",
 } as const;
 
 export interface CreateProposalBody {
@@ -240,6 +242,7 @@ export const UpdateProposalBodyProjectType = {
   marketing: "marketing",
   print: "print",
   tiered: "tiered",
+  "ala-carte": "ala-carte",
 } as const;
 
 export type UpdateProposalBodyStatus =
@@ -283,6 +286,7 @@ export const GenerateProposalBodyProjectType = {
   marketing: "marketing",
   print: "print",
   tiered: "tiered",
+  "ala-carte": "ala-carte",
 } as const;
 
 export interface GenerateProposalBody {
