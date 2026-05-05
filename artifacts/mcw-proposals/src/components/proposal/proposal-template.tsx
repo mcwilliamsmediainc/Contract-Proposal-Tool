@@ -106,7 +106,6 @@ export function TestimonialSection({ quote, author, websiteImg, websiteAlt, dark
   return (
     <section id="section-client-success" className={`py-20 px-6 ${dark ? "bg-[#0a1f5c]" : "bg-[#f8f9fc]"}`}>
       <div className="max-w-4xl mx-auto">
-        <p className={`text-sm font-bold tracking-widest uppercase mb-8 ${dark ? "text-blue-300" : "text-blue-600"}`}>Client Success</p>
         <div className={`grid gap-8 items-center ${websiteImg ? "grid-cols-1 lg:grid-cols-[5fr_8fr]" : "grid-cols-1"}`}>
           {websiteImg && (
             <div className="rounded-xl overflow-hidden shadow-xl border border-white/10 max-w-[260px] w-full mx-auto lg:mx-0">
