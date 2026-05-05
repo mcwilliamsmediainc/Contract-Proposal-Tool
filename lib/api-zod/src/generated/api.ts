@@ -22,29 +22,38 @@ export const ListProposalsQueryParams = zod.object({
   status: zod.enum(["draft", "sent", "accepted", "archived"]).optional(),
 });
 
-export const ListProposalsResponseItem = zod.object({
-  id: zod.string(),
-  clientName: zod.string(),
-  businessName: zod.string(),
-  clientEmail: zod.string(),
-  projectType: zod.enum(["web", "marketing", "print"]),
-  status: zod.enum(["draft", "sent", "accepted", "archived"]),
-  totalAmount: zod.number(),
-  content: zod.string().nullish(),
-  specialContext: zod.string().nullish(),
-  loomVideoUrl: zod.string().nullish(),
-  calendlyUrl: zod.string().nullish(),
-  signatureData: zod.string().nullish(),
-  signedAt: zod.coerce.date().nullish(),
-  numberOfPages: zod.number().nullish(),
-  pageNames: zod.string().nullish(),
-  clientStrategist: zod.string().nullish(),
-  notes: zod.string().nullish(),
-  viewCount: zod.number(),
-  lastViewedAt: zod.coerce.date().nullish(),
-  createdAt: zod.coerce.date(),
-  updatedAt: zod.coerce.date(),
-});
+export const ListProposalsResponseItem = zod
+  .object({
+    id: zod.string(),
+    clientName: zod.string(),
+    businessName: zod.string(),
+    clientEmail: zod.string(),
+    projectType: zod.enum(["web", "marketing", "print"]),
+    status: zod.enum(["draft", "sent", "accepted", "archived"]),
+    totalAmount: zod.number(),
+    content: zod.string().nullish(),
+    specialContext: zod.string().nullish(),
+    loomVideoUrl: zod.string().nullish(),
+    calendlyUrl: zod.string().nullish(),
+    signatureData: zod.string().nullish(),
+    signedAt: zod.coerce.date().nullish(),
+    numberOfPages: zod.number().nullish(),
+    pageNames: zod.string().nullish(),
+    clientStrategist: zod.string().nullish(),
+    viewCount: zod.number(),
+    lastViewedAt: zod.coerce.date().nullish(),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "Public-facing proposal shape — excludes internal notes (safe for client portal)",
+  )
+  .and(
+    zod.object({
+      notes: zod.string().nullish(),
+    }),
+  )
+  .describe("Full proposal shape including internal admin-only fields");
 export const ListProposalsResponse = zod.array(ListProposalsResponseItem);
 
 /**
@@ -66,35 +75,38 @@ export const CreateProposalBody = zod.object({
 });
 
 /**
- * @summary Get a proposal by ID
+ * @summary Get a proposal by ID (public — excludes internal notes)
  */
 export const GetProposalParams = zod.object({
   id: zod.coerce.string(),
 });
 
-export const GetProposalResponse = zod.object({
-  id: zod.string(),
-  clientName: zod.string(),
-  businessName: zod.string(),
-  clientEmail: zod.string(),
-  projectType: zod.enum(["web", "marketing", "print"]),
-  status: zod.enum(["draft", "sent", "accepted", "archived"]),
-  totalAmount: zod.number(),
-  content: zod.string().nullish(),
-  specialContext: zod.string().nullish(),
-  loomVideoUrl: zod.string().nullish(),
-  calendlyUrl: zod.string().nullish(),
-  signatureData: zod.string().nullish(),
-  signedAt: zod.coerce.date().nullish(),
-  numberOfPages: zod.number().nullish(),
-  pageNames: zod.string().nullish(),
-  clientStrategist: zod.string().nullish(),
-  notes: zod.string().nullish(),
-  viewCount: zod.number(),
-  lastViewedAt: zod.coerce.date().nullish(),
-  createdAt: zod.coerce.date(),
-  updatedAt: zod.coerce.date(),
-});
+export const GetProposalResponse = zod
+  .object({
+    id: zod.string(),
+    clientName: zod.string(),
+    businessName: zod.string(),
+    clientEmail: zod.string(),
+    projectType: zod.enum(["web", "marketing", "print"]),
+    status: zod.enum(["draft", "sent", "accepted", "archived"]),
+    totalAmount: zod.number(),
+    content: zod.string().nullish(),
+    specialContext: zod.string().nullish(),
+    loomVideoUrl: zod.string().nullish(),
+    calendlyUrl: zod.string().nullish(),
+    signatureData: zod.string().nullish(),
+    signedAt: zod.coerce.date().nullish(),
+    numberOfPages: zod.number().nullish(),
+    pageNames: zod.string().nullish(),
+    clientStrategist: zod.string().nullish(),
+    viewCount: zod.number(),
+    lastViewedAt: zod.coerce.date().nullish(),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "Public-facing proposal shape — excludes internal notes (safe for client portal)",
+  );
 
 /**
  * @summary Update a proposal
@@ -120,29 +132,38 @@ export const UpdateProposalBody = zod.object({
   notes: zod.string().nullish(),
 });
 
-export const UpdateProposalResponse = zod.object({
-  id: zod.string(),
-  clientName: zod.string(),
-  businessName: zod.string(),
-  clientEmail: zod.string(),
-  projectType: zod.enum(["web", "marketing", "print"]),
-  status: zod.enum(["draft", "sent", "accepted", "archived"]),
-  totalAmount: zod.number(),
-  content: zod.string().nullish(),
-  specialContext: zod.string().nullish(),
-  loomVideoUrl: zod.string().nullish(),
-  calendlyUrl: zod.string().nullish(),
-  signatureData: zod.string().nullish(),
-  signedAt: zod.coerce.date().nullish(),
-  numberOfPages: zod.number().nullish(),
-  pageNames: zod.string().nullish(),
-  clientStrategist: zod.string().nullish(),
-  notes: zod.string().nullish(),
-  viewCount: zod.number(),
-  lastViewedAt: zod.coerce.date().nullish(),
-  createdAt: zod.coerce.date(),
-  updatedAt: zod.coerce.date(),
-});
+export const UpdateProposalResponse = zod
+  .object({
+    id: zod.string(),
+    clientName: zod.string(),
+    businessName: zod.string(),
+    clientEmail: zod.string(),
+    projectType: zod.enum(["web", "marketing", "print"]),
+    status: zod.enum(["draft", "sent", "accepted", "archived"]),
+    totalAmount: zod.number(),
+    content: zod.string().nullish(),
+    specialContext: zod.string().nullish(),
+    loomVideoUrl: zod.string().nullish(),
+    calendlyUrl: zod.string().nullish(),
+    signatureData: zod.string().nullish(),
+    signedAt: zod.coerce.date().nullish(),
+    numberOfPages: zod.number().nullish(),
+    pageNames: zod.string().nullish(),
+    clientStrategist: zod.string().nullish(),
+    viewCount: zod.number(),
+    lastViewedAt: zod.coerce.date().nullish(),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "Public-facing proposal shape — excludes internal notes (safe for client portal)",
+  )
+  .and(
+    zod.object({
+      notes: zod.string().nullish(),
+    }),
+  )
+  .describe("Full proposal shape including internal admin-only fields");
 
 /**
  * @summary Delete a proposal
@@ -162,29 +183,38 @@ export const AcceptProposalBody = zod.object({
   signatureData: zod.string(),
 });
 
-export const AcceptProposalResponse = zod.object({
-  id: zod.string(),
-  clientName: zod.string(),
-  businessName: zod.string(),
-  clientEmail: zod.string(),
-  projectType: zod.enum(["web", "marketing", "print"]),
-  status: zod.enum(["draft", "sent", "accepted", "archived"]),
-  totalAmount: zod.number(),
-  content: zod.string().nullish(),
-  specialContext: zod.string().nullish(),
-  loomVideoUrl: zod.string().nullish(),
-  calendlyUrl: zod.string().nullish(),
-  signatureData: zod.string().nullish(),
-  signedAt: zod.coerce.date().nullish(),
-  numberOfPages: zod.number().nullish(),
-  pageNames: zod.string().nullish(),
-  clientStrategist: zod.string().nullish(),
-  notes: zod.string().nullish(),
-  viewCount: zod.number(),
-  lastViewedAt: zod.coerce.date().nullish(),
-  createdAt: zod.coerce.date(),
-  updatedAt: zod.coerce.date(),
-});
+export const AcceptProposalResponse = zod
+  .object({
+    id: zod.string(),
+    clientName: zod.string(),
+    businessName: zod.string(),
+    clientEmail: zod.string(),
+    projectType: zod.enum(["web", "marketing", "print"]),
+    status: zod.enum(["draft", "sent", "accepted", "archived"]),
+    totalAmount: zod.number(),
+    content: zod.string().nullish(),
+    specialContext: zod.string().nullish(),
+    loomVideoUrl: zod.string().nullish(),
+    calendlyUrl: zod.string().nullish(),
+    signatureData: zod.string().nullish(),
+    signedAt: zod.coerce.date().nullish(),
+    numberOfPages: zod.number().nullish(),
+    pageNames: zod.string().nullish(),
+    clientStrategist: zod.string().nullish(),
+    viewCount: zod.number(),
+    lastViewedAt: zod.coerce.date().nullish(),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "Public-facing proposal shape — excludes internal notes (safe for client portal)",
+  )
+  .and(
+    zod.object({
+      notes: zod.string().nullish(),
+    }),
+  )
+  .describe("Full proposal shape including internal admin-only fields");
 
 /**
  * @summary List onboarding tasks for a proposal
@@ -244,35 +274,51 @@ export const AddOnboardingTaskBody = zod.object({
 });
 
 /**
- * @summary Record a view event for a proposal
+ * @summary Record a view event for a proposal (public — excludes internal notes)
  */
 export const RecordProposalViewParams = zod.object({
   id: zod.coerce.string(),
 });
 
-export const RecordProposalViewResponse = zod.object({
-  id: zod.string(),
-  clientName: zod.string(),
-  businessName: zod.string(),
-  clientEmail: zod.string(),
-  projectType: zod.enum(["web", "marketing", "print"]),
-  status: zod.enum(["draft", "sent", "accepted", "archived"]),
-  totalAmount: zod.number(),
-  content: zod.string().nullish(),
-  specialContext: zod.string().nullish(),
-  loomVideoUrl: zod.string().nullish(),
-  calendlyUrl: zod.string().nullish(),
-  signatureData: zod.string().nullish(),
-  signedAt: zod.coerce.date().nullish(),
-  numberOfPages: zod.number().nullish(),
-  pageNames: zod.string().nullish(),
-  clientStrategist: zod.string().nullish(),
-  notes: zod.string().nullish(),
-  viewCount: zod.number(),
-  lastViewedAt: zod.coerce.date().nullish(),
-  createdAt: zod.coerce.date(),
-  updatedAt: zod.coerce.date(),
+export const RecordProposalViewResponse = zod
+  .object({
+    id: zod.string(),
+    clientName: zod.string(),
+    businessName: zod.string(),
+    clientEmail: zod.string(),
+    projectType: zod.enum(["web", "marketing", "print"]),
+    status: zod.enum(["draft", "sent", "accepted", "archived"]),
+    totalAmount: zod.number(),
+    content: zod.string().nullish(),
+    specialContext: zod.string().nullish(),
+    loomVideoUrl: zod.string().nullish(),
+    calendlyUrl: zod.string().nullish(),
+    signatureData: zod.string().nullish(),
+    signedAt: zod.coerce.date().nullish(),
+    numberOfPages: zod.number().nullish(),
+    pageNames: zod.string().nullish(),
+    clientStrategist: zod.string().nullish(),
+    viewCount: zod.number(),
+    lastViewedAt: zod.coerce.date().nullish(),
+    createdAt: zod.coerce.date(),
+    updatedAt: zod.coerce.date(),
+  })
+  .describe(
+    "Public-facing proposal shape — excludes internal notes (safe for client portal)",
+  );
+
+/**
+ * @summary Get internal notes for a proposal (admin only)
+ */
+export const GetProposalNotesParams = zod.object({
+  id: zod.coerce.string(),
 });
+
+export const GetProposalNotesResponse = zod
+  .object({
+    notes: zod.string().nullable(),
+  })
+  .describe("Internal notes for a proposal — admin only");
 
 /**
  * @summary Generate proposal content using Gemini AI

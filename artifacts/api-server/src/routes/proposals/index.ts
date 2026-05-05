@@ -32,10 +32,9 @@ const DEFAULT_ONBOARDING_TASKS = [
   "Deliver first milestone",
 ];
 
-// Single formatter used for all routes.
-// notes is internal-only: the client portal UI never renders it, but the
-// field is included so the admin editor can read/write it via the same endpoint.
-function formatProposal(p: typeof proposalsTable.$inferSelect) {
+// Public formatter — safe for client portal routes; never includes internal notes.
+// Matches the PublicProposal schema in openapi.yaml.
+function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
   return {
     id: String(p.uuid ?? p.id),
     clientName: p.clientName,
@@ -53,11 +52,19 @@ function formatProposal(p: typeof proposalsTable.$inferSelect) {
     numberOfPages: p.numberOfPages ?? null,
     pageNames: p.pageNames ?? null,
     clientStrategist: p.clientStrategist ?? null,
-    notes: p.notes ?? null,
     viewCount: p.viewCount,
     lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
+  };
+}
+
+// Admin formatter — adds internal notes on top of the public shape.
+// Matches the Proposal schema (extends PublicProposal) in openapi.yaml.
+function formatProposal(p: typeof proposalsTable.$inferSelect) {
+  return {
+    ...formatProposalPublic(p),
+    notes: p.notes ?? null,
   };
 }
 
@@ -265,7 +272,26 @@ router.get("/proposals/:id", async (req, res) => {
     return;
   }
 
-  res.json(formatProposal(proposal[0]));
+  // Use public formatter: this endpoint is consumed by the client portal
+  res.json(formatProposalPublic(proposal[0]));
+});
+
+// Admin-only endpoint — returns internal notes; not included in the public portal response.
+// Documented in openapi.yaml as GET /proposals/{id}/notes.
+router.get("/proposals/:id/notes", async (req, res) => {
+  const id = req.params.id;
+  const proposal = await db
+    .select({ notes: proposalsTable.notes })
+    .from(proposalsTable)
+    .where(eq(proposalsTable.uuid, id))
+    .limit(1);
+
+  if (!proposal[0]) {
+    res.status(404).json({ error: "Proposal not found" });
+    return;
+  }
+
+  res.json({ notes: proposal[0].notes ?? null });
 });
 
 router.patch("/proposals/:id", async (req, res) => {
@@ -425,7 +451,8 @@ router.post("/proposals/:id/view", async (req, res) => {
     .where(eq(proposalsTable.uuid, id))
     .returning();
 
-  res.json(formatProposal(updated));
+  // Use public formatter: this endpoint is consumed by the client portal to track views
+  res.json(formatProposalPublic(updated));
 });
 
 router.patch("/onboarding-tasks/:taskId", async (req, res) => {

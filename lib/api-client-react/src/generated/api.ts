@@ -38,6 +38,8 @@ import type {
   ListProposalsParams,
   OnboardingTask,
   Proposal,
+  ProposalNotes,
+  PublicProposal,
   SendGeminiMessageBody,
   SignContractBody,
   ToggleOnboardingTaskBody,
@@ -311,7 +313,7 @@ export const useCreateProposal = <
 };
 
 /**
- * @summary Get a proposal by ID
+ * @summary Get a proposal by ID (public — excludes internal notes)
  */
 export const getGetProposalUrl = (id: string) => {
   return `/api/proposals/${id}`;
@@ -320,8 +322,8 @@ export const getGetProposalUrl = (id: string) => {
 export const getProposal = async (
   id: string,
   options?: RequestInit,
-): Promise<Proposal> => {
-  return customFetch<Proposal>(getGetProposalUrl(id), {
+): Promise<PublicProposal> => {
+  return customFetch<PublicProposal>(getGetProposalUrl(id), {
     ...options,
     method: "GET",
   });
@@ -371,7 +373,7 @@ export type GetProposalQueryResult = NonNullable<
 export type GetProposalQueryError = ErrorType<ApiError>;
 
 /**
- * @summary Get a proposal by ID
+ * @summary Get a proposal by ID (public — excludes internal notes)
  */
 
 export function useGetProposal<
@@ -1002,7 +1004,7 @@ export const useAddOnboardingTask = <
 };
 
 /**
- * @summary Record a view event for a proposal
+ * @summary Record a view event for a proposal (public — excludes internal notes)
  */
 export const getRecordProposalViewUrl = (id: string) => {
   return `/api/proposals/${id}/view`;
@@ -1011,8 +1013,8 @@ export const getRecordProposalViewUrl = (id: string) => {
 export const recordProposalView = async (
   id: string,
   options?: RequestInit,
-): Promise<Proposal> => {
-  return customFetch<Proposal>(getRecordProposalViewUrl(id), {
+): Promise<PublicProposal> => {
+  return customFetch<PublicProposal>(getRecordProposalViewUrl(id), {
     ...options,
     method: "POST",
   });
@@ -1063,7 +1065,7 @@ export type RecordProposalViewMutationResult = NonNullable<
 export type RecordProposalViewMutationError = ErrorType<unknown>;
 
 /**
- * @summary Record a view event for a proposal
+ * @summary Record a view event for a proposal (public — excludes internal notes)
  */
 export const useRecordProposalView = <
   TError = ErrorType<unknown>,
@@ -1084,6 +1086,93 @@ export const useRecordProposalView = <
 > => {
   return useMutation(getRecordProposalViewMutationOptions(options));
 };
+
+/**
+ * @summary Get internal notes for a proposal (admin only)
+ */
+export const getGetProposalNotesUrl = (id: string) => {
+  return `/api/proposals/${id}/notes`;
+};
+
+export const getProposalNotes = async (
+  id: string,
+  options?: RequestInit,
+): Promise<ProposalNotes> => {
+  return customFetch<ProposalNotes>(getGetProposalNotesUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetProposalNotesQueryKey = (id: string) => {
+  return [`/api/proposals/${id}/notes`] as const;
+};
+
+export const getGetProposalNotesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getProposalNotes>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getProposalNotes>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetProposalNotesQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getProposalNotes>>
+  > = ({ signal }) => getProposalNotes(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getProposalNotes>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetProposalNotesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getProposalNotes>>
+>;
+export type GetProposalNotesQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Get internal notes for a proposal (admin only)
+ */
+
+export function useGetProposalNotes<
+  TData = Awaited<ReturnType<typeof getProposalNotes>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getProposalNotes>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetProposalNotesQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary Generate proposal content using Gemini AI

@@ -144,32 +144,35 @@ export interface SignContractBody {
   companyZip?: string | null;
 }
 
-export type ProposalProjectType =
-  (typeof ProposalProjectType)[keyof typeof ProposalProjectType];
+export type PublicProposalProjectType =
+  (typeof PublicProposalProjectType)[keyof typeof PublicProposalProjectType];
 
-export const ProposalProjectType = {
+export const PublicProposalProjectType = {
   web: "web",
   marketing: "marketing",
   print: "print",
 } as const;
 
-export type ProposalStatus =
-  (typeof ProposalStatus)[keyof typeof ProposalStatus];
+export type PublicProposalStatus =
+  (typeof PublicProposalStatus)[keyof typeof PublicProposalStatus];
 
-export const ProposalStatus = {
+export const PublicProposalStatus = {
   draft: "draft",
   sent: "sent",
   accepted: "accepted",
   archived: "archived",
 } as const;
 
-export interface Proposal {
+/**
+ * Public-facing proposal shape — excludes internal notes (safe for client portal)
+ */
+export interface PublicProposal {
   id: string;
   clientName: string;
   businessName: string;
   clientEmail: string;
-  projectType: ProposalProjectType;
-  status: ProposalStatus;
+  projectType: PublicProposalProjectType;
+  status: PublicProposalStatus;
   totalAmount: number;
   content?: string | null;
   specialContext?: string | null;
@@ -180,11 +183,24 @@ export interface Proposal {
   numberOfPages?: number | null;
   pageNames?: string | null;
   clientStrategist?: string | null;
-  notes?: string | null;
   viewCount: number;
   lastViewedAt?: string | null;
   createdAt: string;
   updatedAt: string;
+}
+
+/**
+ * Full proposal shape including internal admin-only fields
+ */
+export type Proposal = PublicProposal & {
+  notes?: string | null;
+};
+
+/**
+ * Internal notes for a proposal — admin only
+ */
+export interface ProposalNotes {
+  notes: string | null;
 }
 
 export type CreateProposalBodyProjectType =
