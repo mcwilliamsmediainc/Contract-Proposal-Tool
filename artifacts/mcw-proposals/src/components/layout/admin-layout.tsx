@@ -143,20 +143,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Desktop top bar */}
-        <header className="hidden md:flex h-[57px] border-b border-border bg-card items-center justify-between px-8 sticky top-0 z-30">
-          <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground uppercase tracking-widest">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-            McWilliams Media · Strategic Portal
-          </div>
-          <a
-            href="https://mcwilliamsmedia.com"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs font-mono text-muted-foreground hover:text-foreground transition-colors uppercase tracking-wider"
-          >
-            mcwilliamsmedia.com
-          </a>
-        </header>
+        <header className="hidden md:flex h-[57px] border-b border-border bg-card items-center px-8 sticky top-0 z-30" />
 
         <div className="flex-1 overflow-auto bg-background p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
