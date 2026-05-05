@@ -200,7 +200,7 @@ export function TimelineSection() {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Timeline Deposit</h2>
-          <p className="text-gray-600 leading-relaxed">To ensure your project gets completed in a timely manner, we have implemented a timeline deposit. This deposit is fully refundable if we receive adequate communication to complete the project within the allotted 90 days.</p>
+          <p className="text-gray-600 leading-relaxed">We want your website live as quickly as possible. The timeline deposit keeps your project moving without delays — and it's fully refundable when we hit your 90-day goal together.</p>
         </div>
       </div>
     </section>
