@@ -11,7 +11,7 @@ import {
   getListOnboardingTasksQueryKey,
   type OnboardingTask,
 } from "@workspace/api-client-react";
-import type { OnboardingClient, OnboardingTask } from "@workspace/api-client-react";
+import type { OnboardingClient } from "@workspace/api-client-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
