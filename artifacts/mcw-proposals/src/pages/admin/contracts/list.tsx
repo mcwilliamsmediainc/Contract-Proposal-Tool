@@ -6,8 +6,26 @@ import { format } from "date-fns";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
+
+type FilterKey = "all" | "draft" | "sent" | "signed";
+
+interface ContractStage {
+  key: FilterKey;
+  label: string;
+  color: string;
+  activeColor: string;
+  dotColor: string;
+}
+
+const CONTRACT_STAGES: ContractStage[] = [
+  { key: "all",    label: "All",    color: "bg-muted/60 text-muted-foreground hover:bg-muted",   activeColor: "bg-foreground text-background",  dotColor: "bg-foreground" },
+  { key: "draft",  label: "Draft",  color: "bg-gray-100 text-gray-600 hover:bg-gray-200",         activeColor: "bg-gray-700 text-white",          dotColor: "bg-gray-400" },
+  { key: "sent",   label: "Sent",   color: "bg-blue-50 text-blue-700 hover:bg-blue-100",           activeColor: "bg-blue-600 text-white",          dotColor: "bg-blue-500" },
+  { key: "signed", label: "Signed", color: "bg-green-50 text-green-700 hover:bg-green-100",        activeColor: "bg-green-600 text-white",         dotColor: "bg-green-500" },
+];
 
 function statusVariant(status: string) {
   if (status === "signed") return "default";
@@ -36,11 +54,28 @@ export default function ContractsList() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [confirmId, setConfirmId] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
 
   const { data: contracts, isLoading } = useListContracts(undefined, {
     query: { queryKey: getListContractsQueryKey() },
   });
   const deleteContract = useDeleteContract();
+
+  const filterCounts = useMemo<Record<FilterKey, number>>(() => {
+    const all = contracts ?? [];
+    return {
+      all:    all.length,
+      draft:  all.filter(c => c.status === "draft").length,
+      sent:   all.filter(c => c.status === "sent").length,
+      signed: all.filter(c => c.status === "signed").length,
+    };
+  }, [contracts]);
+
+  const filteredContracts = useMemo(() => {
+    if (!contracts) return [];
+    if (activeFilter === "all") return contracts;
+    return contracts.filter(c => c.status === activeFilter);
+  }, [contracts, activeFilter]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -104,6 +139,37 @@ export default function ContractsList() {
         </Card>
       </div>
 
+      {/* ── QUICK-FILTER CHIPS ── */}
+      <div className="mb-5 overflow-x-auto">
+        <div className="flex items-center gap-1.5 min-w-max pb-1">
+          {CONTRACT_STAGES.map((stage, idx) => {
+            const isActive = activeFilter === stage.key;
+            const count = filterCounts[stage.key];
+            return (
+              <div key={stage.key} className="flex items-center gap-1.5">
+                {idx > 0 && <div className="w-5 h-px bg-border/60 flex-shrink-0" />}
+                <button
+                  onClick={() => setActiveFilter(stage.key)}
+                  className={cn(
+                    "inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all select-none",
+                    isActive ? stage.activeColor : stage.color
+                  )}
+                >
+                  <span className={cn("w-2 h-2 rounded-full flex-shrink-0", isActive ? "bg-current opacity-80" : stage.dotColor)} />
+                  {stage.label}
+                  <span className={cn(
+                    "inline-flex items-center justify-center min-w-[20px] h-5 px-1 rounded-full text-[10px] font-bold",
+                    isActive ? "bg-white/20 text-inherit" : "bg-current/10 text-current"
+                  )}>
+                    {count}
+                  </span>
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="border border-border/50 rounded-lg overflow-hidden bg-card/30">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -126,18 +192,24 @@ export default function ContractsList() {
                     Loading contracts...
                   </td>
                 </tr>
-              ) : contracts?.length === 0 ? (
+              ) : filteredContracts.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-5 py-12 text-center text-muted-foreground">
                     <FileSignature className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                    <p>No contracts yet.</p>
-                    <Link href="/admin/contracts/new" className="text-primary text-xs mt-1 inline-block hover:underline">
-                      Create your first contract →
-                    </Link>
+                    {activeFilter === "all" ? (
+                      <>
+                        <p>No contracts yet.</p>
+                        <Link href="/admin/contracts/new" className="text-primary text-xs mt-1 inline-block hover:underline">
+                          Create your first contract →
+                        </Link>
+                      </>
+                    ) : (
+                      <p>No <span className="font-semibold">{activeFilter}</span> contracts.</p>
+                    )}
                   </td>
                 </tr>
               ) : (
-                contracts?.map((contract) => (
+                filteredContracts.map((contract) => (
                   <tr key={contract.id} className="hover:bg-accent/50 transition-colors">
                     <td className="px-5 py-3.5 font-medium text-foreground">{contract.clientName}</td>
                     <td className="px-5 py-3.5 text-muted-foreground">{contract.businessName}</td>
