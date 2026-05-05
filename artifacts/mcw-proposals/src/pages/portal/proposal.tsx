@@ -13,7 +13,6 @@ export default function ClientPortal() {
   const recordView = useRecordProposalView();
   const acceptProposal = useAcceptProposal();
   const viewedRef = useRef(false);
-  const [signatureData, setSignatureData] = useState("");
   const [accepted, setAccepted] = useState(false);
 
   useEffect(() => {
@@ -25,9 +24,8 @@ export default function ClientPortal() {
   }, [proposal?.status]);
 
   const handleAccept = async () => {
-    if (!signatureData) return;
     try {
-      const data = await acceptProposal.mutateAsync({ id, data: { signatureData } });
+      const data = await acceptProposal.mutateAsync({ id, data: { signatureData: "" } });
       queryClient.setQueryData(getGetProposalQueryKey(id), data);
       setAccepted(true);
     } catch {}
@@ -76,8 +74,6 @@ export default function ClientPortal() {
       }}
       onAccept={handleAccept}
       isPending={acceptProposal.isPending}
-      signatureData={signatureData}
-      onSign={setSignatureData}
     />
   );
 }

@@ -65,15 +65,15 @@ export function SectionIntro({ content }: { content?: string | null }) {
   return (
     <section id="section-intro" className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
-        <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed">
+        <div className="max-w-none text-gray-700 leading-relaxed">
           {content ? (
-            <p className="text-lg leading-relaxed whitespace-pre-wrap">{content}</p>
+            <p className="text-xl leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{content}</p>
           ) : (
             <>
-              <p className="text-lg leading-relaxed mb-6">
+              <p className="text-xl leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
                 Thank you for considering McWilliams Media as your partner in achieving your new website goals! We're excited for the opportunity to work with you and bring your vision to life with a professional, unique and conversion-focused design.
               </p>
-              <p className="text-lg leading-relaxed mb-10">
+              <p className="text-xl leading-relaxed mb-10" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
                 In this proposal, we'll outline our recommendations for your new website so that your business makes a strong first impression and helps you achieve your goals. Our team brings a blend of creativity, technical expertise, and strategic insight to every project, ensuring that your investment in your online presence delivers maximum impact.
               </p>
             </>
@@ -326,8 +326,8 @@ export function TeamSection() {
   const team = [
     { name: "Matt McWilliams", title: "Owner & CEO", photo: mattDarkPhoto, bio: "We've been helping businesses like yours succeed through thoughtful web design since 2011." },
     { name: "Lindsay McWilliams", title: "Owner & CFO", photo: lindsayPhoto, bio: "I help create a strong foundation that allows our team to focus on delivering exceptional design solutions tailored to your needs." },
-    { name: "Tiffany King", title: "Owner & COO", photo: tiffanyPhoto, bio: "My passion for marketing and design continues to earn the trust of business leaders." },
-    { name: "Rachelle Hoover", title: "Marketing Director", photo: rachellePhoto, bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts." },
+    { name: "Tiffany King", title: "Owner & COO", photo: rachellePhoto, bio: "My passion for marketing and design continues to earn the trust of business leaders." },
+    { name: "Rachelle Hoover", title: "Marketing Director", photo: tiffanyPhoto, bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts." },
     { name: "Elise Johnson", title: "Client Strategist", photo: elisePhoto, bio: "With a collaborative approach, I work closely with you to guide strategy and keep initiatives moving forward." },
     { name: "Christel Moser", title: "Billing Manager", photo: christelPhoto, bio: "My goal is to make every step of your experience with us simple, smooth, and stress-free." },
     { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I care about creating a website that not only looks great, but also feels aligned with your brand." },
@@ -375,43 +375,39 @@ export function WhatsNextSection() {
   );
 }
 
-export function AcceptSection({ clientName, totalAmount, onAccept, isPending, signatureData, onSign, disabled }: {
+export function AcceptSection({ clientName, totalAmount, onAccept, isPending, disabled }: {
   clientName: string; totalAmount: number; onAccept?: () => void;
-  isPending?: boolean; signatureData?: string; onSign?: (data: string) => void; disabled?: boolean;
+  isPending?: boolean; disabled?: boolean;
 }) {
   return (
     <section className="py-20 px-6" style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 50%, #1a5bb8 100%)" }}>
       <div className="max-w-xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Ready to work together?</h2>
-        <p className="text-blue-200 mb-2">Click Below to Accept the Proposal</p>
+        <p className="text-blue-200 mb-2">Click below to accept this proposal.</p>
         <p className="text-blue-300 text-sm mb-10">Our team will follow up with a contract.</p>
-        <div className="bg-white rounded-2xl p-8 text-left shadow-2xl">
-          <p className="text-gray-600 text-sm mb-6">By signing below, <strong>{clientName || "the client"}</strong> agrees to the strategic roadmap and investment of <strong>${(totalAmount || 0).toLocaleString()}</strong>.</p>
-          {onSign && <SignaturePad onEnd={onSign} />}
+        <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
+          <p className="text-gray-600 text-sm mb-8"><strong>{clientName || "the client"}</strong> agrees to the strategic roadmap and investment of <strong>${(totalAmount || 0).toLocaleString()}</strong>.</p>
           {onAccept && (
             <Button
               onClick={onAccept}
-              disabled={disabled || !signatureData || isPending}
-              className="w-full h-14 mt-6 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl"
+              disabled={disabled || isPending}
+              className="w-full h-14 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl"
             >
               {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                 <span className="flex items-center gap-2">Accept Proposal <ArrowRight className="w-4 h-4" /></span>
               )}
             </Button>
           )}
-          <p className="text-center text-gray-400 text-xs mt-3">Legally binding digital signature</p>
         </div>
       </div>
     </section>
   );
 }
 
-export function FullProposalTemplate({ data, onAccept, isPending, signatureData, onSign }: {
+export function FullProposalTemplate({ data, onAccept, isPending }: {
   data: ProposalData;
   onAccept?: () => void;
   isPending?: boolean;
-  signatureData?: string;
-  onSign?: (d: string) => void;
 }) {
   const proposalDate = data.createdAt ? new Date(data.createdAt) : new Date();
   const dateStr = proposalDate.toLocaleDateString("en-US", { month: "long", day: "numeric" });
@@ -467,8 +463,6 @@ export function FullProposalTemplate({ data, onAccept, isPending, signatureData,
         totalAmount={Number(data.totalAmount) || 0}
         onAccept={onAccept}
         isPending={isPending}
-        signatureData={signatureData}
-        onSign={onSign}
         disabled={false}
       />
     </div>
