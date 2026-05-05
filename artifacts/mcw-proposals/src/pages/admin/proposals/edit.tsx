@@ -167,8 +167,16 @@ export default function EditProposal() {
         content: proposal.content || "",
         loomVideoUrl: proposal.loomVideoUrl || "",
         calendlyUrl: proposal.calendlyUrl || "",
-        notes: proposal.notes || "",
+        notes: "",
       });
+      // Notes are internal-only and not included in the public proposal endpoint.
+      // Fetch them separately from the admin-only /notes endpoint.
+      fetch(`/api/proposals/${id}/notes`)
+        .then(r => r.ok ? r.json() : { notes: null })
+        .then(({ notes }: { notes: string | null }) => {
+          form.setValue("notes", notes || "");
+        })
+        .catch(() => {/* non-critical — form starts empty */});
     }
   }, [proposal, id, form]);
 

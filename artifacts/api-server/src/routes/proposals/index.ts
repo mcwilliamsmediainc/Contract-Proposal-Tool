@@ -32,7 +32,8 @@ const DEFAULT_ONBOARDING_TASKS = [
   "Deliver first milestone",
 ];
 
-function formatProposal(p: typeof proposalsTable.$inferSelect) {
+// Public formatter — safe for client portal; never includes internal notes
+function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
   return {
     id: String(p.uuid ?? p.id),
     clientName: p.clientName,
@@ -50,13 +51,24 @@ function formatProposal(p: typeof proposalsTable.$inferSelect) {
     numberOfPages: p.numberOfPages ?? null,
     pageNames: p.pageNames ?? null,
     clientStrategist: p.clientStrategist ?? null,
-    notes: p.notes ?? null,
+    notes: null as null,
     viewCount: p.viewCount,
     lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
 }
+
+// Admin formatter — includes internal notes; only for admin-facing routes
+function formatProposalAdmin(p: typeof proposalsTable.$inferSelect) {
+  return {
+    ...formatProposalPublic(p),
+    notes: p.notes ?? null,
+  };
+}
+
+// Alias used throughout admin routes
+const formatProposal = formatProposalAdmin;
 
 function formatTask(t: typeof onboardingTasksTable.$inferSelect) {
   return {
@@ -98,7 +110,7 @@ Your writing is authoritative, specific, and vision-focused.
 Write in flowing paragraphs, not bullet points. Use strategic language that speaks to business outcomes.
 Format your response in Markdown with clear sections.`;
 
-  const projectLabel = projectType === "web" || projectType === "website" ? "website" : projectType === "marketing" ? "marketing strategy" : "print materials";
+  const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : "print materials";
 
   const userPrompt = `Create a complete strategic proposal for ${clientName} at ${businessName}.
 
@@ -262,7 +274,25 @@ router.get("/proposals/:id", async (req, res) => {
     return;
   }
 
-  res.json(formatProposal(proposal[0]));
+  // Public-safe: excludes internal notes
+  res.json(formatProposalPublic(proposal[0]));
+});
+
+// Admin-only: returns internal notes for the proposal editor
+router.get("/proposals/:id/notes", async (req, res) => {
+  const id = req.params.id;
+  const proposal = await db
+    .select({ notes: proposalsTable.notes })
+    .from(proposalsTable)
+    .where(eq(proposalsTable.uuid, id))
+    .limit(1);
+
+  if (!proposal[0]) {
+    res.status(404).json({ error: "Proposal not found" });
+    return;
+  }
+
+  res.json({ notes: proposal[0].notes ?? null });
 });
 
 router.patch("/proposals/:id", async (req, res) => {
@@ -422,7 +452,8 @@ router.post("/proposals/:id/view", async (req, res) => {
     .where(eq(proposalsTable.uuid, id))
     .returning();
 
-  res.json(formatProposal(updated));
+  // Public-safe: portal calls this to increment view count
+  res.json(formatProposalPublic(updated));
 });
 
 router.patch("/onboarding-tasks/:taskId", async (req, res) => {
