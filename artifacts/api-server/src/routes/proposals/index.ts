@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, asc } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, proposalsTable } from "@workspace/db";
+import { db, proposalsTable, onboardingTasksTable } from "@workspace/db";
 import {
   CreateProposalBody,
   UpdateProposalBody,
@@ -13,10 +13,24 @@ import {
   RecordProposalViewParams,
   ListProposalsQueryParams,
   GenerateProposalContentBody,
+  ListOnboardingTasksParams,
+  ToggleOnboardingTaskParams,
+  ToggleOnboardingTaskBody,
+  DeleteOnboardingTaskParams,
+  AddOnboardingTaskParams,
+  AddOnboardingTaskBody,
 } from "@workspace/api-zod";
 import { ai } from "@workspace/integrations-gemini-ai";
 
 const router = Router();
+
+const DEFAULT_ONBOARDING_TASKS = [
+  "Send welcome email",
+  "Schedule kickoff call",
+  "Collect brand assets",
+  "Set up client portal access",
+  "Deliver first milestone",
+];
 
 function formatProposal(p: typeof proposalsTable.$inferSelect) {
   return {
@@ -36,10 +50,33 @@ function formatProposal(p: typeof proposalsTable.$inferSelect) {
     numberOfPages: p.numberOfPages ?? null,
     pageNames: p.pageNames ?? null,
     clientStrategist: p.clientStrategist ?? null,
+    notes: p.notes ?? null,
     viewCount: p.viewCount,
+    lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
+}
+
+function formatTask(t: typeof onboardingTasksTable.$inferSelect) {
+  return {
+    id: t.id,
+    proposalUuid: t.proposalUuid,
+    label: t.label,
+    completed: t.completed,
+    sortOrder: t.sortOrder,
+    createdAt: t.createdAt.toISOString(),
+  };
+}
+
+async function seedDefaultTasks(proposalUuid: string) {
+  const tasks = DEFAULT_ONBOARDING_TASKS.map((label, idx) => ({
+    proposalUuid,
+    label,
+    sortOrder: idx,
+    completed: false,
+  }));
+  await db.insert(onboardingTasksTable).values(tasks);
 }
 
 router.get("/proposals/generate", (req, res) => {
@@ -150,6 +187,62 @@ router.post("/proposals", async (req, res) => {
   res.status(201).json(formatProposal(proposal));
 });
 
+router.get("/proposals/:id/onboarding-tasks", async (req, res) => {
+  const parsed = ListOnboardingTasksParams.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  const { id } = parsed.data;
+  const proposal = await db.select().from(proposalsTable).where(eq(proposalsTable.uuid, id)).limit(1);
+  if (!proposal[0]) {
+    res.status(404).json({ error: "Proposal not found" });
+    return;
+  }
+
+  const tasks = await db
+    .select()
+    .from(onboardingTasksTable)
+    .where(eq(onboardingTasksTable.proposalUuid, id))
+    .orderBy(asc(onboardingTasksTable.sortOrder), asc(onboardingTasksTable.createdAt));
+
+  res.json(tasks.map(formatTask));
+});
+
+router.post("/proposals/:id/onboarding-tasks/add", async (req, res) => {
+  const paramsParsed = AddOnboardingTaskParams.safeParse(req.params);
+  if (!paramsParsed.success) {
+    res.status(400).json({ error: "Invalid id" });
+    return;
+  }
+
+  const bodyParsed = AddOnboardingTaskBody.safeParse(req.body);
+  if (!bodyParsed.success) {
+    res.status(400).json({ error: "label is required" });
+    return;
+  }
+
+  const { id } = paramsParsed.data;
+  const { label } = bodyParsed.data;
+
+  const proposal = await db.select().from(proposalsTable).where(eq(proposalsTable.uuid, id)).limit(1);
+  if (!proposal[0]) {
+    res.status(404).json({ error: "Proposal not found" });
+    return;
+  }
+
+  const existing = await db.select().from(onboardingTasksTable).where(eq(onboardingTasksTable.proposalUuid, id));
+  const sortOrder = existing.length;
+
+  const [task] = await db
+    .insert(onboardingTasksTable)
+    .values({ proposalUuid: id, label, sortOrder, completed: false })
+    .returning();
+
+  res.status(201).json(formatTask(task));
+});
+
 router.get("/proposals/:id", async (req, res) => {
   const parsed = GetProposalParams.safeParse(req.params);
   if (!parsed.success) {
@@ -205,6 +298,7 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.numberOfPages !== undefined) updateData.numberOfPages = data.numberOfPages;
   if (data.pageNames !== undefined) updateData.pageNames = data.pageNames;
   if (data.clientStrategist !== undefined) updateData.clientStrategist = data.clientStrategist;
+  if (data.notes !== undefined) updateData.notes = data.notes;
 
   const [updated] = await db
     .update(proposalsTable)
@@ -215,6 +309,18 @@ router.patch("/proposals/:id", async (req, res) => {
   if (!updated) {
     res.status(404).json({ error: "Proposal not found" });
     return;
+  }
+
+  // Seed default onboarding tasks when proposal first transitions to accepted
+  if (data.status === "accepted") {
+    const existing = await db
+      .select()
+      .from(onboardingTasksTable)
+      .where(eq(onboardingTasksTable.proposalUuid, id))
+      .limit(1);
+    if (existing.length === 0) {
+      await seedDefaultTasks(id);
+    }
   }
 
   res.json(formatProposal(updated));
@@ -273,6 +379,16 @@ router.post("/proposals/:id/accept", async (req, res) => {
     return;
   }
 
+  // Seed default onboarding tasks (only if not already seeded)
+  const existing = await db
+    .select()
+    .from(onboardingTasksTable)
+    .where(eq(onboardingTasksTable.proposalUuid, id))
+    .limit(1);
+  if (existing.length === 0) {
+    await seedDefaultTasks(id);
+  }
+
   res.json(formatProposal(updated));
 });
 
@@ -300,12 +416,68 @@ router.post("/proposals/:id/view", async (req, res) => {
     .update(proposalsTable)
     .set({
       viewCount: (existing[0].viewCount ?? 0) + 1,
+      lastViewedAt: new Date(),
       updatedAt: new Date(),
     })
     .where(eq(proposalsTable.uuid, id))
     .returning();
 
   res.json(formatProposal(updated));
+});
+
+router.patch("/onboarding-tasks/:taskId", async (req, res) => {
+  const paramsParsed = ToggleOnboardingTaskParams.safeParse({
+    taskId: Number(req.params.taskId),
+  });
+  if (!paramsParsed.success) {
+    res.status(400).json({ error: "Invalid taskId" });
+    return;
+  }
+
+  const bodyParsed = ToggleOnboardingTaskBody.safeParse(req.body);
+  if (!bodyParsed.success) {
+    res.status(400).json({ error: "completed (boolean) is required" });
+    return;
+  }
+
+  const { taskId } = paramsParsed.data;
+  const { completed } = bodyParsed.data;
+
+  const [updated] = await db
+    .update(onboardingTasksTable)
+    .set({ completed })
+    .where(eq(onboardingTasksTable.id, taskId))
+    .returning();
+
+  if (!updated) {
+    res.status(404).json({ error: "Task not found" });
+    return;
+  }
+
+  res.json(formatTask(updated));
+});
+
+router.delete("/onboarding-tasks/:taskId", async (req, res) => {
+  const paramsParsed = DeleteOnboardingTaskParams.safeParse({
+    taskId: Number(req.params.taskId),
+  });
+  if (!paramsParsed.success) {
+    res.status(400).json({ error: "Invalid taskId" });
+    return;
+  }
+
+  const { taskId } = paramsParsed.data;
+  const deleted = await db
+    .delete(onboardingTasksTable)
+    .where(eq(onboardingTasksTable.id, taskId))
+    .returning();
+
+  if (!deleted[0]) {
+    res.status(404).json({ error: "Task not found" });
+    return;
+  }
+
+  res.status(204).send();
 });
 
 export default router;

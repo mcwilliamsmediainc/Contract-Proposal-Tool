@@ -7,7 +7,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Activity, BarChart3, Briefcase, FileSignature, FileText, Send, Trash2, Filter } from "lucide-react";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
 import { useQueryClient } from "@tanstack/react-query";
@@ -293,16 +293,17 @@ export default function AdminDashboard() {
                 <th className="px-5 py-4 font-medium">Value</th>
                 <th className="px-5 py-4 font-medium">Status</th>
                 <th className="px-5 py-4 font-medium">Views</th>
+                <th className="px-5 py-4 font-medium">Last Viewed</th>
                 <th className="px-5 py-4 font-medium">Date</th>
                 <th className="px-5 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {loadingProposals ? (
-                <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">Loading...</td></tr>
+                <tr><td colSpan={9} className="px-5 py-8 text-center text-muted-foreground">Loading...</td></tr>
               ) : isContractStage ? (
                 <tr>
-                  <td colSpan={8} className="px-5 py-10 text-center text-muted-foreground">
+                  <td colSpan={9} className="px-5 py-10 text-center text-muted-foreground">
                     <FileSignature className="w-8 h-8 mx-auto mb-2 opacity-25" />
                     <p className="text-sm font-medium">Clients at this stage have progressed to contracts.</p>
                     <p className="text-xs mt-1">
@@ -343,6 +344,12 @@ export default function AdminDashboard() {
                     </Badge>
                   </td>
                   <td className="px-5 py-3.5 font-mono text-muted-foreground">{proposal.viewCount}</td>
+                  <td className="px-5 py-3.5 text-sm text-muted-foreground">
+                    {proposal.lastViewedAt
+                      ? formatDistanceToNow(new Date(proposal.lastViewedAt), { addSuffix: true })
+                      : <span className="opacity-30">—</span>
+                    }
+                  </td>
                   <td className="px-5 py-3.5 font-mono text-muted-foreground text-xs">{format(new Date(proposal.createdAt), "MMM dd, yyyy")}</td>
                   <td className="px-5 py-3.5 text-right">
                     {confirmProposal === proposal.id ? (

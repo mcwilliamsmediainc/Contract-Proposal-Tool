@@ -170,6 +170,108 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
+  /proposals/{id}/onboarding-tasks:
+    get:
+      operationId: listOnboardingTasks
+      tags: [proposals]
+      summary: List onboarding tasks for a proposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of onboarding tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OnboardingTask"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /onboarding-tasks/{taskId}:
+    patch:
+      operationId: toggleOnboardingTask
+      tags: [proposals]
+      summary: Toggle an onboarding task completed state
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ToggleOnboardingTaskBody"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingTask"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    delete:
+      operationId: deleteOnboardingTask
+      tags: [proposals]
+      summary: Delete an onboarding task
+      parameters:
+        - name: taskId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /proposals/{id}/onboarding-tasks/add:
+    post:
+      operationId: addOnboardingTask
+      tags: [proposals]
+      summary: Add a custom onboarding task to a proposal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddOnboardingTaskBody"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingTask"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
   /proposals/{id}/view:
     post:
       operationId: recordProposalView
@@ -747,8 +849,15 @@ components:
         clientStrategist:
           type: string
           nullable: true
+        notes:
+          type: string
+          nullable: true
         viewCount:
           type: integer
+        lastViewedAt:
+          type: string
+          format: date-time
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -846,6 +955,9 @@ components:
         clientStrategist:
           type: string
           nullable: true
+        notes:
+          type: string
+          nullable: true
 
     AcceptProposalBody:
       type: object
@@ -908,6 +1020,46 @@ components:
         - draftCount
         - sentCount
         - acceptedCount
+
+    OnboardingTask:
+      type: object
+      properties:
+        id:
+          type: integer
+        proposalUuid:
+          type: string
+        label:
+          type: string
+        completed:
+          type: boolean
+        sortOrder:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - proposalUuid
+        - label
+        - completed
+        - sortOrder
+        - createdAt
+
+    ToggleOnboardingTaskBody:
+      type: object
+      properties:
+        completed:
+          type: boolean
+      required:
+        - completed
+
+    AddOnboardingTaskBody:
+      type: object
+      properties:
+        label:
+          type: string
+      required:
+        - label
 
     ApiError:
       type: object

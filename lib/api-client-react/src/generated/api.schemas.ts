@@ -180,7 +180,9 @@ export interface Proposal {
   numberOfPages?: number | null;
   pageNames?: string | null;
   clientStrategist?: string | null;
+  notes?: string | null;
   viewCount: number;
+  lastViewedAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -242,6 +244,7 @@ export interface UpdateProposalBody {
   numberOfPages?: number | null;
   pageNames?: string | null;
   clientStrategist?: string | null;
+  notes?: string | null;
 }
 
 export interface AcceptProposalBody {
@@ -277,6 +280,23 @@ export interface AdminStats {
   draftCount: number;
   sentCount: number;
   acceptedCount: number;
+}
+
+export interface OnboardingTask {
+  id: number;
+  proposalUuid: string;
+  label: string;
+  completed: boolean;
+  sortOrder: number;
+  createdAt: string;
+}
+
+export interface ToggleOnboardingTaskBody {
+  completed: boolean;
+}
+
+export interface AddOnboardingTaskBody {
+  label: string;
 }
 
 export interface ApiError {

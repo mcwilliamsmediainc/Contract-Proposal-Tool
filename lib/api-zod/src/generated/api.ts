@@ -39,7 +39,9 @@ export const ListProposalsResponseItem = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   clientStrategist: zod.string().nullish(),
+  notes: zod.string().nullish(),
   viewCount: zod.number(),
+  lastViewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -87,7 +89,9 @@ export const GetProposalResponse = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   clientStrategist: zod.string().nullish(),
+  notes: zod.string().nullish(),
   viewCount: zod.number(),
+  lastViewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -113,6 +117,7 @@ export const UpdateProposalBody = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   clientStrategist: zod.string().nullish(),
+  notes: zod.string().nullish(),
 });
 
 export const UpdateProposalResponse = zod.object({
@@ -132,7 +137,9 @@ export const UpdateProposalResponse = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   clientStrategist: zod.string().nullish(),
+  notes: zod.string().nullish(),
   viewCount: zod.number(),
+  lastViewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
@@ -172,9 +179,68 @@ export const AcceptProposalResponse = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   clientStrategist: zod.string().nullish(),
+  notes: zod.string().nullish(),
   viewCount: zod.number(),
+  lastViewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
+});
+
+/**
+ * @summary List onboarding tasks for a proposal
+ */
+export const ListOnboardingTasksParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const ListOnboardingTasksResponseItem = zod.object({
+  id: zod.number(),
+  proposalUuid: zod.string(),
+  label: zod.string(),
+  completed: zod.boolean(),
+  sortOrder: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+export const ListOnboardingTasksResponse = zod.array(
+  ListOnboardingTasksResponseItem,
+);
+
+/**
+ * @summary Toggle an onboarding task completed state
+ */
+export const ToggleOnboardingTaskParams = zod.object({
+  taskId: zod.coerce.number(),
+});
+
+export const ToggleOnboardingTaskBody = zod.object({
+  completed: zod.boolean(),
+});
+
+export const ToggleOnboardingTaskResponse = zod.object({
+  id: zod.number(),
+  proposalUuid: zod.string(),
+  label: zod.string(),
+  completed: zod.boolean(),
+  sortOrder: zod.number(),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete an onboarding task
+ */
+export const DeleteOnboardingTaskParams = zod.object({
+  taskId: zod.coerce.number(),
+});
+
+/**
+ * @summary Add a custom onboarding task to a proposal
+ */
+export const AddOnboardingTaskParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const AddOnboardingTaskBody = zod.object({
+  label: zod.string(),
 });
 
 /**
@@ -201,7 +267,9 @@ export const RecordProposalViewResponse = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   clientStrategist: zod.string().nullish(),
+  notes: zod.string().nullish(),
   viewCount: zod.number(),
+  lastViewedAt: zod.coerce.date().nullish(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });

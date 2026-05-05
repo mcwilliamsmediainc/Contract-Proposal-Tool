@@ -11,7 +11,7 @@ import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, Send, ArrowLeft, X, Users, FileText,
-  DollarSign, Layout, ExternalLink, Plus, Trash2
+  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -34,10 +34,11 @@ const formSchema = z.object({
   content: z.string().optional(),
   loomVideoUrl: z.string().optional(),
   calendlyUrl: z.string().optional(),
+  notes: z.string().optional(),
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Panel = "client" | "pages" | "content" | "pricing" | "settings" | null;
+type Panel = "client" | "pages" | "content" | "pricing" | "settings" | "notes" | null;
 
 function SlidePanel({ open, onClose, title, children, onSave, saving }: {
   open: boolean; onClose: () => void; title: string;
@@ -166,6 +167,7 @@ export default function EditProposal() {
         content: proposal.content || "",
         loomVideoUrl: proposal.loomVideoUrl || "",
         calendlyUrl: proposal.calendlyUrl || "",
+        notes: proposal.notes || "",
       });
     }
   }, [proposal, id, form]);
@@ -248,6 +250,7 @@ export default function EditProposal() {
     { panel: "content", label: "Intro Text", icon: FileText },
     { panel: "pricing", label: "Investment", icon: DollarSign },
     { panel: "settings", label: "Settings", icon: ExternalLink },
+    { panel: "notes", label: "Notes", icon: StickyNote },
   ];
 
   return (
@@ -525,6 +528,54 @@ export default function EditProposal() {
                 </a>
               </div>
             </div>
+          </div>
+        </Form>
+      </SlidePanel>
+
+      {/* ── NOTES PANEL ── */}
+      <SlidePanel
+        open={activePanel === "notes"}
+        onClose={() => setActivePanel(null)}
+        title="Internal Notes"
+        onSave={savePanel}
+        saving={saving}
+      >
+        <Form {...form}>
+          <div className="space-y-3">
+            <p className="text-xs text-gray-500 leading-relaxed">
+              Internal strategist notes — never shown to the client. Auto-saves when you click away from the text area.
+            </p>
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="sr-only">Notes</FormLabel>
+                  <FormControl>
+                    <textarea
+                      {...field}
+                      rows={14}
+                      placeholder="Add notes about this client, their goals, objections, follow-up actions…"
+                      className="w-full rounded-md border border-gray-200 bg-amber-50/40 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400/50 resize-none transition-all"
+                      onBlur={async () => {
+                        if (!id) return;
+                        try {
+                          await updateProposal.mutateAsync({
+                            id,
+                            data: { notes: field.value },
+                          });
+                          queryClient.invalidateQueries({ queryKey: getGetProposalQueryKey(id) });
+                          toast({ title: "Notes saved", duration: 1500 });
+                        } catch {
+                          toast({ title: "Error saving notes", variant: "destructive" });
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
         </Form>
       </SlidePanel>

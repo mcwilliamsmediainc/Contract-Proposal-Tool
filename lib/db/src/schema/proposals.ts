@@ -5,6 +5,7 @@ import {
   integer,
   numeric,
   timestamp,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -27,9 +28,20 @@ export const proposalsTable = pgTable("proposals", {
   numberOfPages: integer("number_of_pages"),
   pageNames: text("page_names"),
   clientStrategist: text("client_strategist"),
+  notes: text("notes"),
   viewCount: integer("view_count").notNull().default(0),
+  lastViewedAt: timestamp("last_viewed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const onboardingTasksTable = pgTable("onboarding_tasks", {
+  id: serial("id").primaryKey(),
+  proposalUuid: text("proposal_uuid").notNull(),
+  label: text("label").notNull(),
+  completed: boolean("completed").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const insertProposalSchema = createInsertSchema(proposalsTable).omit({
@@ -40,3 +52,4 @@ export const insertProposalSchema = createInsertSchema(proposalsTable).omit({
 
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposalsTable.$inferSelect;
+export type OnboardingTask = typeof onboardingTasksTable.$inferSelect;
