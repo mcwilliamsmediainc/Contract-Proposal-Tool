@@ -40,6 +40,12 @@ export const ListProposalsResponseItem = zod
     numberOfPages: zod.number().nullish(),
     pageNames: zod.string().nullish(),
     selectedTier: zod.string().nullish(),
+    pricingItems: zod
+      .string()
+      .nullish()
+      .describe(
+        "JSON-encoded array of custom pricing line items for website proposals",
+      ),
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -78,6 +84,12 @@ export const CreateProposalBody = zod.object({
   calendlyUrl: zod.string().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  pricingItems: zod
+    .string()
+    .nullish()
+    .describe(
+      "JSON-encoded array of custom pricing line items for website proposals",
+    ),
   clientStrategist: zod.string().nullish(),
 });
 
@@ -106,6 +118,12 @@ export const GetProposalResponse = zod
     numberOfPages: zod.number().nullish(),
     pageNames: zod.string().nullish(),
     selectedTier: zod.string().nullish(),
+    pricingItems: zod
+      .string()
+      .nullish()
+      .describe(
+        "JSON-encoded array of custom pricing line items for website proposals",
+      ),
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -139,6 +157,12 @@ export const UpdateProposalBody = zod.object({
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
   selectedTier: zod.string().nullish(),
+  pricingItems: zod
+    .string()
+    .nullish()
+    .describe(
+      "JSON-encoded array of custom pricing line items for website proposals",
+    ),
   clientStrategist: zod.string().nullish(),
   notes: zod.string().nullish(),
 });
@@ -161,6 +185,12 @@ export const UpdateProposalResponse = zod
     numberOfPages: zod.number().nullish(),
     pageNames: zod.string().nullish(),
     selectedTier: zod.string().nullish(),
+    pricingItems: zod
+      .string()
+      .nullish()
+      .describe(
+        "JSON-encoded array of custom pricing line items for website proposals",
+      ),
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -220,6 +250,12 @@ export const AcceptProposalResponse = zod
     numberOfPages: zod.number().nullish(),
     pageNames: zod.string().nullish(),
     selectedTier: zod.string().nullish(),
+    pricingItems: zod
+      .string()
+      .nullish()
+      .describe(
+        "JSON-encoded array of custom pricing line items for website proposals",
+      ),
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -325,6 +361,12 @@ export const RecordProposalViewResponse = zod
     numberOfPages: zod.number().nullish(),
     pageNames: zod.string().nullish(),
     selectedTier: zod.string().nullish(),
+    pricingItems: zod
+      .string()
+      .nullish()
+      .describe(
+        "JSON-encoded array of custom pricing line items for website proposals",
+      ),
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -639,6 +681,12 @@ export const GetAdminProposalResponse = zod
     numberOfPages: zod.number().nullish(),
     pageNames: zod.string().nullish(),
     selectedTier: zod.string().nullish(),
+    pricingItems: zod
+      .string()
+      .nullish()
+      .describe(
+        "JSON-encoded array of custom pricing line items for website proposals",
+      ),
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),

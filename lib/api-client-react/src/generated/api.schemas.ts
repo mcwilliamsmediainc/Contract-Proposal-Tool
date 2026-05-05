@@ -185,6 +185,8 @@ export interface PublicProposal {
   numberOfPages?: number | null;
   pageNames?: string | null;
   selectedTier?: string | null;
+  /** JSON-encoded array of custom pricing line items for website proposals */
+  pricingItems?: string | null;
   clientStrategist?: string | null;
   viewCount: number;
   lastViewedAt?: string | null;
@@ -231,6 +233,8 @@ export interface CreateProposalBody {
   calendlyUrl?: string | null;
   numberOfPages?: number | null;
   pageNames?: string | null;
+  /** JSON-encoded array of custom pricing line items for website proposals */
+  pricingItems?: string | null;
   clientStrategist?: string | null;
 }
 
@@ -269,6 +273,8 @@ export interface UpdateProposalBody {
   numberOfPages?: number | null;
   pageNames?: string | null;
   selectedTier?: string | null;
+  /** JSON-encoded array of custom pricing line items for website proposals */
+  pricingItems?: string | null;
   clientStrategist?: string | null;
   notes?: string | null;
 }

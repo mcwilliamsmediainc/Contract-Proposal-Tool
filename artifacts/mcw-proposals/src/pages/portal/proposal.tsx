@@ -131,6 +131,7 @@ export default function ClientPortal() {
         numberOfPages: proposal.numberOfPages,
         pageNames: proposal.pageNames,
         totalAmount: Number(proposal.totalAmount),
+        pricingItems: proposal.pricingItems,
         content: proposal.content,
         loomVideoUrl: proposal.loomVideoUrl,
         createdAt: proposal.createdAt,

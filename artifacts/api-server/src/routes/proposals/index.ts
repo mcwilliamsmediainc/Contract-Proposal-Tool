@@ -53,6 +53,7 @@ function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
     numberOfPages: p.numberOfPages ?? null,
     pageNames: p.pageNames ?? null,
     selectedTier: p.selectedTier ?? null,
+    pricingItems: p.pricingItems ?? null,
     clientStrategist: p.clientStrategist ?? null,
     viewCount: p.viewCount,
     lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
@@ -359,6 +360,7 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.clientStrategist !== undefined) updateData.clientStrategist = data.clientStrategist;
   if (data.notes !== undefined) updateData.notes = data.notes;
   if (data.selectedTier !== undefined) updateData.selectedTier = data.selectedTier ?? null;
+  if (data.pricingItems !== undefined) updateData.pricingItems = data.pricingItems ?? null;
 
   const [updated] = await db
     .update(proposalsTable)

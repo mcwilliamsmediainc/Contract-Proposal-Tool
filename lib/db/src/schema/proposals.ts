@@ -29,6 +29,7 @@ export const proposalsTable = pgTable("proposals", {
   pageNames: text("page_names"),
   clientStrategist: text("client_strategist"),
   selectedTier: text("selected_tier"),
+  pricingItems: text("pricing_items"),
   notes: text("notes"),
   viewCount: integer("view_count").notNull().default(0),
   lastViewedAt: timestamp("last_viewed_at"),

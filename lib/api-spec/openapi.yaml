@@ -1024,6 +1024,10 @@ components:
         selectedTier:
           type: string
           nullable: true
+        pricingItems:
+          type: string
+          nullable: true
+          description: JSON-encoded array of custom pricing line items for website proposals
         clientStrategist:
           type: string
           nullable: true
@@ -1107,6 +1111,10 @@ components:
         pageNames:
           type: string
           nullable: true
+        pricingItems:
+          type: string
+          nullable: true
+          description: JSON-encoded array of custom pricing line items for website proposals
         clientStrategist:
           type: string
           nullable: true
@@ -1154,6 +1162,10 @@ components:
         selectedTier:
           type: string
           nullable: true
+        pricingItems:
+          type: string
+          nullable: true
+          description: JSON-encoded array of custom pricing line items for website proposals
         clientStrategist:
           type: string
           nullable: true

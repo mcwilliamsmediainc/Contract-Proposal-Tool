@@ -11,12 +11,12 @@ import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, ArrowLeft, X, Users, FileText,
-  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote, Link2, ClipboardCheck
+  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote, Link2, ClipboardCheck, GripVertical
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Controller } from "react-hook-form";
-import { FullProposalTemplate } from "@/components/proposal/proposal-template";
+import { FullProposalTemplate, PricingLineItem } from "@/components/proposal/proposal-template";
 import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
 import { AlaCarteMarketingTemplate } from "@/components/proposal/ala-carte-marketing-template";
 import { cn } from "@/lib/utils";
@@ -32,6 +32,7 @@ const formSchema = z.object({
   totalAmount: z.coerce.number().min(0).optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
+  pricingItems: z.string().optional(),
   specialContext: z.string().optional(),
   content: z.string().optional(),
   loomVideoUrl: z.string().optional(),
@@ -148,6 +149,7 @@ export default function EditProposal() {
       clientName: "", businessName: "", clientEmail: "",
       projectType: "web", clientStrategist: "",
       totalAmount: undefined, numberOfPages: undefined, pageNames: "",
+      pricingItems: undefined,
       specialContext: "", content: "", loomVideoUrl: "", calendlyUrl: "",
     },
   });
@@ -165,6 +167,7 @@ export default function EditProposal() {
         totalAmount: Number(proposal.totalAmount) || undefined,
         numberOfPages: proposal.numberOfPages ?? undefined,
         pageNames: proposal.pageNames || "",
+        pricingItems: proposal.pricingItems || undefined,
         specialContext: proposal.specialContext || "",
         content: proposal.content || "",
         loomVideoUrl: proposal.loomVideoUrl || "",
@@ -266,7 +269,7 @@ export default function EditProposal() {
     { panel: "client", label: "Client Info", icon: Users },
     ...(!isTiered && !isAlaCarte ? [{ panel: "pages" as Panel, label: "Edit Pages", icon: Layout }] : []),
     { panel: "content", label: "Intro Text", icon: FileText },
-    { panel: "pricing", label: "Investment", icon: DollarSign },
+    { panel: "pricing", label: "Pricing", icon: DollarSign },
     { panel: "settings", label: "Settings", icon: ExternalLink },
     { panel: "notes", label: "Notes", icon: StickyNote },
   ];
@@ -529,7 +532,7 @@ export default function EditProposal() {
       </SlidePanel>
 
       {/* ── PRICING PANEL ── */}
-      <SlidePanel open={activePanel === "pricing"} onClose={() => setActivePanel(null)} title="Investment / Pricing" onSave={savePanel} saving={saving}>
+      <SlidePanel open={activePanel === "pricing"} onClose={() => setActivePanel(null)} title="Pricing" onSave={savePanel} saving={saving}>
         <Form {...form}>
           <div className="space-y-5">
             {isTiered ? (
@@ -563,45 +566,153 @@ export default function EditProposal() {
                 )} />
               </>
             ) : (
-              <>
-                <p className="text-sm text-gray-600">Set the total investment amount. The pricing table calculates line items automatically based on page count, but the total shown to the client will be this value.</p>
-                <FormField control={form.control} name="totalAmount" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Total Investment ($)</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
-                        <Input
-                          type="number" min={0} step={0.01} placeholder="e.g. 5089"
-                          className="pl-7 text-lg font-semibold"
-                          value={field.value ?? ""}
-                          onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
-                        />
+              <Controller
+                control={form.control}
+                name="pricingItems"
+                render={({ field }) => {
+                  const pages = watched.numberOfPages || 5;
+                  const defaultRows: PricingLineItem[] = [
+                    { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
+                    { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
+                    { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
+                    { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
+                    { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
+                    { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
+                  ];
+
+                  let rows: PricingLineItem[];
+                  try {
+                    const parsed = field.value ? JSON.parse(field.value) as PricingLineItem[] : null;
+                    rows = parsed && parsed.length > 0 ? parsed : defaultRows;
+                  } catch {
+                    rows = defaultRows;
+                  }
+
+                  const setRows = (updated: PricingLineItem[]) => {
+                    field.onChange(JSON.stringify(updated));
+                  };
+
+                  const updateRow = (i: number, key: keyof PricingLineItem, val: string | number) => {
+                    const updated = rows.map((r, idx) => idx === i ? { ...r, [key]: val } : r);
+                    setRows(updated);
+                  };
+
+                  const addRow = () => {
+                    setRows([...rows, { desc: "New Line Item", rate: 0, qty: "1 Unit", price: 0 }]);
+                  };
+
+                  const removeRow = (i: number) => {
+                    setRows(rows.filter((_, idx) => idx !== i));
+                  };
+
+                  const resetToDefaults = () => {
+                    field.onChange(undefined);
+                  };
+
+                  const lineTotal = rows.reduce((s, r) => s + Number(r.price), 0);
+
+                  return (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Line Items</p>
+                        <button
+                          type="button"
+                          onClick={resetToDefaults}
+                          className="text-xs text-blue-600 hover:text-blue-800 underline underline-offset-2"
+                        >
+                          Reset to defaults
+                        </button>
                       </div>
-                    </FormControl>
-                  </FormItem>
-                )} />
-                <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-                  <p className="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Pricing Breakdown Preview</p>
-                  {[
-                    ["Website Setup & Required Pages", "$1,100"],
-                    ["Revisions & Launch", "$350"],
-                    ["Google Analytics Setup", "$110"],
-                    [`Web Pages (${watched.numberOfPages || 5})`, `$${((watched.numberOfPages || 5) * 450).toLocaleString()}`],
-                    ["Website Theme", "$75"],
-                    ["Timeline Deposit", "$500"],
-                  ].map(([label, price]) => (
-                    <div key={label} className="flex justify-between text-sm py-1 border-b border-blue-100 last:border-0">
-                      <span className="text-gray-700">{label}</span>
-                      <span className="font-semibold text-gray-900">{price}</span>
+
+                      <div className="space-y-2">
+                        {rows.map((row, i) => (
+                          <div key={i} className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-2">
+                            <div className="flex items-center gap-2">
+                              <GripVertical className="w-4 h-4 text-gray-300 flex-shrink-0" />
+                              <input
+                                className="flex-1 bg-white border border-gray-200 rounded px-2 py-1 text-sm font-medium text-gray-800 outline-none focus:ring-1 focus:ring-blue-400"
+                                value={row.desc}
+                                onChange={e => updateRow(i, "desc", e.target.value)}
+                                placeholder="Description"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeRow(i)}
+                                className="p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors flex-shrink-0"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <div className="flex gap-2 pl-6">
+                              <div className="flex-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rate ($)</label>
+                                <input
+                                  type="number"
+                                  className="w-full bg-white border border-gray-200 rounded px-2 py-1 text-sm text-gray-700 outline-none focus:ring-1 focus:ring-blue-400"
+                                  value={row.rate}
+                                  onChange={e => updateRow(i, "rate", Number(e.target.value))}
+                                  min={0}
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Qty</label>
+                                <input
+                                  className="w-full bg-white border border-gray-200 rounded px-2 py-1 text-sm text-gray-700 outline-none focus:ring-1 focus:ring-blue-400"
+                                  value={row.qty}
+                                  onChange={e => updateRow(i, "qty", e.target.value)}
+                                  placeholder="e.g. 1 Unit"
+                                />
+                              </div>
+                              <div className="flex-1">
+                                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Price ($)</label>
+                                <input
+                                  type="number"
+                                  className="w-full bg-white border border-gray-200 rounded px-2 py-1 text-sm font-semibold text-gray-900 outline-none focus:ring-1 focus:ring-blue-400"
+                                  value={row.price}
+                                  onChange={e => updateRow(i, "price", Number(e.target.value))}
+                                  min={0}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={addRow}
+                        className="w-full flex items-center justify-center gap-2 py-2 rounded-lg border border-dashed border-blue-300 text-blue-600 hover:bg-blue-50 text-sm font-medium transition-colors"
+                      >
+                        <Plus className="w-4 h-4" /> Add Line Item
+                      </button>
+
+                      <div className="rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 flex justify-between items-center">
+                        <span className="text-sm font-bold text-gray-700">Line Item Total</span>
+                        <span className="text-base font-bold text-blue-700">${lineTotal.toLocaleString()}</span>
+                      </div>
+
+                      <div className="pt-1">
+                        <FormField control={form.control} name="totalAmount" render={({ field: f }) => (
+                          <FormItem>
+                            <FormLabel>Override Total ($) <span className="text-gray-400 font-normal text-xs">— leave blank to use line item total</span></FormLabel>
+                            <FormControl>
+                              <div className="relative">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                                <Input
+                                  type="number" min={0} step={0.01} placeholder={String(lineTotal)}
+                                  className="pl-7 text-lg font-semibold"
+                                  value={f.value ?? ""}
+                                  onChange={e => f.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                                />
+                              </div>
+                            </FormControl>
+                          </FormItem>
+                        )} />
+                      </div>
                     </div>
-                  ))}
-                  <div className="flex justify-between text-sm pt-2 font-bold">
-                    <span>Calculated Subtotal</span>
-                    <span className="text-blue-700">${(2135 + (watched.numberOfPages || 5) * 450).toLocaleString()}</span>
-                  </div>
-                </div>
-              </>
+                  );
+                }}
+              />
             )}
           </div>
         </Form>

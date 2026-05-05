@@ -14,6 +14,13 @@ import elisePhoto from "@assets/2lJSuNP-9GC_cdugrSxCkqbLTDWLIG9f7UHeVA_177792675
 import christelPhoto from "@assets/8qEx0RVlV0ihSnsIyAmQEToz5xBp4QDBGSrBnQ_1777926757399.png";
 import chloePhoto from "@assets/6F8LcZ4mEOUe8ZWZUfuiyUFa_FnvPAHdDzjrHQ_1777926760382.png";
 
+export interface PricingLineItem {
+  desc: string;
+  rate: number;
+  qty: string;
+  price: number;
+}
+
 export interface ProposalData {
   clientName: string;
   businessName: string;
@@ -21,6 +28,7 @@ export interface ProposalData {
   numberOfPages?: number | null;
   pageNames?: string | null;
   totalAmount?: number | null;
+  pricingItems?: string | null;
   content?: string | null;
   loomVideoUrl?: string | null;
   createdAt?: string | Date;
@@ -267,9 +275,13 @@ export function EssentialsSection() {
   );
 }
 
-export function PricingSection({ numberOfPages, totalAmount }: { numberOfPages?: number | null; totalAmount?: number | null }) {
+export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
+  numberOfPages?: number | null;
+  totalAmount?: number | null;
+  pricingItems?: string | null;
+}) {
   const pages = numberOfPages || 5;
-  const items = [
+  const defaultItems: PricingLineItem[] = [
     { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
     { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
     { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
@@ -277,6 +289,12 @@ export function PricingSection({ numberOfPages, totalAmount }: { numberOfPages?:
     { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
     { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
   ];
+
+  let customItems: PricingLineItem[] | null = null;
+  if (pricingItems) {
+    try { customItems = JSON.parse(pricingItems) as PricingLineItem[]; } catch { customItems = null; }
+  }
+  const items = customItems && customItems.length > 0 ? customItems : defaultItems;
   const calcTotal = items.reduce((s, i) => s + i.price, 0);
   const displayTotal = (totalAmount && totalAmount > 0) ? totalAmount : calcTotal;
 
@@ -442,7 +460,7 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
       <TimelineSection />
       <BrandShootSection />
       <EssentialsSection />
-      <PricingSection numberOfPages={data.numberOfPages} totalAmount={data.totalAmount} />
+      <PricingSection numberOfPages={data.numberOfPages} totalAmount={data.totalAmount} pricingItems={data.pricingItems} />
       <TeamSection />
       <TestimonialSection
         quote="They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!"
