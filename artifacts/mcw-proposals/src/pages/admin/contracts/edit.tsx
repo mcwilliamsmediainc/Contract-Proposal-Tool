@@ -28,9 +28,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, Eye, CheckCircle2 } from "lucide-react";
+import { Loader2, Send, Eye, CheckCircle2, Rocket } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -127,8 +127,28 @@ export default function EditContract() {
   if (isLoading) return <AdminLayout><div className="flex h-[50vh] items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div></AdminLayout>;
   if (!contract) return <AdminLayout><div>Contract not found</div></AdminLayout>;
 
+  const isSigned = contract.status === "signed";
+
   return (
     <AdminLayout>
+      {isSigned && (
+        <div className="flex items-center justify-between mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+          <div className="flex items-center gap-3">
+            <CheckCircle2 className="w-5 h-5 text-green-600 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-green-800">Contract signed — ready to begin onboarding</p>
+              <p className="text-xs text-green-700 mt-0.5">This client is ready to move into the active onboarding phase.</p>
+            </div>
+          </div>
+          <Link href="/admin/onboarding">
+            <button className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition-colors whitespace-nowrap">
+              <Rocket className="w-4 h-4" />
+              Begin Onboarding →
+            </button>
+          </Link>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end mb-8 gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight mb-1">Edit Contract</h1>

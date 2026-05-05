@@ -29,8 +29,9 @@ import {
 } from "@/components/ui/select";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft, FileText } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 
 const formSchema = z.object({
   proposalId: z.string().optional(),
@@ -56,17 +57,26 @@ export default function NewContract() {
     query: { queryKey: getListProposalsQueryKey() },
   });
 
+  // Read pre-fill params from URL (set when converting an accepted proposal)
+  const searchParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+  const prefillClientName = searchParams.get("clientName") || "";
+  const prefillBusinessName = searchParams.get("businessName") || "";
+  const prefillClientEmail = searchParams.get("clientEmail") || "";
+  const prefillTotalCost = Number(searchParams.get("totalCost") || 0);
+  const prefillProposalId = searchParams.get("proposalId") || "none";
+  const hasPrefill = !!prefillClientName;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      proposalId: "none",
-      clientName: "",
-      businessName: "",
-      clientEmail: "",
+      proposalId: prefillProposalId,
+      clientName: prefillClientName,
+      businessName: prefillBusinessName,
+      clientEmail: prefillClientEmail,
       contractType: "website",
-      totalCost: 0,
+      totalCost: prefillTotalCost,
       depositAmount: 0,
-      remainingBalance: 0,
+      remainingBalance: prefillTotalCost,
       hostingOption: "none",
       scheduleA: "",
     },
@@ -106,12 +116,26 @@ export default function NewContract() {
 
   return (
     <AdminLayout>
-      <div className="flex justify-between items-end mb-8">
+      <div className="flex justify-between items-end mb-6">
         <div>
+          <Link href="/admin" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground text-sm mb-3 transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5" />
+            Back to Dashboard
+          </Link>
           <h1 className="text-3xl font-bold tracking-tight mb-1">New Contract</h1>
           <p className="text-muted-foreground font-mono text-sm">CONTRACT CREATION</p>
         </div>
       </div>
+
+      {hasPrefill && (
+        <div className="flex items-start gap-3 mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+          <FileText className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-sm font-semibold text-green-800">Pre-filled from accepted proposal</p>
+            <p className="text-xs text-green-700 mt-0.5">Client details and total have been imported. Review and adjust as needed before creating.</p>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-3xl">
         <Form {...form}>

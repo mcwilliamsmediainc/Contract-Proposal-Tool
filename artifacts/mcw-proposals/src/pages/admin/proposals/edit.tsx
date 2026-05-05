@@ -327,6 +327,22 @@ export default function EditProposal() {
         </div>
       </div>
 
+      {/* Accepted proposal — convert to contract nudge */}
+      {proposal.status === "accepted" && (
+        <div className="flex items-center justify-between px-6 py-3 bg-green-50 border-b border-green-200">
+          <div className="flex items-center gap-3">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span className="text-sm font-semibold text-green-800">This proposal was accepted — ready to create a contract?</span>
+          </div>
+          <a
+            href={`/admin/contracts/new?proposalId=${id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(Number(proposal.totalAmount))}`}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
+          >
+            Create Contract →
+          </a>
+        </div>
+      )}
+
       {/* Full proposal preview */}
       <FullProposalTemplate
         data={{
