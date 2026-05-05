@@ -123,13 +123,6 @@ export default function AdminDashboard() {
 
   const handleStageClick = (key: StageKey) => {
     setActiveStage(key);
-    if (CONTRACT_STAGES.includes(key)) {
-      setFilterStatus("all");
-    } else if (key !== "all") {
-      setFilterStatus(key as string);
-    } else {
-      setFilterStatus("all");
-    }
   };
 
   const handleDeleteProposal = async (id: string) => {
@@ -266,11 +259,7 @@ export default function AdminDashboard() {
           </Select>
           <Select
             value={filterStatus}
-            onValueChange={v => {
-              setFilterStatus(v);
-              if (v !== "all") setActiveStage(v as StageKey);
-              else if (!CONTRACT_STAGES.includes(activeStage)) setActiveStage("all");
-            }}
+            onValueChange={setFilterStatus}
           >
             <SelectTrigger className="h-8 text-xs w-36">
               <SelectValue placeholder="All Statuses" />
