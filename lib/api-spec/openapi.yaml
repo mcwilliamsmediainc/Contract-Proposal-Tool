@@ -18,6 +18,8 @@ tags:
     description: Admin dashboard analytics
   - name: gemini
     description: Gemini AI chat and image operations
+  - name: onboarding
+    description: Client onboarding intake form
 paths:
   /healthz:
     get:
@@ -568,6 +570,60 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Proposal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+
+  /onboarding-form/{id}:
+    get:
+      operationId: getOnboardingForm
+      tags: [onboarding]
+      summary: Get onboarding intake form state for a client (public)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Onboarding form state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingFormState"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+    post:
+      operationId: saveOnboardingForm
+      tags: [onboarding]
+      summary: Save or submit onboarding intake form responses
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveOnboardingFormBody"
+      responses:
+        "200":
+          description: Saved form state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OnboardingFormState"
         "404":
           description: Not found
           content:
@@ -1130,6 +1186,43 @@ components:
           type: string
       required:
         - content
+
+    OnboardingFormState:
+      type: object
+      required: [id, clientName, businessName, services, status, responses]
+      properties:
+        id:
+          type: string
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientStrategist:
+          type: string
+          nullable: true
+        services:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, submitted]
+        submittedAt:
+          type: string
+          nullable: true
+        responses:
+          type: object
+          additionalProperties: true
+
+    SaveOnboardingFormBody:
+      type: object
+      required: [responses]
+      properties:
+        responses:
+          type: object
+          additionalProperties: true
+        submitted:
+          type: boolean
 
     ClientRecord:
       type: object

@@ -627,6 +627,47 @@ export const GetAdminProposalResponse = zod
   .describe("Full proposal shape including internal admin-only fields");
 
 /**
+ * @summary Get onboarding intake form state for a client (public)
+ */
+export const GetOnboardingFormParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const GetOnboardingFormResponse = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientStrategist: zod.string().nullish(),
+  services: zod.array(zod.string()),
+  status: zod.enum(["pending", "submitted"]),
+  submittedAt: zod.string().nullish(),
+  responses: zod.record(zod.string(), zod.unknown()),
+});
+
+/**
+ * @summary Save or submit onboarding intake form responses
+ */
+export const SaveOnboardingFormParams = zod.object({
+  id: zod.coerce.string(),
+});
+
+export const SaveOnboardingFormBody = zod.object({
+  responses: zod.record(zod.string(), zod.unknown()),
+  submitted: zod.boolean().optional(),
+});
+
+export const SaveOnboardingFormResponse = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientStrategist: zod.string().nullish(),
+  services: zod.array(zod.string()),
+  status: zod.enum(["pending", "submitted"]),
+  submittedAt: zod.string().nullish(),
+  responses: zod.record(zod.string(), zod.unknown()),
+});
+
+/**
  * @summary Master client list with pipeline stage
  */
 export const ListClientsResponseItem = zod.object({

@@ -35,6 +35,8 @@ import {
   ChevronDown,
   ChevronRight,
   X,
+  Link2,
+  ClipboardCheck,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useState, KeyboardEvent } from "react";
@@ -348,6 +350,40 @@ function NewOnboardingDialog({
 
 // ── Onboarding Card ────────────────────────────────────────────────────────────
 
+function ShareFormButton({ clientId }: { clientId: string }) {
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const url = `${window.location.origin}/intake/${clientId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      toast({ title: "Link copied!", description: "Send this link to your client to complete their intake form." });
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40">
+      <button
+        onClick={handleCopy}
+        className={cn(
+          "flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-all",
+          copied
+            ? "border-green-500/40 bg-green-50 text-green-700"
+            : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5"
+        )}
+      >
+        {copied ? (
+          <><ClipboardCheck className="w-3 h-3" /> Copied!</>
+        ) : (
+          <><Link2 className="w-3 h-3" /> Share Intake Form</>
+        )}
+      </button>
+    </div>
+  );
+}
+
 function OnboardingCard({ client }: { client: OnboardingClient }) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -490,6 +526,9 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
             </span>
           )}
         </div>
+
+        {/* Intake form link */}
+        <ShareFormButton clientId={client.id} />
       </div>
 
       {/* Checklist */}

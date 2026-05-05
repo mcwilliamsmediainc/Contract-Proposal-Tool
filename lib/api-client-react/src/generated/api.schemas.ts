@@ -288,6 +288,34 @@ export interface GeneratedProposalContent {
   content: string;
 }
 
+export type OnboardingFormStateStatus =
+  (typeof OnboardingFormStateStatus)[keyof typeof OnboardingFormStateStatus];
+
+export const OnboardingFormStateStatus = {
+  pending: "pending",
+  submitted: "submitted",
+} as const;
+
+export type OnboardingFormStateResponses = { [key: string]: unknown };
+
+export interface OnboardingFormState {
+  id: string;
+  clientName: string;
+  businessName: string;
+  clientStrategist?: string | null;
+  services: string[];
+  status: OnboardingFormStateStatus;
+  submittedAt?: string | null;
+  responses: OnboardingFormStateResponses;
+}
+
+export type SaveOnboardingFormBodyResponses = { [key: string]: unknown };
+
+export interface SaveOnboardingFormBody {
+  responses: SaveOnboardingFormBodyResponses;
+  submitted?: boolean;
+}
+
 export type ClientRecordStage =
   (typeof ClientRecordStage)[keyof typeof ClientRecordStage];
 

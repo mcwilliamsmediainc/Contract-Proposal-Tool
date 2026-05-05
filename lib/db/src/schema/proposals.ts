@@ -50,6 +50,17 @@ export const onboardingClientsTable = pgTable("onboarding_clients", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const onboardingFormResponsesTable = pgTable("onboarding_form_responses", {
+  id: serial("id").primaryKey(),
+  uuid: text("uuid").notNull().unique(),
+  onboardingClientId: text("onboarding_client_id").notNull(),
+  responses: text("responses").notNull().default("{}"),
+  status: text("status").notNull().default("pending"),
+  submittedAt: timestamp("submitted_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export const onboardingTasksTable = pgTable("onboarding_tasks", {
   id: serial("id").primaryKey(),
   proposalUuid: text("proposal_uuid").notNull(),

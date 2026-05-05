@@ -39,10 +39,12 @@ import type {
   ListContractsParams,
   ListProposalsParams,
   OnboardingClient,
+  OnboardingFormState,
   OnboardingTask,
   Proposal,
   ProposalNotes,
   PublicProposal,
+  SaveOnboardingFormBody,
   SendGeminiMessageBody,
   SignContractBody,
   ToggleOnboardingTaskBody,
@@ -2208,6 +2210,180 @@ export function useGetAdminProposal<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * @summary Get onboarding intake form state for a client (public)
+ */
+export const getGetOnboardingFormUrl = (id: string) => {
+  return `/api/onboarding-form/${id}`;
+};
+
+export const getOnboardingForm = async (
+  id: string,
+  options?: RequestInit,
+): Promise<OnboardingFormState> => {
+  return customFetch<OnboardingFormState>(getGetOnboardingFormUrl(id), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetOnboardingFormQueryKey = (id: string) => {
+  return [`/api/onboarding-form/${id}`] as const;
+};
+
+export const getGetOnboardingFormQueryOptions = <
+  TData = Awaited<ReturnType<typeof getOnboardingForm>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getOnboardingForm>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetOnboardingFormQueryKey(id);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getOnboardingForm>>
+  > = ({ signal }) => getOnboardingForm(id, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!id,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getOnboardingForm>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetOnboardingFormQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getOnboardingForm>>
+>;
+export type GetOnboardingFormQueryError = ErrorType<ApiError>;
+
+/**
+ * @summary Get onboarding intake form state for a client (public)
+ */
+
+export function useGetOnboardingForm<
+  TData = Awaited<ReturnType<typeof getOnboardingForm>>,
+  TError = ErrorType<ApiError>,
+>(
+  id: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getOnboardingForm>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetOnboardingFormQueryOptions(id, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Save or submit onboarding intake form responses
+ */
+export const getSaveOnboardingFormUrl = (id: string) => {
+  return `/api/onboarding-form/${id}`;
+};
+
+export const saveOnboardingForm = async (
+  id: string,
+  saveOnboardingFormBody: SaveOnboardingFormBody,
+  options?: RequestInit,
+): Promise<OnboardingFormState> => {
+  return customFetch<OnboardingFormState>(getSaveOnboardingFormUrl(id), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(saveOnboardingFormBody),
+  });
+};
+
+export const getSaveOnboardingFormMutationOptions = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof saveOnboardingForm>>,
+    TError,
+    { id: string; data: BodyType<SaveOnboardingFormBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof saveOnboardingForm>>,
+  TError,
+  { id: string; data: BodyType<SaveOnboardingFormBody> },
+  TContext
+> => {
+  const mutationKey = ["saveOnboardingForm"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof saveOnboardingForm>>,
+    { id: string; data: BodyType<SaveOnboardingFormBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return saveOnboardingForm(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type SaveOnboardingFormMutationResult = NonNullable<
+  Awaited<ReturnType<typeof saveOnboardingForm>>
+>;
+export type SaveOnboardingFormMutationBody = BodyType<SaveOnboardingFormBody>;
+export type SaveOnboardingFormMutationError = ErrorType<ApiError>;
+
+/**
+ * @summary Save or submit onboarding intake form responses
+ */
+export const useSaveOnboardingForm = <
+  TError = ErrorType<ApiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof saveOnboardingForm>>,
+    TError,
+    { id: string; data: BodyType<SaveOnboardingFormBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof saveOnboardingForm>>,
+  TError,
+  { id: string; data: BodyType<SaveOnboardingFormBody> },
+  TContext
+> => {
+  return useMutation(getSaveOnboardingFormMutationOptions(options));
+};
 
 /**
  * @summary Master client list with pipeline stage
