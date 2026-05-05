@@ -10,8 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Sparkles, Send, ArrowLeft, X, Users, FileText,
-  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote
+  Loader2, Sparkles, ArrowLeft, X, Users, FileText,
+  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote, Link2, ClipboardCheck
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -206,13 +206,21 @@ export default function EditProposal() {
     }
   };
 
-  const handleSend = async () => {
+  const [linkCopied, setLinkCopied] = useState(false);
+
+  const handleCopyLink = async () => {
     try {
-      const data = await updateProposal.mutateAsync({ id, data: { status: "sent" } });
-      queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
-      toast({ title: "Sent!", description: "Proposal is now visible to the client." });
+      if (!isSent) {
+        const data = await updateProposal.mutateAsync({ id, data: { status: "sent" } });
+        queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
+      }
+      const url = `${window.location.origin}/proposal/${id}`;
+      await navigator.clipboard.writeText(url);
+      setLinkCopied(true);
+      toast({ title: "Link copied!", description: "Paste it into your email to share with the client." });
+      setTimeout(() => setLinkCopied(false), 2500);
     } catch {
-      toast({ title: "Error", description: "Failed to send.", variant: "destructive" });
+      toast({ title: "Error", description: "Could not copy link.", variant: "destructive" });
     }
   };
 
@@ -299,17 +307,19 @@ export default function EditProposal() {
               Client View
             </a>
             <button
-              onClick={handleSend}
-              disabled={isSent}
+              onClick={handleCopyLink}
+              disabled={proposal.status === "accepted"}
               className={cn(
                 "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all",
-                isSent
+                linkCopied
+                  ? "bg-green-600 text-white"
+                  : proposal.status === "accepted"
                   ? "bg-green-600 text-white cursor-default"
                   : "bg-white text-amber-900 hover:bg-amber-50 shadow-sm"
               )}
             >
-              <Send className="w-3.5 h-3.5" />
-              {isSent ? (proposal.status === "accepted" ? "Accepted" : "Sent") : "Go Live"}
+              {linkCopied ? <ClipboardCheck className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
+              {proposal.status === "accepted" ? "Accepted" : linkCopied ? "Copied!" : "Copy Link"}
             </button>
             {confirmDelete ? (
               <span className="flex items-center gap-1.5">
