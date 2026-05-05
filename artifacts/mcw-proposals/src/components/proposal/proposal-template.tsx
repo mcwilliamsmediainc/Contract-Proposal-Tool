@@ -131,10 +131,8 @@ export function StrategySection() {
           A proven strategy customized for your business goals.
         </h2>
         <div className="space-y-5 text-gray-600 text-lg leading-relaxed">
-          <p>With over 75% of consumers reporting they go online to research a business before choosing whether to make a purchase, the modern business owner needs an online presence. But you don't want an online presence just for the sake of it.</p>
-          <p className="font-semibold text-gray-800">You want a branded website focused on setting you apart from the competition.</p>
-          <p className="font-semibold text-gray-800">You want a marketing strategy focused on building consistent qualified leads.</p>
-          <p>With decades of combined experience, our team is here to help strengthen your strategy through a website designed to speak directly to your target audiences so you can sell with ease!</p>
+          <p>More than 75% of consumers research a business online before making a purchase — making your website your first impression, your best salesperson, and your strongest competitive edge.</p>
+          <p>But it has to be built right. With decades of combined experience, we design websites around your goals and your audience, so visitors don't just browse — they buy.</p>
         </div>
       </div>
     </section>
