@@ -9,15 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+
+const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "marketing", "print"]),
+  clientStrategist: z.string().optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
   specialContext: z.string().optional(),
@@ -44,6 +48,7 @@ export default function NewProposal() {
       businessName: "",
       clientEmail: "",
       projectType: "web",
+      clientStrategist: "",
       numberOfPages: undefined,
       pageNames: "",
       specialContext: "",
@@ -60,6 +65,7 @@ export default function NewProposal() {
       const proposal = await createProposal.mutateAsync({
         data: {
           ...values,
+          clientStrategist: values.clientStrategist || null,
           numberOfPages: values.numberOfPages ?? null,
           pageNames: values.pageNames || null,
           specialContext: values.specialContext || null,
@@ -145,6 +151,26 @@ export default function NewProposal() {
                           <SelectItem value="web">Website</SelectItem>
                           <SelectItem value="marketing">Marketing</SelectItem>
                           <SelectItem value="print">Print</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="clientStrategist"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Client Strategist</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value || ""}>
+                        <FormControl>
+                          <SelectTrigger><SelectValue placeholder="Assign a strategist..." /></SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="unassigned">— Unassigned —</SelectItem>
+                          {STRATEGISTS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />

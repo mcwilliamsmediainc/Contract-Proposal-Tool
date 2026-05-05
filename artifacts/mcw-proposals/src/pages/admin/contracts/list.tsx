@@ -1,10 +1,13 @@
 import { AdminLayout } from "@/components/layout/admin-layout";
-import { useListContracts, getListContractsQueryKey } from "@workspace/api-client-react";
+import { useListContracts, useDeleteContract, getListContractsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FileSignature, Plus } from "lucide-react";
+import { FileSignature, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 function statusVariant(status: string) {
   if (status === "signed") return "default";
@@ -19,10 +22,37 @@ function contractTypeLabel(type: string) {
   return type;
 }
 
+function ConfirmDelete({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="text-xs text-red-600 font-medium">Delete?</span>
+      <button onClick={onConfirm} className="text-xs font-mono font-bold text-red-600 hover:text-red-800">YES</button>
+      <button onClick={onCancel} className="text-xs font-mono text-muted-foreground hover:text-foreground">NO</button>
+    </span>
+  );
+}
+
 export default function ContractsList() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [confirmId, setConfirmId] = useState<string | null>(null);
+
   const { data: contracts, isLoading } = useListContracts(undefined, {
     query: { queryKey: getListContractsQueryKey() },
   });
+  const deleteContract = useDeleteContract();
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteContract.mutateAsync({ id });
+      queryClient.invalidateQueries({ queryKey: getListContractsQueryKey() });
+      toast({ title: "Deleted", description: "Contract removed." });
+    } catch {
+      toast({ title: "Error", description: "Could not delete contract.", variant: "destructive" });
+    } finally {
+      setConfirmId(null);
+    }
+  };
 
   return (
     <AdminLayout>
@@ -79,25 +109,26 @@ export default function ContractsList() {
           <table className="w-full text-sm text-left">
             <thead className="bg-muted/50 border-b border-border/50 font-mono text-xs uppercase text-muted-foreground">
               <tr>
-                <th className="px-6 py-4 font-medium">Client</th>
-                <th className="px-6 py-4 font-medium">Business</th>
-                <th className="px-6 py-4 font-medium">Type</th>
-                <th className="px-6 py-4 font-medium">Total</th>
-                <th className="px-6 py-4 font-medium">Status</th>
-                <th className="px-6 py-4 font-medium">Date</th>
-                <th className="px-6 py-4 font-medium text-right">Actions</th>
+                <th className="px-5 py-4 font-medium">Client</th>
+                <th className="px-5 py-4 font-medium">Business</th>
+                <th className="px-5 py-4 font-medium">Strategist</th>
+                <th className="px-5 py-4 font-medium">Type</th>
+                <th className="px-5 py-4 font-medium">Total</th>
+                <th className="px-5 py-4 font-medium">Status</th>
+                <th className="px-5 py-4 font-medium">Date</th>
+                <th className="px-5 py-4 font-medium text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
               {isLoading ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-8 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">
                     Loading contracts...
                   </td>
                 </tr>
               ) : contracts?.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-5 py-12 text-center text-muted-foreground">
                     <FileSignature className="w-8 h-8 mx-auto mb-3 opacity-30" />
                     <p>No contracts yet.</p>
                     <Link href="/admin/contracts/new" className="text-primary text-xs mt-1 inline-block hover:underline">
@@ -108,13 +139,20 @@ export default function ContractsList() {
               ) : (
                 contracts?.map((contract) => (
                   <tr key={contract.id} className="hover:bg-accent/50 transition-colors">
-                    <td className="px-6 py-4 font-medium text-foreground">{contract.clientName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{contract.businessName}</td>
-                    <td className="px-6 py-4 text-muted-foreground">{contractTypeLabel(contract.contractType)}</td>
-                    <td className="px-6 py-4 font-mono text-foreground">
-                      ${contract.totalCost.toLocaleString()}
+                    <td className="px-5 py-3.5 font-medium text-foreground">{contract.clientName}</td>
+                    <td className="px-5 py-3.5 text-muted-foreground">{contract.businessName}</td>
+                    <td className="px-5 py-3.5">
+                      {contract.teamMember ? (
+                        <span className="text-xs font-medium text-blue-600">{contract.teamMember}</span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground/50">—</span>
+                      )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-3.5 text-muted-foreground">{contractTypeLabel(contract.contractType)}</td>
+                    <td className="px-5 py-3.5 font-mono text-foreground">
+                      ${Number(contract.totalCost).toLocaleString()}
+                    </td>
+                    <td className="px-5 py-3.5">
                       <Badge
                         variant={statusVariant(contract.status)}
                         className="font-mono uppercase text-[10px] tracking-wider"
@@ -122,24 +160,39 @@ export default function ContractsList() {
                         {contract.status}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 font-mono text-muted-foreground text-xs">
+                    <td className="px-5 py-3.5 font-mono text-muted-foreground text-xs">
                       {format(new Date(contract.createdAt), "MMM dd, yyyy")}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <Link
-                        href={`/admin/contracts/${contract.id}/edit`}
-                        className="text-primary hover:text-primary/80 font-medium text-xs font-mono mr-4"
-                      >
-                        EDIT
-                      </Link>
-                      <a
-                        href={`/contract/${contract.id}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono"
-                      >
-                        VIEW
-                      </a>
+                    <td className="px-5 py-3.5 text-right">
+                      {confirmId === contract.id ? (
+                        <ConfirmDelete
+                          onConfirm={() => handleDelete(contract.id)}
+                          onCancel={() => setConfirmId(null)}
+                        />
+                      ) : (
+                        <span className="inline-flex items-center gap-3">
+                          <Link
+                            href={`/admin/contracts/${contract.id}/edit`}
+                            className="text-primary hover:text-primary/80 font-medium text-xs font-mono"
+                          >
+                            EDIT
+                          </Link>
+                          <a
+                            href={`/contract/${contract.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono"
+                          >
+                            VIEW
+                          </a>
+                          <button
+                            onClick={() => setConfirmId(contract.id)}
+                            className="text-muted-foreground hover:text-red-500 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))

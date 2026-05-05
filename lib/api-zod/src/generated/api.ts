@@ -38,6 +38,7 @@ export const ListProposalsResponseItem = zod.object({
   signedAt: zod.coerce.date().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -59,6 +60,7 @@ export const CreateProposalBody = zod.object({
   calendlyUrl: zod.string().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
 });
 
 /**
@@ -84,6 +86,7 @@ export const GetProposalResponse = zod.object({
   signedAt: zod.coerce.date().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -109,6 +112,7 @@ export const UpdateProposalBody = zod.object({
   calendlyUrl: zod.string().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
 });
 
 export const UpdateProposalResponse = zod.object({
@@ -127,6 +131,7 @@ export const UpdateProposalResponse = zod.object({
   signedAt: zod.coerce.date().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -166,6 +171,7 @@ export const AcceptProposalResponse = zod.object({
   signedAt: zod.coerce.date().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
@@ -194,6 +200,7 @@ export const RecordProposalViewResponse = zod.object({
   signedAt: zod.coerce.date().nullish(),
   numberOfPages: zod.number().nullish(),
   pageNames: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
   viewCount: zod.number(),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),

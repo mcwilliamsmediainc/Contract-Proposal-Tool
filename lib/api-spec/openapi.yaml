@@ -744,6 +744,9 @@ components:
         pageNames:
           type: string
           nullable: true
+        clientStrategist:
+          type: string
+          nullable: true
         viewCount:
           type: integer
         createdAt:
@@ -796,6 +799,9 @@ components:
         pageNames:
           type: string
           nullable: true
+        clientStrategist:
+          type: string
+          nullable: true
       required:
         - clientName
         - businessName
@@ -835,6 +841,9 @@ components:
           type: integer
           nullable: true
         pageNames:
+          type: string
+          nullable: true
+        clientStrategist:
           type: string
           nullable: true
 

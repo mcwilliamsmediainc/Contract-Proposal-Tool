@@ -179,6 +179,7 @@ export interface Proposal {
   signedAt?: string | null;
   numberOfPages?: number | null;
   pageNames?: string | null;
+  clientStrategist?: string | null;
   viewCount: number;
   createdAt: string;
   updatedAt: string;
@@ -205,6 +206,7 @@ export interface CreateProposalBody {
   calendlyUrl?: string | null;
   numberOfPages?: number | null;
   pageNames?: string | null;
+  clientStrategist?: string | null;
 }
 
 export type UpdateProposalBodyProjectType =
@@ -239,6 +241,7 @@ export interface UpdateProposalBody {
   calendlyUrl?: string | null;
   numberOfPages?: number | null;
   pageNames?: string | null;
+  clientStrategist?: string | null;
 }
 
 export interface AcceptProposalBody {

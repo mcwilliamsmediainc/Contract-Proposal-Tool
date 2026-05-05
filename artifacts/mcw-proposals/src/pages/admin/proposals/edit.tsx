@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetProposal, useUpdateProposal, useGenerateProposalContent, getGetProposalQueryKey } from "@workspace/api-client-react";
+import { useGetProposal, useUpdateProposal, useDeleteProposal, useGenerateProposalContent, getGetProposalQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,11 +19,14 @@ import { Controller } from "react-hook-form";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
 import { cn } from "@/lib/utils";
 
+const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
+
 const formSchema = z.object({
   clientName: z.string().min(1),
   businessName: z.string().min(1),
   clientEmail: z.string().email(),
   projectType: z.enum(["web", "marketing", "print"]),
+  clientStrategist: z.string().optional(),
   totalAmount: z.coerce.number().min(0).optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
@@ -140,8 +143,8 @@ export default function EditProposal() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       clientName: "", businessName: "", clientEmail: "",
-      projectType: "web", totalAmount: undefined,
-      numberOfPages: undefined, pageNames: "",
+      projectType: "web", clientStrategist: "",
+      totalAmount: undefined, numberOfPages: undefined, pageNames: "",
       specialContext: "", content: "", loomVideoUrl: "", calendlyUrl: "",
     },
   });
@@ -155,6 +158,7 @@ export default function EditProposal() {
         businessName: proposal.businessName,
         clientEmail: proposal.clientEmail,
         projectType: proposal.projectType as "web" | "marketing" | "print",
+        clientStrategist: proposal.clientStrategist || "",
         totalAmount: Number(proposal.totalAmount) || undefined,
         numberOfPages: proposal.numberOfPages ?? undefined,
         pageNames: proposal.pageNames || "",
@@ -167,7 +171,20 @@ export default function EditProposal() {
   }, [proposal, id, form]);
 
   const updateProposal = useUpdateProposal();
+  const deleteProposal = useDeleteProposal();
   const generateContent = useGenerateProposalContent();
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const handleDelete = async () => {
+    try {
+      await deleteProposal.mutateAsync({ id });
+      queryClient.invalidateQueries({ queryKey: getListProposalsQueryKey() });
+      toast({ title: "Deleted", description: "Proposal removed." });
+      window.location.href = "/admin";
+    } catch {
+      toast({ title: "Error", description: "Could not delete.", variant: "destructive" });
+    }
+  };
 
   const savePanel = async () => {
     setSaving(true);
@@ -291,6 +308,21 @@ export default function EditProposal() {
               <Send className="w-3.5 h-3.5" />
               {isSent ? (proposal.status === "accepted" ? "Accepted" : "Sent") : "Go Live"}
             </button>
+            {confirmDelete ? (
+              <span className="flex items-center gap-1.5">
+                <span className="text-xs text-amber-950 font-bold">Delete?</span>
+                <button onClick={handleDelete} className="px-2 py-1 rounded text-xs font-bold bg-red-600 text-white hover:bg-red-700">YES</button>
+                <button onClick={() => setConfirmDelete(false)} className="px-2 py-1 rounded text-xs font-bold bg-amber-800 text-amber-100 hover:bg-amber-900">NO</button>
+              </span>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="p-1.5 rounded-lg text-amber-900/60 hover:text-red-700 hover:bg-amber-400 transition-all"
+                title="Delete proposal"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -334,6 +366,18 @@ export default function EditProposal() {
                     <SelectItem value="web">Website</SelectItem>
                     <SelectItem value="marketing">Marketing</SelectItem>
                     <SelectItem value="print">Print</SelectItem>
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )} />
+            <FormField control={form.control} name="clientStrategist" render={({ field }) => (
+              <FormItem>
+                <FormLabel>Client Strategist</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <FormControl><SelectTrigger><SelectValue placeholder="Assign a strategist..." /></SelectTrigger></FormControl>
+                  <SelectContent>
+                    <SelectItem value="unassigned">— Unassigned —</SelectItem>
+                    {STRATEGISTS.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </FormItem>

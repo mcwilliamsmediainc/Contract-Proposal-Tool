@@ -26,6 +26,7 @@ export const proposalsTable = pgTable("proposals", {
   signedAt: timestamp("signed_at"),
   numberOfPages: integer("number_of_pages"),
   pageNames: text("page_names"),
+  clientStrategist: text("client_strategist"),
   viewCount: integer("view_count").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),

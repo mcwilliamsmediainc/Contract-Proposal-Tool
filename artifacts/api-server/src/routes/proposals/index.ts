@@ -33,6 +33,9 @@ function formatProposal(p: typeof proposalsTable.$inferSelect) {
     calendlyUrl: p.calendlyUrl ?? null,
     signatureData: p.signatureData ?? null,
     signedAt: p.signedAt?.toISOString() ?? null,
+    numberOfPages: p.numberOfPages ?? null,
+    pageNames: p.pageNames ?? null,
+    clientStrategist: p.clientStrategist ?? null,
     viewCount: p.viewCount,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
@@ -137,6 +140,9 @@ router.post("/proposals", async (req, res) => {
       specialContext: data.specialContext ?? null,
       loomVideoUrl: data.loomVideoUrl ?? null,
       calendlyUrl: data.calendlyUrl ?? null,
+      numberOfPages: data.numberOfPages ?? null,
+      pageNames: data.pageNames ?? null,
+      clientStrategist: data.clientStrategist ?? null,
       status: "draft",
     })
     .returning();
@@ -196,6 +202,9 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.specialContext !== undefined) updateData.specialContext = data.specialContext;
   if (data.loomVideoUrl !== undefined) updateData.loomVideoUrl = data.loomVideoUrl;
   if (data.calendlyUrl !== undefined) updateData.calendlyUrl = data.calendlyUrl;
+  if (data.numberOfPages !== undefined) updateData.numberOfPages = data.numberOfPages;
+  if (data.pageNames !== undefined) updateData.pageNames = data.pageNames;
+  if (data.clientStrategist !== undefined) updateData.clientStrategist = data.clientStrategist;
 
   const [updated] = await db
     .update(proposalsTable)
