@@ -96,21 +96,21 @@ export function TestimonialSection({ quote, author, websiteImg, websiteAlt, dark
   quote: string; author: string; websiteImg?: string; websiteAlt?: string; dark?: boolean;
 }) {
   return (
-    <section className={`py-20 px-6 ${dark ? "bg-[#0a1f5c]" : "bg-[#f8f9fc]"}`}>
+    <section id="section-client-success" className={`py-20 px-6 ${dark ? "bg-[#0a1f5c]" : "bg-[#f8f9fc]"}`}>
       <div className="max-w-4xl mx-auto">
         <p className={`text-sm font-bold tracking-widest uppercase mb-8 ${dark ? "text-blue-300" : "text-blue-600"}`}>Client Success</p>
-        <div className={`grid gap-12 items-center ${websiteImg ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}>
+        <div className={`grid gap-8 items-center ${websiteImg ? "grid-cols-1 lg:grid-cols-[5fr_8fr]" : "grid-cols-1"}`}>
+          {websiteImg && (
+            <div className="rounded-xl overflow-hidden shadow-xl border border-white/10 max-w-[260px] w-full mx-auto lg:mx-0">
+              <img src={websiteImg} alt={websiteAlt || "Client website"} className="w-full h-auto object-cover" />
+            </div>
+          )}
           <div>
             <blockquote className={`text-xl md:text-2xl leading-relaxed font-medium ${dark ? "text-white" : "text-gray-800"}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
               "{quote}"
             </blockquote>
             <p className={`mt-6 text-base font-medium ${dark ? "text-blue-200" : "text-blue-700"}`}>— {author}</p>
           </div>
-          {websiteImg && (
-            <div className="rounded-xl overflow-hidden shadow-2xl border border-white/10">
-              <img src={websiteImg} alt={websiteAlt || "Client website"} className="w-full h-auto object-cover" />
-            </div>
-          )}
         </div>
       </div>
     </section>
