@@ -91,16 +91,16 @@ router.get("/admin/proposals/:id", async (req, res) => {
     res.status(400).json({ error: "Invalid id" });
     return;
   }
-  const proposal = await db
-    .select()
-    .from(proposalsTable)
-    .where(eq(proposalsTable.uuid, id))
-    .limit(1);
+  const [proposal, contractRows] = await Promise.all([
+    db.select().from(proposalsTable).where(eq(proposalsTable.uuid, id)).limit(1),
+    db.select({ uuid: contractsTable.uuid }).from(contractsTable).where(eq(contractsTable.proposalId, id)).limit(1),
+  ]);
   if (!proposal[0]) {
     res.status(404).json({ error: "Proposal not found" });
     return;
   }
-  res.json(formatProposalAdmin(proposal[0]));
+  const contractId = contractRows[0]?.uuid ?? null;
+  res.json({ ...formatProposalAdmin(proposal[0]), contractId });
 });
 
 router.get("/admin/stats", async (req, res) => {

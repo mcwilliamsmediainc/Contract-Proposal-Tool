@@ -194,6 +194,8 @@ export interface PublicProposal {
  */
 export type Proposal = PublicProposal & {
   notes?: string | null;
+  /** ID of the linked contract, if one has been created for this proposal */
+  contractId?: string | null;
 };
 
 /**

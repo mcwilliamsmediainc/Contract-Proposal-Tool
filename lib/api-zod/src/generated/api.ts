@@ -51,6 +51,12 @@ export const ListProposalsResponseItem = zod
   .and(
     zod.object({
       notes: zod.string().nullish(),
+      contractId: zod
+        .string()
+        .nullish()
+        .describe(
+          "ID of the linked contract, if one has been created for this proposal",
+        ),
     }),
   )
   .describe("Full proposal shape including internal admin-only fields");
@@ -161,6 +167,12 @@ export const UpdateProposalResponse = zod
   .and(
     zod.object({
       notes: zod.string().nullish(),
+      contractId: zod
+        .string()
+        .nullish()
+        .describe(
+          "ID of the linked contract, if one has been created for this proposal",
+        ),
     }),
   )
   .describe("Full proposal shape including internal admin-only fields");
@@ -212,6 +224,12 @@ export const AcceptProposalResponse = zod
   .and(
     zod.object({
       notes: zod.string().nullish(),
+      contractId: zod
+        .string()
+        .nullish()
+        .describe(
+          "ID of the linked contract, if one has been created for this proposal",
+        ),
     }),
   )
   .describe("Full proposal shape including internal admin-only fields");
@@ -623,6 +641,12 @@ export const GetAdminProposalResponse = zod
   .and(
     zod.object({
       notes: zod.string().nullish(),
+      contractId: zod
+        .string()
+        .nullish()
+        .describe(
+          "ID of the linked contract, if one has been created for this proposal",
+        ),
     }),
   )
   .describe("Full proposal shape including internal admin-only fields");

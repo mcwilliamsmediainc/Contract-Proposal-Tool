@@ -330,20 +330,35 @@ export default function EditProposal() {
         </div>
       </div>
 
-      {/* Accepted proposal — convert to contract nudge */}
+      {/* Accepted proposal — contract nudge or existing contract warning */}
       {proposal.status === "accepted" && (
-        <div className="flex items-center justify-between px-6 py-3 bg-green-50 border-b border-green-200">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span className="text-sm font-semibold text-green-800">This proposal was accepted — ready to create a contract?</span>
+        proposal.contractId ? (
+          <div className="flex items-center justify-between px-6 py-3 bg-amber-50 border-b border-amber-200">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-sm font-semibold text-amber-800">A contract already exists for this client.</span>
+            </div>
+            <Link
+              href={`/admin/contracts/${proposal.contractId}`}
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
+            >
+              View Contract →
+            </Link>
           </div>
-          <Link
-            href={`/admin/contracts/new?proposalId=${id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(Number(proposal.totalAmount))}`}
-            className="flex items-center gap-1.5 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
-          >
-            Create Contract →
-          </Link>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between px-6 py-3 bg-green-50 border-b border-green-200">
+            <div className="flex items-center gap-3">
+              <div className="w-2 h-2 rounded-full bg-green-500" />
+              <span className="text-sm font-semibold text-green-800">This proposal was accepted — ready to create a contract?</span>
+            </div>
+            <Link
+              href={`/admin/contracts/new?proposalId=${id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(Number(proposal.totalAmount))}`}
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
+            >
+              Create Contract →
+            </Link>
+          </div>
+        )
       )}
 
       {/* Full proposal preview */}

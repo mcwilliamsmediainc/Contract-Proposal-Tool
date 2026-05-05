@@ -1057,6 +1057,10 @@ components:
         notes:
           type: string
           nullable: true
+        contractId:
+          type: string
+          nullable: true
+          description: ID of the linked contract, if one has been created for this proposal
 
     ProposalNotes:
       type: object
