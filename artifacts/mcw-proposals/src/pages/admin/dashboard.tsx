@@ -6,7 +6,7 @@ import {
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, BarChart3, Briefcase, FileSignature, FileText, Send, Trash2, Filter } from "lucide-react";
+import { Activity, BarChart3, Briefcase, FileSignature, FileText, Send, Trash2, Filter, FilePlus2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -153,8 +153,9 @@ export default function AdminDashboard() {
           <h1 className="text-3xl font-bold tracking-tight mb-1">Current Leads</h1>
           <p className="text-muted-foreground font-mono text-sm">STRATEGIC PIPELINE OVERVIEW</p>
         </div>
-        <Link href="/admin/proposals/new" className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
-          + Initialize Proposal
+        <Link href="/admin/proposals/new" className="inline-flex h-10 items-center gap-2 justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90">
+          <FilePlus2 className="w-4 h-4" />
+          Initialize Proposal
         </Link>
       </div>
 
