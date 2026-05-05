@@ -217,15 +217,15 @@ export default function EditProposal() {
 
   const handleCopyLink = async () => {
     try {
-      if (!isSent) {
-        const data = await updateProposal.mutateAsync({ id, data: { status: "sent" } });
-        queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
-      }
       const url = `${window.location.origin}/proposal/${id}`;
       await navigator.clipboard.writeText(url);
       setLinkCopied(true);
       toast({ title: "Link copied!", description: "Paste it into your email to share with the client." });
       setTimeout(() => setLinkCopied(false), 2500);
+      if (!isSent) {
+        const data = await updateProposal.mutateAsync({ id, data: { status: "sent" } });
+        queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
+      }
     } catch {
       toast({ title: "Error", description: "Could not copy link.", variant: "destructive" });
     }
