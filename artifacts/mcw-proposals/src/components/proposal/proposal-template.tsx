@@ -11,7 +11,6 @@ import lindsayPhoto from "@assets/IdR0Q_YLLfwgxCAZdUawGXKlzULvbUjTBiKdyQ_1777926
 import tiffanyPhoto from "@assets/hICsrvVhBWveCy-DzcjqEjB6kOHMJHF6KdDJpQ_1777926751626.png";
 import rachellePhoto from "@assets/ssMoAw74pdhyxd7r-DQT0dFCZPwoP-UOcOJhbQ_1777926746603.jpeg";
 import elisePhoto from "@assets/2lJSuNP-9GC_cdugrSxCkqbLTDWLIG9f7UHeVA_1777926754493.png";
-import christelPhoto from "@assets/8qEx0RVlV0ihSnsIyAmQEToz5xBp4QDBGSrBnQ_1777926757399.png";
 import chloePhoto from "@assets/6F8LcZ4mEOUe8ZWZUfuiyUFa_FnvPAHdDzjrHQ_1777926760382.png";
 
 export interface PricingLineItem {
@@ -334,8 +333,7 @@ export function TeamSection() {
     { name: "Tiffany King", title: "Owner & COO", photo: rachellePhoto, bio: "My passion for marketing and design continues to earn the trust of business leaders." },
     { name: "Rachelle Hoover", title: "Marketing Director", photo: tiffanyPhoto, bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts." },
     { name: "Elise Johnson", title: "Client Strategist", photo: elisePhoto, bio: "With a collaborative approach, I work closely with you to guide strategy and keep initiatives moving forward." },
-    { name: "Christel Moser", title: "Billing Manager", photo: christelPhoto, bio: "My goal is to make every step of your experience with us simple, smooth, and stress-free." },
-    { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I care about creating a website that not only looks great, but also feels aligned with your brand." },
+    { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I'm passionate about creating websites that are both functional and beautifully designed. I focus on creating an experience that stays true to your brand's goals. It's incredibly rewarding to know that the websites I design help businesses grow and stand out in their industries." },
   ];
   return (
     <section className="bg-[#0a1f5c] py-20 px-6">
