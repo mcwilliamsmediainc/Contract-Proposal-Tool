@@ -75,7 +75,7 @@ export const CreateProposalBody = zod.object({
 });
 
 /**
- * @summary Get a proposal by ID (public — excludes internal notes)
+ * @summary Get a proposal by ID
  */
 export const GetProposalParams = zod.object({
   id: zod.coerce.string(),
@@ -106,7 +106,13 @@ export const GetProposalResponse = zod
   })
   .describe(
     "Public-facing proposal shape — excludes internal notes (safe for client portal)",
-  );
+  )
+  .and(
+    zod.object({
+      notes: zod.string().nullish(),
+    }),
+  )
+  .describe("Full proposal shape including internal admin-only fields");
 
 /**
  * @summary Update a proposal

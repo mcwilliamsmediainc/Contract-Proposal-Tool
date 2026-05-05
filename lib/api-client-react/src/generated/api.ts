@@ -315,7 +315,7 @@ export const useCreateProposal = <
 };
 
 /**
- * @summary Get a proposal by ID (public — excludes internal notes)
+ * @summary Get a proposal by ID
  */
 export const getGetProposalUrl = (id: string) => {
   return `/api/proposals/${id}`;
@@ -324,8 +324,8 @@ export const getGetProposalUrl = (id: string) => {
 export const getProposal = async (
   id: string,
   options?: RequestInit,
-): Promise<PublicProposal> => {
-  return customFetch<PublicProposal>(getGetProposalUrl(id), {
+): Promise<Proposal> => {
+  return customFetch<Proposal>(getGetProposalUrl(id), {
     ...options,
     method: "GET",
   });
@@ -375,7 +375,7 @@ export type GetProposalQueryResult = NonNullable<
 export type GetProposalQueryError = ErrorType<ApiError>;
 
 /**
- * @summary Get a proposal by ID (public — excludes internal notes)
+ * @summary Get a proposal by ID
  */
 
 export function useGetProposal<

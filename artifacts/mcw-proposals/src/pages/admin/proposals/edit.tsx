@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetProposal, useUpdateProposal, useDeleteProposal, useGenerateProposalContent, useGetProposalNotes, getGetProposalQueryKey, getGetProposalNotesQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
+import { useGetProposal, useUpdateProposal, useDeleteProposal, useGenerateProposalContent, getGetProposalQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -140,11 +140,6 @@ export default function EditProposal() {
     query: { enabled: !!id, queryKey: getGetProposalQueryKey(id) }
   });
 
-  // Fetch internal notes separately — they are excluded from the public proposal endpoint
-  const { data: notesData } = useGetProposalNotes(id, {
-    query: { enabled: !!id, queryKey: getGetProposalNotesQueryKey(id) }
-  });
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -172,10 +167,10 @@ export default function EditProposal() {
         content: proposal.content || "",
         loomVideoUrl: proposal.loomVideoUrl || "",
         calendlyUrl: proposal.calendlyUrl || "",
-        notes: notesData?.notes || "",
+        notes: proposal.notes || "",
       });
     }
-  }, [proposal, notesData, id, form]);
+  }, [proposal, id, form]);
 
   const updateProposal = useUpdateProposal();
   const deleteProposal = useDeleteProposal();

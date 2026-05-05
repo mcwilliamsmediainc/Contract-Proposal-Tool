@@ -224,9 +224,14 @@ router.get("/proposals/:id/onboarding-tasks", async (req, res) => {
   }
 
   const { id } = parsed.data;
-  const proposal = await db.select().from(proposalsTable).where(eq(proposalsTable.uuid, id)).limit(1);
-  if (!proposal[0]) {
-    res.status(404).json({ error: "Proposal not found" });
+  // Check onboarding_clients (covers both proposal-backed and standalone clients)
+  const client = await db
+    .select({ uuid: onboardingClientsTable.uuid })
+    .from(onboardingClientsTable)
+    .where(eq(onboardingClientsTable.uuid, id))
+    .limit(1);
+  if (!client[0]) {
+    res.status(404).json({ error: "Onboarding client not found" });
     return;
   }
 
@@ -255,9 +260,14 @@ router.post("/proposals/:id/onboarding-tasks/add", async (req, res) => {
   const { id } = paramsParsed.data;
   const { label } = bodyParsed.data;
 
-  const proposal = await db.select().from(proposalsTable).where(eq(proposalsTable.uuid, id)).limit(1);
-  if (!proposal[0]) {
-    res.status(404).json({ error: "Proposal not found" });
+  // Check onboarding_clients (covers both proposal-backed and standalone clients)
+  const clientRow = await db
+    .select({ uuid: onboardingClientsTable.uuid })
+    .from(onboardingClientsTable)
+    .where(eq(onboardingClientsTable.uuid, id))
+    .limit(1);
+  if (!clientRow[0]) {
+    res.status(404).json({ error: "Onboarding client not found" });
     return;
   }
 
@@ -291,8 +301,8 @@ router.get("/proposals/:id", async (req, res) => {
     return;
   }
 
-  // Use public formatter: this endpoint is consumed by the client portal
-  res.json(formatProposalPublic(proposal[0]));
+  // Return full proposal including notes — admin editor reads notes from here
+  res.json(formatProposal(proposal[0]));
 });
 
 // Admin-only endpoint — returns internal notes; not included in the public portal response.
