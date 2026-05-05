@@ -19,6 +19,7 @@ function formatProposalAdmin(p: typeof proposalsTable.$inferSelect) {
     signedAt: p.signedAt?.toISOString() ?? null,
     numberOfPages: p.numberOfPages ?? null,
     pageNames: p.pageNames ?? null,
+    selectedTier: p.selectedTier ?? null,
     clientStrategist: p.clientStrategist ?? null,
     notes: p.notes ?? null,
     viewCount: p.viewCount,

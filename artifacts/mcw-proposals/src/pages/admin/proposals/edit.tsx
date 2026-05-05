@@ -17,6 +17,7 @@ import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Controller } from "react-hook-form";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
+import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
 import { cn } from "@/lib/utils";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
@@ -25,7 +26,7 @@ const formSchema = z.object({
   clientName: z.string().min(1),
   businessName: z.string().min(1),
   clientEmail: z.string().email(),
-  projectType: z.enum(["web", "marketing", "print"]),
+  projectType: z.enum(["web", "marketing", "print", "tiered"]),
   clientStrategist: z.string().optional(),
   totalAmount: z.coerce.number().min(0).optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
@@ -158,7 +159,7 @@ export default function EditProposal() {
         clientName: proposal.clientName,
         businessName: proposal.businessName,
         clientEmail: proposal.clientEmail,
-        projectType: proposal.projectType as "web" | "marketing" | "print",
+        projectType: proposal.projectType as "web" | "marketing" | "print" | "tiered",
         clientStrategist: proposal.clientStrategist || "",
         totalAmount: Number(proposal.totalAmount) || undefined,
         numberOfPages: proposal.numberOfPages ?? undefined,
@@ -252,9 +253,10 @@ export default function EditProposal() {
   if (!proposal) return <div className="p-8">Proposal not found.</div>;
 
   const isSent = proposal.status === "sent" || proposal.status === "accepted";
+  const isTiered = watched.projectType === "tiered";
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
-    { panel: "pages", label: "Edit Pages", icon: Layout },
+    ...(!isTiered ? [{ panel: "pages" as Panel, label: "Edit Pages", icon: Layout }] : []),
     { panel: "content", label: "Intro Text", icon: FileText },
     { panel: "pricing", label: "Investment", icon: DollarSign },
     { panel: "settings", label: "Settings", icon: ExternalLink },
@@ -372,19 +374,32 @@ export default function EditProposal() {
       )}
 
       {/* Full proposal preview */}
-      <FullProposalTemplate
-        data={{
-          clientName: watched.clientName || proposal.clientName,
-          businessName: watched.businessName || proposal.businessName,
-          projectType: watched.projectType || proposal.projectType,
-          numberOfPages: watched.numberOfPages,
-          pageNames: watched.pageNames,
-          totalAmount: watched.totalAmount,
-          content: watched.content,
-          loomVideoUrl: watched.loomVideoUrl,
-          createdAt: proposal.createdAt,
-        }}
-      />
+      {isTiered ? (
+        <TieredMarketingTemplate
+          data={{
+            clientName: watched.clientName || proposal.clientName,
+            businessName: watched.businessName || proposal.businessName,
+            projectType: "tiered",
+            content: watched.content,
+            loomVideoUrl: watched.loomVideoUrl,
+            createdAt: proposal.createdAt,
+          }}
+        />
+      ) : (
+        <FullProposalTemplate
+          data={{
+            clientName: watched.clientName || proposal.clientName,
+            businessName: watched.businessName || proposal.businessName,
+            projectType: watched.projectType || proposal.projectType,
+            numberOfPages: watched.numberOfPages,
+            pageNames: watched.pageNames,
+            totalAmount: watched.totalAmount,
+            content: watched.content,
+            loomVideoUrl: watched.loomVideoUrl,
+            createdAt: proposal.createdAt,
+          }}
+        />
+      )}
 
       {/* ── CLIENT INFO PANEL ── */}
       <SlidePanel open={activePanel === "client"} onClose={() => setActivePanel(null)} title="Client Information" onSave={savePanel} saving={saving}>
@@ -410,6 +425,7 @@ export default function EditProposal() {
                     <SelectItem value="web">Website</SelectItem>
                     <SelectItem value="marketing">Marketing</SelectItem>
                     <SelectItem value="print">Print</SelectItem>
+                    <SelectItem value="tiered">Tiered Marketing</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -487,43 +503,64 @@ export default function EditProposal() {
       <SlidePanel open={activePanel === "pricing"} onClose={() => setActivePanel(null)} title="Investment / Pricing" onSave={savePanel} saving={saving}>
         <Form {...form}>
           <div className="space-y-5">
-            <p className="text-sm text-gray-600">Set the total investment amount. The pricing table calculates line items automatically based on page count, but the total shown to the client will be this value.</p>
-            <FormField control={form.control} name="totalAmount" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total Investment ($)</FormLabel>
-                <FormControl>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
-                    <Input
-                      type="number" min={0} step={0.01} placeholder="e.g. 5089"
-                      className="pl-7 text-lg font-semibold"
-                      value={field.value ?? ""}
-                      onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
-                    />
-                  </div>
-                </FormControl>
-              </FormItem>
-            )} />
-            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
-              <p className="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Pricing Breakdown Preview</p>
-              {[
-                ["Website Setup & Required Pages", "$1,100"],
-                ["Revisions & Launch", "$350"],
-                ["Google Analytics Setup", "$110"],
-                [`Web Pages (${watched.numberOfPages || 5})`, `$${((watched.numberOfPages || 5) * 450).toLocaleString()}`],
-                ["Website Theme", "$75"],
-                ["Timeline Deposit", "$500"],
-              ].map(([label, price]) => (
-                <div key={label} className="flex justify-between text-sm py-1 border-b border-blue-100 last:border-0">
-                  <span className="text-gray-700">{label}</span>
-                  <span className="font-semibold text-gray-900">{price}</span>
+            {isTiered ? (
+              <>
+                <p className="text-sm text-gray-600">Tiered marketing proposals use fixed monthly pricing. The client selects their preferred plan when accepting.</p>
+                <div className="space-y-3">
+                  {[
+                    { name: "Pro Plan", price: "$1,500 / month" },
+                    { name: "Plus Plan", price: "$2,500 / month" },
+                    { name: "Platinum Plan", price: "$4,000 / month" },
+                  ].map(({ name, price }) => (
+                    <div key={name} className="flex justify-between items-center p-3 rounded-lg bg-blue-50 border border-blue-100">
+                      <span className="font-semibold text-gray-800">{name}</span>
+                      <span className="text-blue-700 font-bold">{price}</span>
+                    </div>
+                  ))}
                 </div>
-              ))}
-              <div className="flex justify-between text-sm pt-2 font-bold">
-                <span>Calculated Subtotal</span>
-                <span className="text-blue-700">${(2135 + (watched.numberOfPages || 5) * 450).toLocaleString()}</span>
-              </div>
-            </div>
+                <p className="text-xs text-gray-400">+ $500 one-time setup fee applies to all plans</p>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600">Set the total investment amount. The pricing table calculates line items automatically based on page count, but the total shown to the client will be this value.</p>
+                <FormField control={form.control} name="totalAmount" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total Investment ($)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">$</span>
+                        <Input
+                          type="number" min={0} step={0.01} placeholder="e.g. 5089"
+                          className="pl-7 text-lg font-semibold"
+                          value={field.value ?? ""}
+                          onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                        />
+                      </div>
+                    </FormControl>
+                  </FormItem>
+                )} />
+                <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                  <p className="text-xs font-bold text-gray-700 mb-3 uppercase tracking-wider">Pricing Breakdown Preview</p>
+                  {[
+                    ["Website Setup & Required Pages", "$1,100"],
+                    ["Revisions & Launch", "$350"],
+                    ["Google Analytics Setup", "$110"],
+                    [`Web Pages (${watched.numberOfPages || 5})`, `$${((watched.numberOfPages || 5) * 450).toLocaleString()}`],
+                    ["Website Theme", "$75"],
+                    ["Timeline Deposit", "$500"],
+                  ].map(([label, price]) => (
+                    <div key={label} className="flex justify-between text-sm py-1 border-b border-blue-100 last:border-0">
+                      <span className="text-gray-700">{label}</span>
+                      <span className="font-semibold text-gray-900">{price}</span>
+                    </div>
+                  ))}
+                  <div className="flex justify-between text-sm pt-2 font-bold">
+                    <span>Calculated Subtotal</span>
+                    <span className="text-blue-700">${(2135 + (watched.numberOfPages || 5) * 450).toLocaleString()}</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         </Form>
       </SlidePanel>

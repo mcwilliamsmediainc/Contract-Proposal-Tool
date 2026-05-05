@@ -52,6 +52,7 @@ function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
     signedAt: p.signedAt?.toISOString() ?? null,
     numberOfPages: p.numberOfPages ?? null,
     pageNames: p.pageNames ?? null,
+    selectedTier: p.selectedTier ?? null,
     clientStrategist: p.clientStrategist ?? null,
     viewCount: p.viewCount,
     lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
@@ -357,6 +358,7 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.pageNames !== undefined) updateData.pageNames = data.pageNames;
   if (data.clientStrategist !== undefined) updateData.clientStrategist = data.clientStrategist;
   if (data.notes !== undefined) updateData.notes = data.notes;
+  if (data.selectedTier !== undefined) updateData.selectedTier = data.selectedTier ?? null;
 
   const [updated] = await db
     .update(proposalsTable)
@@ -373,7 +375,7 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.status === "accepted") {
     const services = updated.projectType === "web"
       ? ["website"]
-      : updated.projectType === "marketing"
+      : updated.projectType === "marketing" || updated.projectType === "tiered"
         ? ["marketing"]
         : updated.projectType === "print"
           ? ["print"]
@@ -438,7 +440,7 @@ router.post("/proposals/:id/accept", async (req, res) => {
   }
 
   const { id } = paramsParsed.data;
-  const { signatureData } = bodyParsed.data;
+  const { signatureData, selectedTier } = bodyParsed.data;
 
   const [updated] = await db
     .update(proposalsTable)
@@ -447,6 +449,7 @@ router.post("/proposals/:id/accept", async (req, res) => {
       signatureData,
       signedAt: new Date(),
       updatedAt: new Date(),
+      ...(selectedTier !== undefined && selectedTier !== null ? { selectedTier } : {}),
     })
     .where(eq(proposalsTable.uuid, id))
     .returning();
@@ -467,7 +470,7 @@ router.post("/proposals/:id/accept", async (req, res) => {
   if (existingClient.length === 0) {
     const services = updated.projectType === "web"
       ? ["website"]
-      : updated.projectType === "marketing"
+      : updated.projectType === "marketing" || updated.projectType === "tiered"
         ? ["marketing"]
         : updated.projectType === "print"
           ? ["print"]

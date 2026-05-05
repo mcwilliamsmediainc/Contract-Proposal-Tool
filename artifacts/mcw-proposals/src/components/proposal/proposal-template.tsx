@@ -40,7 +40,7 @@ function CheckItem({ children }: { children: React.ReactNode }) {
 export function ProposalCover({ clientName, businessName, projectType, date }: {
   clientName: string; businessName: string; projectType: string; date: string;
 }) {
-  const label = projectType === "marketing" ? "Marketing" : projectType === "print" ? "Print" : "Website";
+  const label = projectType === "tiered" ? "Marketing" : projectType === "marketing" ? "Marketing" : projectType === "print" ? "Print" : "Website";
   return (
     <section id="section-cover" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden"
       style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 35%, #1a5bb8 65%, #0d3494 85%, #0a1f5c 100%)" }}>

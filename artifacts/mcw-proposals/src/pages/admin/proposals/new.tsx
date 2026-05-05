@@ -20,7 +20,7 @@ const formSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
-  projectType: z.enum(["web", "marketing", "print"]),
+  projectType: z.enum(["web", "marketing", "print", "tiered"]),
   clientStrategist: z.string().optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
@@ -34,6 +34,7 @@ const projectTypeLabel = (type: string) => {
   if (type === "web") return "Website";
   if (type === "marketing") return "Marketing";
   if (type === "print") return "Print";
+  if (type === "tiered") return "Tiered Marketing";
   return "Website";
 };
 
@@ -151,6 +152,7 @@ export default function NewProposal() {
                           <SelectItem value="web">Website</SelectItem>
                           <SelectItem value="marketing">Marketing</SelectItem>
                           <SelectItem value="print">Print</SelectItem>
+                          <SelectItem value="tiered">Tiered Marketing</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -178,48 +180,52 @@ export default function NewProposal() {
                   )}
                 />
 
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="numberOfPages"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Number of Pages</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={1}
-                            placeholder="e.g. 5"
-                            {...field}
-                            value={field.value ?? ""}
-                            onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex items-end">
-                    <p className="text-xs text-muted-foreground pb-2">Enter the total number of web pages included in the project.</p>
-                  </div>
-                </div>
+                {watched.projectType !== "tiered" && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="numberOfPages"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Number of Pages</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={1}
+                                placeholder="e.g. 5"
+                                {...field}
+                                value={field.value ?? ""}
+                                onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex items-end">
+                        <p className="text-xs text-muted-foreground pb-2">Enter the total number of web pages included in the project.</p>
+                      </div>
+                    </div>
 
-                <FormField
-                  control={form.control}
-                  name="pageNames"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Page Names</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Home | About | Services | Contact"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    <FormField
+                      control={form.control}
+                      name="pageNames"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Page Names</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Home | About | Services | Contact"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
 
                 <FormField
                   control={form.control}

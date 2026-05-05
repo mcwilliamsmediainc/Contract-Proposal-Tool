@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { Loader2, CheckCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
+import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
+import type { Tier } from "@/components/proposal/tiered-marketing-template";
 
 export default function ClientPortal() {
   const params = useParams<{ id: string }>();
@@ -14,6 +16,7 @@ export default function ClientPortal() {
   const acceptProposal = useAcceptProposal();
   const viewedRef = useRef(false);
   const [accepted, setAccepted] = useState(false);
+  const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
 
   useEffect(() => {
     if (id && !viewedRef.current) { viewedRef.current = true; recordView.mutate({ id }); }
@@ -25,7 +28,13 @@ export default function ClientPortal() {
 
   const handleAccept = async () => {
     try {
-      const data = await acceptProposal.mutateAsync({ id, data: { signatureData: "" } });
+      const data = await acceptProposal.mutateAsync({
+        id,
+        data: {
+          signatureData: "",
+          ...(selectedTier ? { selectedTier } : {}),
+        } as { signatureData: string },
+      });
       queryClient.setQueryData(getGetProposalQueryKey(id), data);
       setAccepted(true);
     } catch {}
@@ -54,10 +63,34 @@ export default function ClientPortal() {
         </div>
         <h1 className="text-2xl font-bold text-gray-900 mb-3">Proposal Accepted!</h1>
         <p className="text-gray-600 mb-1">Welcome, {proposal.clientName}. The McWilliams Media team has been notified and will be in touch shortly.</p>
+        {selectedTier && (
+          <p className="text-sm text-blue-600 font-semibold mt-3">
+            Selected: {selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Plan
+          </p>
+        )}
         <p className="text-xs text-gray-400 mt-6">Transaction: {proposal.id}</p>
       </div>
     </div>
   );
+
+  if (proposal.projectType === "tiered") {
+    return (
+      <TieredMarketingTemplate
+        data={{
+          clientName: proposal.clientName,
+          businessName: proposal.businessName,
+          projectType: proposal.projectType,
+          content: proposal.content,
+          loomVideoUrl: proposal.loomVideoUrl,
+          createdAt: proposal.createdAt,
+        }}
+        selectedTier={selectedTier}
+        onSelectTier={setSelectedTier}
+        onAccept={handleAccept}
+        isPending={acceptProposal.isPending}
+      />
+    );
+  }
 
   return (
     <FullProposalTemplate

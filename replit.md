@@ -39,6 +39,7 @@ lib/
    - Digital signature pad (signature_pad library)
    - Markdown content rendering (react-markdown + remark-gfm)
    - Loom/YouTube and Calendly embed support
+   - **Tiered Marketing Proposal** (`projectType: "tiered"`): interactive 3-tier plan selection (Pro $1,500/mo · Plus $2,500/mo · Platinum $4,000/mo + $500 setup); accept button gated on tier selection; selected tier saved to `proposals.selected_tier`
 6. **Onboarding Pipeline** (`/admin/onboarding`) — Post-signature onboarding steps
 7. **Contract Management** (`/admin/contracts`) — Full contract lifecycle system
    - Contracts list with stats (total, awaiting, signed)
@@ -78,7 +79,7 @@ lib/
 ### `contracts` table
 - `id` (serial PK), `uuid` (public-facing)
 - `proposalId` (optional FK to proposal UUID), `clientName`, `businessName`, `clientEmail`
-- `contractType` (website/marketing/print)
+- `contractType` (website/marketing/print/tiered)
 - `totalCost`, `depositAmount`, `remainingBalance` (numeric)
 - `hostingOption` (none/basic/platinum)
 - `status` (draft/sent/signed)
@@ -93,6 +94,7 @@ lib/
 - `title`, `content` (markdown), `status` (draft/sent/viewed/accepted)
 - `signatureDataUrl`, `signedAt`, `viewedAt`, `sentAt`
 - `loomUrl`, `calendlyUrl`, `value` (numeric)
+- `selectedTier` (pro/plus/platinum) — set when client accepts a tiered proposal
 - `createdAt`, `updatedAt`
 
 ### `conversations` table

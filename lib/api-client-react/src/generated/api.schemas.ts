@@ -151,6 +151,7 @@ export const PublicProposalProjectType = {
   web: "web",
   marketing: "marketing",
   print: "print",
+  tiered: "tiered",
 } as const;
 
 export type PublicProposalStatus =
@@ -182,6 +183,7 @@ export interface PublicProposal {
   signedAt?: string | null;
   numberOfPages?: number | null;
   pageNames?: string | null;
+  selectedTier?: string | null;
   clientStrategist?: string | null;
   viewCount: number;
   lastViewedAt?: string | null;
@@ -212,6 +214,7 @@ export const CreateProposalBodyProjectType = {
   web: "web",
   marketing: "marketing",
   print: "print",
+  tiered: "tiered",
 } as const;
 
 export interface CreateProposalBody {
@@ -236,6 +239,7 @@ export const UpdateProposalBodyProjectType = {
   web: "web",
   marketing: "marketing",
   print: "print",
+  tiered: "tiered",
 } as const;
 
 export type UpdateProposalBodyStatus =
@@ -261,12 +265,14 @@ export interface UpdateProposalBody {
   calendlyUrl?: string | null;
   numberOfPages?: number | null;
   pageNames?: string | null;
+  selectedTier?: string | null;
   clientStrategist?: string | null;
   notes?: string | null;
 }
 
 export interface AcceptProposalBody {
   signatureData: string;
+  selectedTier?: string | null;
 }
 
 export type GenerateProposalBodyProjectType =
@@ -276,6 +282,7 @@ export const GenerateProposalBodyProjectType = {
   web: "web",
   marketing: "marketing",
   print: "print",
+  tiered: "tiered",
 } as const;
 
 export interface GenerateProposalBody {

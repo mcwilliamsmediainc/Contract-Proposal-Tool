@@ -990,7 +990,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print]
+          enum: [web, marketing, print, tiered]
         status:
           type: string
           enum: [draft, sent, accepted, archived]
@@ -1019,6 +1019,9 @@ components:
           type: integer
           nullable: true
         pageNames:
+          type: string
+          nullable: true
+        selectedTier:
           type: string
           nullable: true
         clientStrategist:
@@ -1083,7 +1086,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print]
+          enum: [web, marketing, print, tiered]
         totalAmount:
           type: number
         specialContext:
@@ -1124,7 +1127,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print]
+          enum: [web, marketing, print, tiered]
         totalAmount:
           type: number
         status:
@@ -1148,6 +1151,9 @@ components:
         pageNames:
           type: string
           nullable: true
+        selectedTier:
+          type: string
+          nullable: true
         clientStrategist:
           type: string
           nullable: true
@@ -1160,6 +1166,9 @@ components:
       properties:
         signatureData:
           type: string
+        selectedTier:
+          type: string
+          nullable: true
       required:
         - signatureData
 
@@ -1172,7 +1181,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print]
+          enum: [web, marketing, print, tiered]
         totalAmount:
           type: number
         specialContext:
