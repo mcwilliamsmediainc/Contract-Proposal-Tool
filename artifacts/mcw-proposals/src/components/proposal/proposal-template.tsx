@@ -272,7 +272,7 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
     { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
     { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
     { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
-    { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
+    { desc: `Web Pages (${pages})`, rate: 350, qty: `${pages} Pages`, price: 350 * pages },
     { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
     { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
   ];
