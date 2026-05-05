@@ -386,7 +386,7 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
     <section className="py-20 px-6" style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 50%, #1a5bb8 100%)" }}>
       <div className="max-w-xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Ready to work together?</h2>
-        <p className="text-blue-200 mb-2">Click below to accept this proposal.</p>
+        <p className="text-blue-200 mb-2">Click below to accept this proposal and secure your spot on our project calendar.</p>
         <p className="text-blue-300 text-sm mb-10">Our team will follow up with a contract.</p>
         <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
           {totalAmount > 0 && (
