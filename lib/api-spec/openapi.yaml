@@ -575,6 +575,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
+  /admin/clients:
+    get:
+      operationId: listClients
+      tags: [admin]
+      summary: Master client list with pipeline stage
+      responses:
+        "200":
+          description: List of all clients with pipeline status
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ClientRecord"
+
   /admin/stats:
     get:
       operationId: getAdminStats
@@ -1115,6 +1130,42 @@ components:
           type: string
       required:
         - content
+
+    ClientRecord:
+      type: object
+      required: [id, clientName, businessName, clientEmail, proposalId, proposalStatus, proposalAmount, stage, createdAt]
+      properties:
+        id:
+          type: string
+        clientName:
+          type: string
+        businessName:
+          type: string
+        clientEmail:
+          type: string
+        clientStrategist:
+          type: string
+          nullable: true
+        proposalId:
+          type: string
+        proposalStatus:
+          type: string
+        proposalAmount:
+          type: number
+        contractId:
+          type: string
+          nullable: true
+        contractStatus:
+          type: string
+          nullable: true
+        onboardingStatus:
+          type: string
+          nullable: true
+        stage:
+          type: string
+          enum: [proposal_draft, proposal_sent, proposal_accepted, contract_draft, contract_sent, contract_signed, onboarding]
+        createdAt:
+          type: string
 
     AdminStats:
       type: object

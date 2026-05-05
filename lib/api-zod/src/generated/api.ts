@@ -627,6 +627,34 @@ export const GetAdminProposalResponse = zod
   .describe("Full proposal shape including internal admin-only fields");
 
 /**
+ * @summary Master client list with pipeline stage
+ */
+export const ListClientsResponseItem = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string(),
+  clientEmail: zod.string(),
+  clientStrategist: zod.string().nullish(),
+  proposalId: zod.string(),
+  proposalStatus: zod.string(),
+  proposalAmount: zod.number(),
+  contractId: zod.string().nullish(),
+  contractStatus: zod.string().nullish(),
+  onboardingStatus: zod.string().nullish(),
+  stage: zod.enum([
+    "proposal_draft",
+    "proposal_sent",
+    "proposal_accepted",
+    "contract_draft",
+    "contract_sent",
+    "contract_signed",
+    "onboarding",
+  ]),
+  createdAt: zod.string(),
+});
+export const ListClientsResponse = zod.array(ListClientsResponseItem);
+
+/**
  * @summary Get admin dashboard statistics
  */
 export const GetAdminStatsResponse = zod.object({

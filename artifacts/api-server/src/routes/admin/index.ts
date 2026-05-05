@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { eq, count, sum } from "drizzle-orm";
-import { db, proposalsTable } from "@workspace/db";
+import { db, proposalsTable, contractsTable, onboardingClientsTable } from "@workspace/db";
 
 function formatProposalAdmin(p: typeof proposalsTable.$inferSelect) {
   return {
@@ -29,6 +29,61 @@ function formatProposalAdmin(p: typeof proposalsTable.$inferSelect) {
 }
 
 const router = Router();
+
+router.get("/admin/clients", async (req, res) => {
+  const [proposals, contracts, onboardingClients] = await Promise.all([
+    db.select().from(proposalsTable).orderBy(proposalsTable.createdAt),
+    db.select().from(contractsTable),
+    db.select().from(onboardingClientsTable),
+  ]);
+
+  const contractByProposal = new Map(
+    contracts.filter((c) => c.proposalId).map((c) => [c.proposalId!, c])
+  );
+  const onboardingByProposal = new Map(
+    onboardingClients.filter((o) => o.proposalId).map((o) => [o.proposalId!, o])
+  );
+
+  const clients = proposals.map((p) => {
+    const contract = contractByProposal.get(p.uuid) ?? null;
+    const onboarding = onboardingByProposal.get(p.uuid) ?? null;
+
+    let stage: string;
+    if (onboarding) {
+      stage = "onboarding";
+    } else if (contract?.status === "signed") {
+      stage = "contract_signed";
+    } else if (contract?.status === "sent") {
+      stage = "contract_sent";
+    } else if (contract?.status === "draft") {
+      stage = "contract_draft";
+    } else if (p.status === "accepted") {
+      stage = "proposal_accepted";
+    } else if (p.status === "sent") {
+      stage = "proposal_sent";
+    } else {
+      stage = "proposal_draft";
+    }
+
+    return {
+      id: p.uuid,
+      clientName: p.clientName,
+      businessName: p.businessName,
+      clientEmail: p.clientEmail,
+      clientStrategist: p.clientStrategist ?? null,
+      proposalId: p.uuid,
+      proposalStatus: p.status,
+      proposalAmount: Number(p.totalAmount),
+      contractId: contract?.uuid ?? null,
+      contractStatus: contract?.status ?? null,
+      onboardingStatus: onboarding?.status ?? null,
+      stage,
+      createdAt: p.createdAt.toISOString(),
+    };
+  });
+
+  res.json(clients);
+});
 
 router.get("/admin/proposals/:id", async (req, res) => {
   const id = req.params.id;

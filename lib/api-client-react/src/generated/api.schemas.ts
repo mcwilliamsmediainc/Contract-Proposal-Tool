@@ -288,6 +288,35 @@ export interface GeneratedProposalContent {
   content: string;
 }
 
+export type ClientRecordStage =
+  (typeof ClientRecordStage)[keyof typeof ClientRecordStage];
+
+export const ClientRecordStage = {
+  proposal_draft: "proposal_draft",
+  proposal_sent: "proposal_sent",
+  proposal_accepted: "proposal_accepted",
+  contract_draft: "contract_draft",
+  contract_sent: "contract_sent",
+  contract_signed: "contract_signed",
+  onboarding: "onboarding",
+} as const;
+
+export interface ClientRecord {
+  id: string;
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  clientStrategist?: string | null;
+  proposalId: string;
+  proposalStatus: string;
+  proposalAmount: number;
+  contractId?: string | null;
+  contractStatus?: string | null;
+  onboardingStatus?: string | null;
+  stage: ClientRecordStage;
+  createdAt: string;
+}
+
 export interface AdminStats {
   totalEngagement: number;
   activePipeline: number;
