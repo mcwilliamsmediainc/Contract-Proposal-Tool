@@ -366,7 +366,7 @@ export function WhatsNextSection() {
         <p className="text-gray-600 leading-relaxed mb-6">Upon approval, we'll send over a contract for the project. We'll include our First Steps to help us get started in the right direction. Once we receive the contract with your completed First Steps, your Kick-Off meeting will be scheduled.</p>
         <div className="bg-blue-50 rounded-xl p-6 border border-blue-100 mb-8">
           <p className="font-bold text-gray-800 mb-2">Payment Schedule</p>
-          <p className="text-gray-600">Half is due upon signing and the remaining balance is broken up over the next three subsequent months.</p>
+          <p className="text-gray-600">Half is due upon signing and the remaining balance is divided equally over the following three months.</p>
         </div>
         <div className="space-y-2 text-sm">
           <p className="text-gray-700"><span className="font-semibold">Email:</span> support@mcwilliamsmedia.com</p>
