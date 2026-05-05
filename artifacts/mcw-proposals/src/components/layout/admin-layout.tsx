@@ -142,9 +142,6 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="w-8" />
         </header>
 
-        {/* Desktop top bar */}
-        <header className="hidden md:flex h-[57px] border-b border-border bg-card items-center px-8 sticky top-0 z-30" />
-
         <div className="flex-1 overflow-auto bg-background p-6 md:p-8">
           <div className="max-w-6xl mx-auto">
             {children}
