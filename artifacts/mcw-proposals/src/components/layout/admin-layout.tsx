@@ -6,9 +6,9 @@ import { useState } from "react";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/proposals/new", label: "New Proposal", icon: Plus },
-  { href: "/admin/clients", label: "Clients", icon: BookUser },
   { href: "/admin/contracts", label: "Contracts", icon: FileSignature },
   { href: "/admin/onboarding", label: "Onboarding", icon: Users },
+  { href: "/admin/clients", label: "Clients", icon: BookUser },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
