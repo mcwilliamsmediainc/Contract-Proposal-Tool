@@ -49,7 +49,7 @@ export function ProposalCover({ clientName, businessName, projectType, date }: {
       }} />
       <div className="relative z-10 max-w-3xl mx-auto">
         <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-16 md:h-20 mx-auto mb-10 brightness-0 invert" />
-        <h1 className="text-5xl md:text-7xl text-white mb-8 leading-tight" style={{ fontFamily: "'Playfair Display', Georgia, serif", fontWeight: 800, fontStyle: "italic" }}>
+        <h1 className="text-5xl md:text-7xl text-white mb-8 leading-tight tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontStyle: "normal" }}>
           {label} Proposal
         </h1>
         <p className="text-xl md:text-2xl font-bold text-white mb-2">Prepared for {clientName || "[Client Name]"}</p>
