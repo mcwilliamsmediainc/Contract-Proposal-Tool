@@ -203,17 +203,6 @@ export function TimelineSection() {
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Timeline Deposit</h2>
           <p className="text-gray-600 leading-relaxed">To ensure your project gets completed in a timely manner, we have implemented a timeline deposit. This deposit is fully refundable if we receive adequate communication to complete the project within the allotted 90 days.</p>
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Add-On: SEO Google Business Profile</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            {[["$547", "Set-Up + Optimization"], ["$347", "Set-Up Only"], ["$247", "Optimization Only"]].map(([price, label]) => (
-              <div key={label} className="bg-white rounded-lg border border-gray-200 p-4 text-center shadow-sm">
-                <p className="text-2xl font-bold text-blue-700">{price}</p>
-                <p className="text-sm text-gray-600 mt-1">one-time · {label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
@@ -248,11 +237,10 @@ export function EssentialsSection() {
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-6">Website Hosting</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                { name: "Silver", price: "$40/mo", features: ["Dedicated server", "High speed server", "Software updates", "Free SSL certificate"] },
-                { name: "Gold", price: "$65/mo", features: ["Everything in Silver", "Monthly backups", "Advanced security", "Basic site maintenance"], highlight: true },
-                { name: "Platinum", price: "$90/mo", features: ["Everything in Gold", "Up to 1hr/month updates", "Hourly rate $110 after"] },
+                { name: "Gold", price: "$65/mo", features: ["Dedicated server", "High speed server", "Software updates", "Free SSL certificate", "Monthly backups", "Advanced security", "Basic site maintenance"], highlight: true },
+                { name: "Platinum", price: "$90/mo", features: ["Everything in Gold", "1 hour of Monthly Updates"] },
               ].map((plan) => (
                 <div key={plan.name} className={`rounded-xl border p-5 ${plan.highlight ? "border-blue-400 bg-blue-50 shadow-md" : "border-gray-200 bg-white"}`}>
                   <p className={`font-bold text-lg mb-1 ${plan.highlight ? "text-blue-700" : "text-gray-900"}`}>{plan.name}</p>
