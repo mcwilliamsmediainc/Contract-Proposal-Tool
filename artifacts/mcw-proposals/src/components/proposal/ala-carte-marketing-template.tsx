@@ -554,7 +554,7 @@ function FloatingTotalBar({ monthly, oneTime, setupFees, count }: {
 }) {
   if (count === 0) return null;
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+    <div className="no-print fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
       <div className="max-w-4xl mx-auto px-4 pb-4">
         <div className="pointer-events-auto bg-[#0a1f5c] border border-white/10 rounded-2xl shadow-2xl px-6 py-3 flex items-center justify-between gap-4 text-white">
           <div className="flex items-center gap-2 text-sm text-blue-200">

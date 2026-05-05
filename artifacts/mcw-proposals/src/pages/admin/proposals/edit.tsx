@@ -11,7 +11,7 @@ import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, ArrowLeft, X, Users, FileText,
-  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote, Link2, ClipboardCheck, GripVertical
+  DollarSign, Layout, ExternalLink, Plus, Trash2, StickyNote, Link2, ClipboardCheck, GripVertical, Download
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -277,7 +277,7 @@ export default function EditProposal() {
   return (
     <div className="relative">
       {/* Sticky amber draft toolbar */}
-      <div className="sticky top-0 z-30 bg-amber-500 shadow-md">
+      <div className="no-print sticky top-0 z-30 bg-amber-500 shadow-md">
         <div className="flex items-center gap-2 px-4 py-2 flex-wrap">
           <Link href="/admin" className="flex items-center gap-1.5 text-amber-900 hover:text-amber-950 font-semibold text-sm transition-colors mr-2 flex-shrink-0">
             <ArrowLeft className="w-4 h-4" />
@@ -341,6 +341,14 @@ export default function EditProposal() {
             >
               {linkCopied ? <ClipboardCheck className="w-3.5 h-3.5" /> : <Link2 className="w-3.5 h-3.5" />}
               {proposal.status === "accepted" ? "Accepted" : linkCopied ? "Copied!" : "Copy Link"}
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide bg-amber-400 hover:bg-amber-600 text-amber-900 hover:text-white transition-all"
+              title="Download PDF"
+            >
+              <Download className="w-3.5 h-3.5" />
+              PDF
             </button>
             {confirmDelete ? (
               <span className="flex items-center gap-1.5">

@@ -1,7 +1,7 @@
 import { useParams } from "wouter";
 import { useGetProposal, useRecordProposalView, useAcceptProposal, getGetProposalQueryKey } from "@workspace/api-client-react";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, CheckCircle } from "lucide-react";
+import { Loader2, CheckCircle, Download } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
 import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
@@ -74,70 +74,90 @@ export default function ClientPortal() {
     </div>
   );
 
+  const DownloadButton = () => (
+    <button
+      onClick={() => window.print()}
+      className="no-print fixed top-4 right-4 z-50 flex items-center gap-2 px-4 py-2 rounded-xl bg-white/90 backdrop-blur border border-gray-200 shadow-lg text-gray-800 text-sm font-semibold hover:bg-white transition-colors"
+      title="Download as PDF"
+    >
+      <Download className="w-4 h-4" />
+      Download PDF
+    </button>
+  );
+
   if (proposal.projectType === "tiered") {
     return (
-      <TieredMarketingTemplate
-        data={{
-          clientName: proposal.clientName,
-          businessName: proposal.businessName,
-          projectType: proposal.projectType,
-          content: proposal.content,
-          loomVideoUrl: proposal.loomVideoUrl,
-          createdAt: proposal.createdAt,
-        }}
-        selectedTier={selectedTier}
-        onSelectTier={setSelectedTier}
-        onAccept={handleAccept}
-        isPending={acceptProposal.isPending}
-      />
+      <>
+        <DownloadButton />
+        <TieredMarketingTemplate
+          data={{
+            clientName: proposal.clientName,
+            businessName: proposal.businessName,
+            projectType: proposal.projectType,
+            content: proposal.content,
+            loomVideoUrl: proposal.loomVideoUrl,
+            createdAt: proposal.createdAt,
+          }}
+          selectedTier={selectedTier}
+          onSelectTier={setSelectedTier}
+          onAccept={handleAccept}
+          isPending={acceptProposal.isPending}
+        />
+      </>
     );
   }
 
   if (proposal.projectType === "ala-carte") {
     return (
-      <AlaCarteMarketingTemplate
-        data={{
-          clientName: proposal.clientName,
-          businessName: proposal.businessName,
-          projectType: proposal.projectType,
-          content: proposal.content,
-          loomVideoUrl: proposal.loomVideoUrl,
-          createdAt: proposal.createdAt,
-        }}
-        onAccept={async (selectedServiceIds) => {
-          try {
-            const data = await acceptProposal.mutateAsync({
-              id,
-              data: {
-                signatureData: "",
-                selectedTier: JSON.stringify(selectedServiceIds),
-              } as { signatureData: string },
-            });
-            queryClient.setQueryData(getGetProposalQueryKey(id), data);
-            setAccepted(true);
-          } catch {}
-        }}
-        isPending={acceptProposal.isPending}
-      />
+      <>
+        <DownloadButton />
+        <AlaCarteMarketingTemplate
+          data={{
+            clientName: proposal.clientName,
+            businessName: proposal.businessName,
+            projectType: proposal.projectType,
+            content: proposal.content,
+            loomVideoUrl: proposal.loomVideoUrl,
+            createdAt: proposal.createdAt,
+          }}
+          onAccept={async (selectedServiceIds) => {
+            try {
+              const data = await acceptProposal.mutateAsync({
+                id,
+                data: {
+                  signatureData: "",
+                  selectedTier: JSON.stringify(selectedServiceIds),
+                } as { signatureData: string },
+              });
+              queryClient.setQueryData(getGetProposalQueryKey(id), data);
+              setAccepted(true);
+            } catch {}
+          }}
+          isPending={acceptProposal.isPending}
+        />
+      </>
     );
   }
 
   return (
-    <FullProposalTemplate
-      data={{
-        clientName: proposal.clientName,
-        businessName: proposal.businessName,
-        projectType: proposal.projectType,
-        numberOfPages: proposal.numberOfPages,
-        pageNames: proposal.pageNames,
-        totalAmount: Number(proposal.totalAmount),
-        pricingItems: proposal.pricingItems,
-        content: proposal.content,
-        loomVideoUrl: proposal.loomVideoUrl,
-        createdAt: proposal.createdAt,
-      }}
-      onAccept={handleAccept}
-      isPending={acceptProposal.isPending}
-    />
+    <>
+      <DownloadButton />
+      <FullProposalTemplate
+        data={{
+          clientName: proposal.clientName,
+          businessName: proposal.businessName,
+          projectType: proposal.projectType,
+          numberOfPages: proposal.numberOfPages,
+          pageNames: proposal.pageNames,
+          totalAmount: Number(proposal.totalAmount),
+          pricingItems: proposal.pricingItems,
+          content: proposal.content,
+          loomVideoUrl: proposal.loomVideoUrl,
+          createdAt: proposal.createdAt,
+        }}
+        onAccept={handleAccept}
+        isPending={acceptProposal.isPending}
+      />
+    </>
   );
 }

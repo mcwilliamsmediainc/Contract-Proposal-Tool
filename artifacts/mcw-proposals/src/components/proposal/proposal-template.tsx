@@ -409,15 +409,17 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
             {totalAmount > 0 ? <> and investment of <strong>${totalAmount.toLocaleString()}</strong></> : null}.
           </p>
           {onAccept && (
-            <Button
-              onClick={onAccept}
-              disabled={disabled || isPending}
-              className="w-full h-14 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl"
-            >
-              {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <span className="flex items-center gap-2">Accept Proposal <ArrowRight className="w-4 h-4" /></span>
-              )}
-            </Button>
+            <div className="no-print">
+              <Button
+                onClick={onAccept}
+                disabled={disabled || isPending}
+                className="w-full h-14 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl"
+              >
+                {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                  <span className="flex items-center gap-2">Accept Proposal <ArrowRight className="w-4 h-4" /></span>
+                )}
+              </Button>
+            </div>
           )}
         </div>
       </div>
