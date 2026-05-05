@@ -333,8 +333,8 @@ export function TeamSection() {
     { name: "Tiffany King", title: "Owner & COO", photo: rachellePhoto, bio: "My passion for marketing and design continues to earn the trust of business leaders." },
     { name: "Rachelle Hoover", title: "Marketing Director", photo: tiffanyPhoto, bio: "My goal is to help your business stand out online with strategy-driven content that connects and converts." },
     { name: "Elise Johnson", title: "Client Strategist", photo: elisePhoto, bio: "With a collaborative approach, I work closely with you to guide strategy and keep initiatives moving forward." },
-    { name: "Ashlea Calhoon", title: "Social Media Director", photo: ashleaPhoto, bio: "As your Social Media Strategist, I'm here to craft compelling content, spark meaningful conversations, and grow your online community. Seeing your business thrive and knowing I've helped turn followers into loyal customers is what drives me every day." },
-    { name: "Natalee Groves", title: "Designer", photo: nataleePhoto, bio: "I'm passionate about creating websites that are both functional and beautifully designed. I focus on creating an experience that stays true to your brand's goals. It's incredibly rewarding to know that the websites I design help businesses grow and stand out in their industries." },
+    { name: "Ashlea Calhoon", title: "Social Media Director", photo: ashleaPhoto, bio: "I craft compelling content and grow online communities that turn followers into loyal customers." },
+    { name: "Natalee Groves", title: "Designer", photo: nataleePhoto, bio: "I create functional, beautifully designed websites that stay true to your brand and help your business stand out." },
     { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I design websites that are both beautiful and built to perform — staying true to your brand every step of the way." },
   ];
   return (
