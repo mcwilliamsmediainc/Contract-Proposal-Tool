@@ -254,12 +254,6 @@ export default function NewProposal() {
                   />
                 )}
 
-                <div className="pt-2 border-t border-border/50">
-                  <Button type="submit" className="w-full" disabled={createProposal.isPending}>
-                    {createProposal.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-                    Save Draft
-                  </Button>
-                </div>
               </form>
             </Form>
           </CardContent>
@@ -325,6 +319,16 @@ export default function NewProposal() {
             </Form>
           </CardContent>
         </Card>
+        <div className="pb-8">
+          <Button
+            className="w-full"
+            disabled={createProposal.isPending}
+            onClick={form.handleSubmit(onSubmit)}
+          >
+            {createProposal.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+            Save Draft
+          </Button>
+        </div>
       </div>
     </AdminLayout>
   );
