@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import {
   ProposalCover,
   SectionIntro,
+  SituationSection,
   TeamSection,
   TestimonialSection,
 } from "./proposal-template";
@@ -768,7 +769,8 @@ export function AlaCarteMarketingTemplate({
         date={dateStr}
       />
 
-      <SectionIntro content={data.content || "Thank you for considering McWilliams Media as your partner in achieving your marketing goals! We're excited about the opportunity to work with you and bring your vision to life through effective, results-driven digital strategies.\n\nIn this proposal, we'll outline our recommended strategies to elevate your brand, boost engagement, and drive measurable results. Our team brings a blend of creativity, technical expertise, and strategic insight to every project, ensuring that your investment in marketing delivers maximum impact."} />
+      <SectionIntro clientName={data.clientName} businessName={data.businessName} />
+      <SituationSection content={data.content} />
 
       <TestimonialSection
         quote="The results are apparent: In under a year, my business has more than tripled! This was by far the best advertising money I have spent... Everything else was a waste comparatively."

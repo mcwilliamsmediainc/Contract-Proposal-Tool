@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import {
   ProposalCover,
   SectionIntro,
+  SituationSection,
   TeamSection,
   TestimonialSection,
 } from "./proposal-template";
@@ -167,8 +168,6 @@ const PLATINUM_ADDITIONS: FeatureGroup[] = [
 const TIER_PRICES: Record<Tier, number> = { pro: 1500, plus: 2500, platinum: 4000 };
 const TIER_LABELS: Record<Tier, string> = { pro: "Pro", plus: "Plus", platinum: "Platinum" };
 
-const MARKETING_DEFAULT_INTRO =
-  "Thank you for considering McWilliams Media as your partner in achieving your marketing goals! We're excited about the opportunity to work with you and bring your vision to life through effective, results-driven digital strategies.\n\nIn this proposal, we'll outline our recommended strategies to elevate your brand, boost engagement, and drive measurable results. Our team brings a blend of creativity, technical expertise, and strategic insight to every project, ensuring that your investment in marketing delivers maximum impact.";
 
 function TierCard({
   name,
@@ -537,7 +536,8 @@ export function TieredMarketingTemplate({
         projectType="tiered"
         date={dateStr}
       />
-      <SectionIntro content={data.content || MARKETING_DEFAULT_INTRO} />
+      <SectionIntro clientName={data.clientName} businessName={data.businessName} />
+      <SituationSection content={data.content} />
       <TestimonialSection
         quote="The results are apparent: In under a year, my business has more than tripled! This was by far the best advertising money I have spent... Everything else was a waste comparatively."
         author="Chance Johnson"

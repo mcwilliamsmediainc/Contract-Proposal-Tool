@@ -72,31 +72,97 @@ export function ProposalCover({ clientName, businessName, projectType, date }: {
   );
 }
 
-export function SectionIntro({ content }: { content?: string | null }) {
+export function SectionIntro({ clientName, businessName }: { clientName?: string; businessName?: string }) {
   return (
     <section id="section-intro" className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
+        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-6">A Personal Note</p>
         <div className="max-w-none text-gray-700 leading-relaxed">
-          {content ? (
-            <p className="text-xl leading-relaxed whitespace-pre-wrap" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>{content}</p>
-          ) : (
-            <>
-              <p className="text-xl leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                Thank you for considering McWilliams Media as your partner in achieving your new website goals! We're excited for the opportunity to work with you and bring your vision to life with a professional, unique and conversion-focused design.
-              </p>
-              <p className="text-xl leading-relaxed mb-10" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                In this proposal, we'll outline our recommendations for your new website so that your business makes a strong first impression and helps you achieve your goals. Our team brings a blend of creativity, technical expertise, and strategic insight to every project, ensuring that your investment in your online presence delivers maximum impact.
-              </p>
-            </>
-          )}
+          <p className="text-xl leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+            {clientName ? `Dear ${clientName},` : "Dear [Client Name],"}
+          </p>
+          <p className="text-xl leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+            Thank you for taking the time to connect with us and share what's happening at {businessName || "your business"}. I genuinely appreciated hearing where you are right now and where you want to go — those conversations are what make this work meaningful.
+          </p>
+          <p className="text-xl leading-relaxed mb-10" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+            This proposal was built around what you told us. Every recommendation you'll find here is rooted in your goals, your audience, and the challenges you're facing — not a generic template. Our team is excited about this project, and we believe we can make a real difference for your business.
+          </p>
         </div>
         <div className="mt-10 pt-8 border-t border-gray-200 flex items-center gap-5">
           <img src={mattDarkPhoto} alt="Matt McWilliams" className="w-16 h-16 rounded-full object-cover object-top flex-shrink-0 border-2 border-blue-100 shadow-md" />
           <div>
-            <p className="text-gray-500 italic mb-1 text-sm">Best Wishes,</p>
+            <p className="text-gray-500 italic mb-1 text-sm">Warmly,</p>
             <p className="text-gray-800 font-semibold text-lg">Matt McWilliams</p>
             <p className="text-gray-500 text-sm">Founder &amp; CEO, McWilliams Media</p>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function SituationSection({ content }: { content?: string | null }) {
+  if (!content) return null;
+  return (
+    <section id="section-situation" className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
+      <div className="max-w-3xl mx-auto">
+        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-4">Where You Are Right Now</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          The Problem / Your Situation
+        </h2>
+        <p className="text-xl leading-relaxed text-gray-700 whitespace-pre-wrap" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          {content}
+        </p>
+      </div>
+    </section>
+  );
+}
+
+export function SocialProofSection() {
+  const testimonials = [
+    {
+      quote: "I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!",
+      author: "Greg Sutmiller, Evolution Mental Health",
+      websiteImg: evolutionSiteImg,
+      websiteAlt: "Evolution Mental Health website",
+    },
+    {
+      quote: "I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well.",
+      author: "Sunni Petty, Petty Family Floors",
+      websiteImg: pettyFloorsSiteImg,
+      websiteAlt: "Petty Family Floors website",
+    },
+    {
+      quote: "They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!",
+      author: "Alyssa Hobbs, Hobbs Salon + Med Spa",
+      websiteImg: hobbsSiteImg,
+      websiteAlt: "Hobbs Salon + Med Spa website",
+    },
+  ];
+
+  return (
+    <section id="section-social-proof" className="bg-[#0a1f5c] py-20 px-6">
+      <div className="max-w-4xl mx-auto">
+        <p className="text-sm font-semibold uppercase tracking-widest text-blue-300 mb-4">Real Results</p>
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-14 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+          What Our Clients Say
+        </h2>
+        <div className="space-y-14">
+          {testimonials.map((t, i) => (
+            <div key={t.author} className={`grid gap-8 items-center ${t.websiteImg ? "grid-cols-1 lg:grid-cols-[4fr_7fr]" : "grid-cols-1"} ${i < testimonials.length - 1 ? "pb-14 border-b border-white/10" : ""}`}>
+              {t.websiteImg && (
+                <div className="rounded-xl overflow-hidden shadow-xl border border-white/10 max-w-[220px] w-full mx-auto lg:mx-0">
+                  <img src={t.websiteImg} alt={t.websiteAlt || "Client website"} className="w-full h-auto object-cover" />
+                </div>
+              )}
+              <div>
+                <blockquote className="text-xl md:text-2xl leading-relaxed font-medium text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+                  "{t.quote}"
+                </blockquote>
+                <p className="mt-6 text-base font-medium text-blue-300">— {t.author}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -127,16 +193,20 @@ export function TestimonialSection({ quote, author, websiteImg, websiteAlt, dark
   );
 }
 
+/* TestimonialSection kept for backward-compat with tiered/ala-carte templates */
+
 export function StrategySection() {
   return (
     <section className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
+        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-4">Your Solution</p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-          A proven strategy customized for your business goals.
+          What we're building — and why it's right for you.
         </h2>
         <div className="space-y-5 text-gray-600 text-lg leading-relaxed">
           <p>More than 75% of consumers research a business online before making a purchase — making your website your first impression, your best salesperson, and your strongest competitive edge.</p>
-          <p>But it has to be built right. With decades of combined experience, we design websites around your goals and your audience, so visitors don't just browse — they buy.</p>
+          <p>But it has to be built right. With decades of combined experience, we design websites around your goals and your audience, so visitors don't just browse — they buy. Every site we build is tailored specifically to the business behind it — never a cookie-cutter theme applied to your name.</p>
+          <p>The result: a professional, conversion-focused digital presence that works as hard as you do.</p>
         </div>
       </div>
     </section>
@@ -408,11 +478,48 @@ export function TeamSection() {
 }
 
 export function WhatsNextSection() {
+  const steps = [
+    {
+      number: "01",
+      title: "Accept this proposal",
+      desc: "Click the button below to accept. Your spot on our project calendar is secured the moment you do.",
+    },
+    {
+      number: "02",
+      title: "A contract is emailed to you",
+      desc: "We'll send your contract right away. Review and sign it digitally — no printing required.",
+    },
+    {
+      number: "03",
+      title: "Onboarding documents",
+      desc: "You'll receive our onboarding documents to gather the details we need to hit the ground running.",
+    },
+    {
+      number: "04",
+      title: "Kick-off meeting",
+      desc: "Once everything is in place, we'll schedule your kick-off meeting to align on goals, timeline, and next steps.",
+    },
+  ];
+
   return (
     <section className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-900 mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>What's Next?</h2>
-        <p className="text-gray-600 leading-relaxed mb-6">Upon approval, we'll send over a contract for the project. We'll include our First Steps to help us get started in the right direction. Once we receive the contract with your completed First Steps, your Kick-Off meeting will be scheduled.</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-4">One Clear Next Step</p>
+        <h2 className="text-3xl font-bold text-gray-900 mb-4" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>What happens when you say yes.</h2>
+        <p className="text-gray-500 mb-12 text-lg">Here's exactly what to expect — no ambiguity, no chasing people down.</p>
+        <div className="space-y-8 mb-14">
+          {steps.map((step) => (
+            <div key={step.number} className="flex gap-6 items-start">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#0a1f5c] flex items-center justify-center">
+                <span className="text-white text-xs font-bold">{step.number}</span>
+              </div>
+              <div>
+                <p className="font-bold text-gray-900 text-lg mb-1">{step.title}</p>
+                <p className="text-gray-600 leading-relaxed">{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
         <div className="bg-blue-50 rounded-xl p-6 border border-blue-100 mb-8">
           <p className="font-bold text-gray-800 mb-2">Payment Schedule</p>
           <p className="text-gray-600">Half is due upon signing and the remaining balance is divided equally over the following three months.</p>
@@ -483,42 +590,35 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
 
   return (
     <div className="min-h-screen bg-white font-sans">
+      {/* 1. Cover */}
       <ProposalCover
         clientName={data.clientName}
         businessName={data.businessName}
         projectType={data.projectType}
         date={dateStr}
       />
-      <SectionIntro content={data.content} />
-      <TestimonialSection
-        quote="I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!"
-        author="Greg Sutmiller, Evolution Mental Health"
-        websiteImg={evolutionSiteImg}
-        websiteAlt="Evolution Mental Health website"
-      />
+      {/* 2. Personal intro letter — signed by Matt */}
+      <SectionIntro clientName={data.clientName} businessName={data.businessName} />
+      {/* 3. The Problem / Their Situation */}
+      <SituationSection content={data.content} />
+      {/* 4. Social proof — all testimonials in one section, before pricing */}
+      <SocialProofSection />
+      {/* 5. Your solution */}
       <StrategySection />
-      <TestimonialSection
-        quote="I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well."
-        author="Sunni Petty, Petty Family Floors"
-        websiteImg={pettyFloorsSiteImg}
-        websiteAlt="Petty Family Floors website"
-        dark={false}
-      />
+      {/* 6. Deliverables */}
       <CustomWebsiteSection numberOfPages={data.numberOfPages} pageNames={data.pageNames} />
+      {/* 7. Process / Timeline */}
       <TimelineSection />
       <BrandShootSection />
       <EssentialsSection
         selectedHosting={onAccept ? selectedHosting : null}
         onSelectHosting={onAccept ? setSelectedHosting : undefined}
       />
+      {/* 8. Investment — pricing after value is established */}
       <PricingSection numberOfPages={data.numberOfPages} totalAmount={data.totalAmount} pricingItems={data.pricingItems} />
+      {/* 9. Team */}
       <TeamSection />
-      <TestimonialSection
-        quote="They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!"
-        author="Alyssa Hobbs, Hobbs Salon + Med Spa"
-        websiteImg={hobbsSiteImg}
-        websiteAlt="Hobbs Salon + Med Spa website"
-      />
+      {/* 10. What's Next */}
       <WhatsNextSection />
       {data.loomVideoUrl && (
         <section className="bg-gray-50 py-20 px-6 border-t border-gray-100">
