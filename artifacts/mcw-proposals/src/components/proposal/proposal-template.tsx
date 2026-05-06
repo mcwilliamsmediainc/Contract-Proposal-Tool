@@ -118,51 +118,143 @@ export function SituationSection({ content }: { content?: string | null }) {
   );
 }
 
-export function SocialProofSection() {
-  const testimonials = [
-    {
-      quote: "I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!",
-      author: "Greg Sutmiller, Evolution Mental Health",
-      websiteImg: evolutionSiteImg,
-      websiteAlt: "Evolution Mental Health website",
-    },
-    {
-      quote: "I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well.",
-      author: "Sunni Petty, Petty Family Floors",
-      websiteImg: pettyFloorsSiteImg,
-      websiteAlt: "Petty Family Floors website",
-    },
-    {
-      quote: "They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!",
-      author: "Alyssa Hobbs, Hobbs Salon + Med Spa",
-      websiteImg: hobbsSiteImg,
-      websiteAlt: "Hobbs Salon + Med Spa website",
-    },
-  ];
-
+function StarRating() {
   return (
-    <section id="section-social-proof" className="bg-[#0a1f5c] py-20 px-6">
-      <div className="max-w-4xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-300 mb-4">Real Results</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-14 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-          What Our Clients Say
-        </h2>
-        <div className="space-y-14">
-          {testimonials.map((t, i) => (
-            <div key={t.author} className={`grid gap-8 items-center ${t.websiteImg ? "grid-cols-1 lg:grid-cols-[4fr_7fr]" : "grid-cols-1"} ${i < testimonials.length - 1 ? "pb-14 border-b border-white/10" : ""}`}>
-              {t.websiteImg && (
-                <div className="rounded-xl overflow-hidden shadow-xl border border-white/10 max-w-[220px] w-full mx-auto lg:mx-0">
-                  <img src={t.websiteImg} alt={t.websiteAlt || "Client website"} className="w-full h-auto object-cover" />
-                </div>
-              )}
-              <div>
-                <blockquote className="text-xl md:text-2xl leading-relaxed font-medium text-white" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-                  "{t.quote}"
-                </blockquote>
-                <p className="mt-6 text-base font-medium text-blue-300">— {t.author}</p>
+    <div className="flex gap-1 mb-5">
+      {[...Array(5)].map((_, i) => (
+        <svg key={i} className="w-4 h-4 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
+
+export function SocialProofSection() {
+  return (
+    <section
+      id="section-social-proof"
+      className="py-24 px-6"
+      style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 40%, #1a5bb8 70%, #0d3494 85%, #0a1f5c 100%)" }}
+    >
+      <div className="max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <p className="text-sm font-semibold uppercase tracking-widest text-blue-300 mb-3">Real Results</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
+            What Our Clients Say
+          </h2>
+          <div className="mt-4 flex justify-center gap-1">
+            {[...Array(5)].map((_, i) => (
+              <svg key={i} className="w-5 h-5 text-yellow-400 fill-yellow-400" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <p className="text-blue-300 text-sm mt-2">Trusted by businesses across the country</p>
+        </div>
+
+        {/* Featured testimonial — full width hero card */}
+        <div className="relative rounded-2xl overflow-hidden mb-6"
+          style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(10px)" }}>
+          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] items-stretch">
+            {/* Website screenshot */}
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-transparent lg:to-white/5" />
+              <img
+                src={evolutionSiteImg}
+                alt="Evolution Mental Health website"
+                className="w-full h-full object-cover object-top min-h-[220px] lg:min-h-0"
+                style={{ maxHeight: 320 }}
+              />
+              {/* Browser chrome top bar */}
+              <div className="absolute top-0 left-0 right-0 h-6 flex items-center gap-1.5 px-3"
+                style={{ background: "rgba(0,0,0,0.4)" }}>
+                <span className="w-2 h-2 rounded-full bg-red-400/80" />
+                <span className="w-2 h-2 rounded-full bg-yellow-400/80" />
+                <span className="w-2 h-2 rounded-full bg-green-400/80" />
               </div>
             </div>
-          ))}
+
+            {/* Quote content */}
+            <div className="p-8 lg:p-10 flex flex-col justify-center">
+              <StarRating />
+              <div className="text-white/20 text-8xl leading-none font-serif mb-2 -mt-4 select-none">"</div>
+              <blockquote
+                className="text-white text-xl md:text-2xl leading-relaxed font-medium -mt-6"
+                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+              >
+                I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!
+              </blockquote>
+              <div className="mt-6 pt-5 border-t border-white/10 flex items-center gap-3">
+                <div className="w-8 h-px bg-blue-400" />
+                <p className="text-blue-300 font-semibold">Greg Sutmiller</p>
+                <span className="text-white/30 text-sm">·</span>
+                <p className="text-blue-200/70 text-sm">Evolution Mental Health</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Two smaller cards side by side */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Card 2 */}
+          <div className="rounded-2xl p-7 flex flex-col"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}>
+            <StarRating />
+            <div className="text-white/15 text-6xl leading-none font-serif mb-1 -mt-2 select-none">"</div>
+            <blockquote
+              className="text-white text-base md:text-lg leading-relaxed font-medium flex-1 -mt-3"
+              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+            >
+              I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well.
+            </blockquote>
+            <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-3">
+              <div className="w-6 h-px bg-blue-400" />
+              <div>
+                <p className="text-blue-300 font-semibold text-sm">Sunni Petty</p>
+                <p className="text-blue-200/60 text-xs">Petty Family Floors</p>
+              </div>
+            </div>
+            <div className="mt-4 rounded-lg overflow-hidden border border-white/10 relative">
+              <div className="absolute top-0 left-0 right-0 h-4 flex items-center gap-1 px-2"
+                style={{ background: "rgba(0,0,0,0.35)" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+              </div>
+              <img src={pettyFloorsSiteImg} alt="Petty Family Floors website" className="w-full h-28 object-cover object-top" />
+            </div>
+          </div>
+
+          {/* Card 3 */}
+          <div className="rounded-2xl p-7 flex flex-col"
+            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}>
+            <StarRating />
+            <div className="text-white/15 text-6xl leading-none font-serif mb-1 -mt-2 select-none">"</div>
+            <blockquote
+              className="text-white text-base md:text-lg leading-relaxed font-medium flex-1 -mt-3"
+              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+            >
+              They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!
+            </blockquote>
+            <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-3">
+              <div className="w-6 h-px bg-blue-400" />
+              <div>
+                <p className="text-blue-300 font-semibold text-sm">Alyssa Hobbs</p>
+                <p className="text-blue-200/60 text-xs">Hobbs Salon + Med Spa</p>
+              </div>
+            </div>
+            <div className="mt-4 rounded-lg overflow-hidden border border-white/10 relative">
+              <div className="absolute top-0 left-0 right-0 h-4 flex items-center gap-1 px-2"
+                style={{ background: "rgba(0,0,0,0.35)" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+              </div>
+              <img src={hobbsSiteImg} alt="Hobbs Salon + Med Spa website" className="w-full h-28 object-cover object-top" />
+            </div>
+          </div>
         </div>
       </div>
     </section>
