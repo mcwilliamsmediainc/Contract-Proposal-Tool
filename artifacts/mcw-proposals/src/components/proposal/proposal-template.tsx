@@ -54,19 +54,25 @@ export function ProposalCover({ clientName, businessName, projectType, date }: {
   const label = projectType === "tiered" ? "Marketing" : projectType === "ala-carte" ? "Ala Carte Marketing" : projectType === "marketing" ? "Marketing" : projectType === "print" ? "Print" : projectType === "project" ? "Project" : "Website";
   return (
     <section id="section-cover" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 45%, #061e57 100%)" }}>
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(255,255,255,0.08) 0%, transparent 50%)"
+      style={{ background: "#061e57" }}>
+      {/* Subtle diagonal texture */}
+      <div className="absolute inset-0 opacity-[0.04]" style={{
+        backgroundImage: "repeating-linear-gradient(45deg, #ffffff 0px, #ffffff 1px, transparent 1px, transparent 48px)"
       }} />
-      <div className="relative z-10 max-w-3xl mx-auto">
-        <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-16 md:h-20 mx-auto mb-10 brightness-0 invert" />
-        <h1 className="text-5xl md:text-7xl text-white mb-8 leading-tight tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 800, fontStyle: "normal" }}>
-          {label} Proposal
+      <div className="relative z-10 max-w-4xl mx-auto">
+        <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-14 md:h-16 mx-auto mb-10 brightness-0 invert opacity-90" />
+        <div className="w-12 h-0.5 bg-[#b3cee1] mx-auto mb-8" />
+        <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#b3cee1] mb-5">Prepared for</p>
+        <h1 className="text-6xl md:text-8xl text-white mb-3 leading-none uppercase" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, letterSpacing: "0.02em" }}>
+          {label}
         </h1>
-        <p className="text-xl md:text-2xl font-bold text-white mb-2">Prepared for {clientName || "[Client Name]"}</p>
-        <p className="text-lg font-bold text-white/80 mb-4">{businessName || "[Business Name]"}</p>
-        <p className="text-base italic text-white/60 mb-2">{date}, {new Date().getFullYear()}</p>
-        <p className="text-base italic text-white/50">This quote is valid for 30 days</p>
+        <h2 className="text-5xl md:text-7xl leading-none uppercase mb-10" style={{ fontFamily: "'Montserrat', sans-serif", fontWeight: 900, letterSpacing: "0.02em", color: "#b3cee1" }}>
+          Proposal
+        </h2>
+        <div className="w-12 h-0.5 bg-[#b3cee1]/40 mx-auto mb-8" />
+        <p className="text-2xl md:text-3xl font-bold text-white mb-1">{clientName || "[Client Name]"}</p>
+        <p className="text-base font-medium text-white/50 mb-6">{businessName || "[Business Name]"}</p>
+        <p className="text-sm text-white/35 uppercase tracking-widest">{date} · Valid 30 days</p>
       </div>
     </section>
   );
@@ -76,7 +82,7 @@ export function SectionIntro({ clientName, businessName }: { clientName?: string
   return (
     <section id="section-intro" className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-6">A Personal Note</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#3a4856] mb-6 pl-3 border-l-2 border-[#b3cee1]">A Personal Note</p>
         <div className="max-w-none text-gray-700 leading-relaxed">
           <p className="text-xl leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {clientName ? `Dear ${clientName},` : "Dear [Client Name],"}
@@ -106,7 +112,7 @@ export function SituationSection({ content }: { content?: string | null }) {
   return (
     <section id="section-situation" className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-4">Where You Are Right Now</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#3a4856] mb-4 pl-3 border-l-2 border-[#b3cee1]">Where You Are Right Now</p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
           The Problem / Your Situation
         </h2>
@@ -185,7 +191,7 @@ export function SocialProofSection() {
     <section
       id="section-social-proof"
       className="py-24 px-6"
-      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 45%, #061e57 100%)" }}
+      style={{ background: "#061e57" }}
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
@@ -316,7 +322,7 @@ export function StrategySection() {
   return (
     <section className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-4">Your Solution</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#3a4856] mb-4 pl-3 border-l-2 border-[#b3cee1]">Your Solution</p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
           What we're building — and why it's right for you.
         </h2>
@@ -614,9 +620,11 @@ export function TeamSection() {
   return (
     <section className="bg-[#061e57] py-20 px-6">
       <div className="max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Meet Our Team</h2>
-        <p className="text-[#b3cee1]/80 mb-6 italic">Professional, Knowledgeable, Collaborative, Passionate</p>
-        <p className="text-white/85 mb-12 leading-relaxed max-w-2xl">At the heart of our success is a talented team committed to helping you achieve your business goals. Together, we're dedicated to delivering results that make a difference for your business.</p>
+        <div className="w-10 h-0.5 bg-[#b3cee1] mb-6" />
+        <h2 className="text-4xl md:text-5xl font-black text-white uppercase tracking-tight leading-none mb-1" style={{ fontFamily: "'Montserrat', sans-serif" }}>Meet Our</h2>
+        <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tight leading-none mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: "#b3cee1" }}>Team</h3>
+        <p className="text-white/50 text-sm uppercase tracking-widest mb-4">Professional · Knowledgeable · Collaborative · Passionate</p>
+        <p className="text-white/70 mb-12 leading-relaxed max-w-2xl">At the heart of our success is a talented team committed to helping you achieve your business goals. Together, we're dedicated to delivering results that make a difference for your business.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {team.map((member) => (
             <div key={member.name} className="bg-white/10 backdrop-blur rounded-xl p-5 border border-white/10 flex gap-4">
@@ -661,7 +669,7 @@ export function WhatsNextSection() {
   return (
     <section className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-4">One Clear Next Step</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#3a4856] mb-4 pl-3 border-l-2 border-[#b3cee1]">One Clear Next Step</p>
         <h2 className="text-3xl font-bold text-gray-900 mb-4" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>What happens when you say yes.</h2>
         <p className="text-gray-500 mb-12 text-lg">Here's exactly what to expect — no ambiguity, no chasing people down.</p>
         <div className="space-y-8 mb-14">
@@ -700,11 +708,13 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
     : null;
 
   return (
-    <section className="py-20 px-6" style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 100%)" }}>
+    <section className="py-20 px-6" style={{ background: "#061e57" }}>
       <div className="max-w-xl mx-auto text-center">
-        <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Ready to work together?</h2>
-        <p className="text-[#b3cee1]/80 mb-2">Click below to accept this proposal and secure your spot on our project calendar.</p>
-        <p className="text-[#b3cee1] text-sm mb-10">Our team will follow up with a contract.</p>
+        <div className="w-10 h-0.5 bg-[#b3cee1] mx-auto mb-6" />
+        <h2 className="text-4xl md:text-5xl font-black text-white mb-1 uppercase tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>Ready to work</h2>
+        <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tight mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: "#b3cee1" }}>together?</h3>
+        <p className="text-white/60 mb-2 text-sm">Click below to accept this proposal and secure your spot on our project calendar.</p>
+        <p className="text-[#b3cee1]/70 text-sm mb-10">Our team will follow up with a contract.</p>
         <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
           {hostingLabel && (
             <div className="mb-6 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#eef4f9] border border-[#b3cee1]/50 rounded-xl">

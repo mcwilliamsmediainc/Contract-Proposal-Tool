@@ -592,14 +592,14 @@ function AlaCarteAcceptSection({
   return (
     <section
       className="py-20 px-6"
-      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 50%, #3a4856 100%)" }}
+      style={{ background: "#061e57" }}
     >
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: "'Montserrat', sans-serif" }}>
-            Ready to work together?
-          </h2>
-          <p className="text-[#b3cee1]/80">Review your selected services below and click Accept to move forward.</p>
+          <div className="w-10 h-0.5 bg-[#b3cee1] mx-auto mb-6" />
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-1 uppercase tracking-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>Ready to work</h2>
+          <h3 className="text-4xl md:text-5xl font-black uppercase tracking-tight mb-6" style={{ fontFamily: "'Montserrat', sans-serif", color: "#b3cee1" }}>together?</h3>
+          <p className="text-white/60 text-sm">Review your selected services below and click Accept to move forward.</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
