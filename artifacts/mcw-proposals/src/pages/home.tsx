@@ -7,7 +7,7 @@ export default function Home() {
       {/* Header */}
       <header className="sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-md bg-[#061e57]/90">
         <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
-          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-7 w-auto object-contain" />
+          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-7 w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
           <a
             href="https://mcwilliamsmedia.com"
             target="_blank"
