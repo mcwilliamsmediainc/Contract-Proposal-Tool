@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProposal } from "@workspace/api-client-react";
+import { useCreateProposal, useGenerateProposalContent } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,10 +49,29 @@ export default function NewProposal() {
   });
 
   const createProposal = useCreateProposal();
+  const generateContent = useGenerateProposalContent();
 
   const watched = form.watch();
   const isWebsite = watched.projectType === "web";
   const isProject = watched.projectType === "project";
+
+  const handleGenerate = async () => {
+    const values = form.getValues();
+    try {
+      const res = await generateContent.mutateAsync({
+        data: {
+          clientName: values.clientName,
+          businessName: values.businessName,
+          projectType: values.projectType,
+          specialContext: values.specialContext || undefined,
+        },
+      });
+      form.setValue("content", res.content);
+      toast({ title: "Generated", description: "AI intro content ready." });
+    } catch {
+      toast({ title: "Failed", description: "Could not generate content.", variant: "destructive" });
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -259,6 +278,36 @@ export default function NewProposal() {
                         <Textarea
                           placeholder="e.g. They've been struggling with low website traffic. Their current site is outdated and doesn't reflect the quality of their work. They've tried running Google Ads before but didn't see results..."
                           className="min-h-[100px] resize-y text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={generateContent.isPending}
+                  className="w-full"
+                >
+                  {generateContent.isPending
+                    ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    : <Sparkles className="w-4 h-4 mr-2" />}
+                  AI Generate Custom Intro
+                </Button>
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Generated Intro</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="AI-generated intro will appear here. You can also write or edit it manually."
+                          className="min-h-[120px] resize-y text-sm leading-relaxed"
                           {...field}
                         />
                       </FormControl>
