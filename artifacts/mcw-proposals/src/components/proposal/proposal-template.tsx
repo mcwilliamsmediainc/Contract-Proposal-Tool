@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Check, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Check, ArrowRight, Loader2, CheckCircle2, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/ui/signature-pad";
@@ -131,6 +131,56 @@ function StarRating() {
 }
 
 export function SocialProofSection() {
+  const [idx, setIdx] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [slideOffset, setSlideOffset] = useState(0);
+
+  useEffect(() => {
+    const measure = () => {
+      if (!trackRef.current) return;
+      const w = trackRef.current.offsetWidth;
+      const gap = 24;
+      const cardW = (w - gap) / 2;
+      setSlideOffset(cardW + gap);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  const testimonials = [
+    {
+      quote: "I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!",
+      author: "Greg Sutmiller",
+      company: "Evolution Mental Health",
+      img: evolutionSiteImg,
+      alt: "Evolution Mental Health website",
+    },
+    {
+      quote: "I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well.",
+      author: "Sunni Petty",
+      company: "Petty Family Floors",
+      img: pettyFloorsSiteImg,
+      alt: "Petty Family Floors website",
+    },
+    {
+      quote: "They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!",
+      author: "Alyssa Hobbs",
+      company: "Hobbs Salon + Med Spa",
+      img: hobbsSiteImg,
+      alt: "Hobbs Salon + Med Spa website",
+    },
+  ];
+
+  const maxIdx = testimonials.length - 2;
+  const cardStyle: React.CSSProperties = {
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    backdropFilter: "blur(10px)",
+    flexShrink: 0,
+    width: slideOffset ? slideOffset - 24 : "calc(50% - 12px)",
+  };
+
   return (
     <section
       id="section-social-proof"
@@ -139,7 +189,7 @@ export function SocialProofSection() {
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-14">
           <p className="text-sm font-semibold uppercase tracking-widest text-blue-300 mb-3">Real Results</p>
           <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             What Our Clients Say
@@ -154,107 +204,82 @@ export function SocialProofSection() {
           <p className="text-blue-300 text-sm mt-2">Trusted by businesses across the country</p>
         </div>
 
-        {/* Featured testimonial — full width hero card */}
-        <div className="relative rounded-2xl overflow-hidden mb-6"
-          style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(10px)" }}>
-          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] items-stretch">
-            {/* Website screenshot */}
-            <div className="flex flex-col overflow-hidden">
-              {/* Browser chrome bar — sits above the image, not over it */}
-              <div className="flex-shrink-0 h-7 flex items-center gap-1.5 px-3"
-                style={{ background: "rgba(0,0,0,0.55)" }}>
-                <span className="w-2.5 h-2.5 rounded-full bg-red-400/90" />
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/90" />
-                <span className="w-2.5 h-2.5 rounded-full bg-green-400/90" />
+        {/* Carousel track */}
+        <div ref={trackRef} className="overflow-hidden">
+          <div
+            className="flex gap-6 transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${idx * slideOffset}px)` }}
+          >
+            {testimonials.map((t, i) => (
+              <div key={i} className="rounded-2xl p-7 flex flex-col" style={cardStyle}>
+                <StarRating />
+                <div className="text-white/15 text-6xl leading-none font-serif mb-1 -mt-2 select-none">"</div>
+                <blockquote
+                  className="text-white text-base md:text-lg leading-relaxed font-medium flex-1 -mt-3"
+                  style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+                >
+                  {t.quote}
+                </blockquote>
+                <div className="mt-auto">
+                  <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-3">
+                    <div className="w-6 h-px bg-blue-400" />
+                    <div>
+                      <p className="text-blue-300 font-semibold text-sm">{t.author}</p>
+                      <p className="text-blue-200/60 text-xs">{t.company}</p>
+                    </div>
+                  </div>
+                  <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
+                    <div className="h-5 flex items-center gap-1 px-2.5" style={{ background: "rgba(0,0,0,0.5)" }}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-red-400/80" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/80" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-400/80" />
+                    </div>
+                    <img src={t.img} alt={t.alt} className="w-full h-44 object-cover object-top" />
+                  </div>
+                </div>
               </div>
-              <div className="flex-1 min-h-[240px] lg:min-h-0">
-                <img
-                  src={evolutionSiteImg}
-                  alt="Evolution Mental Health website"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-            </div>
-
-            {/* Quote content */}
-            <div className="p-8 lg:p-10 flex flex-col justify-center">
-              <StarRating />
-              <div className="text-white/20 text-8xl leading-none font-serif mb-2 -mt-4 select-none">"</div>
-              <blockquote
-                className="text-white text-xl md:text-2xl leading-relaxed font-medium -mt-6"
-                style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-              >
-                I am very pleased with the finished product of my website! Every member of the team was easily accessible and incredibly responsive. They were great to work with. I highly recommend McWilliams Media to anyone wanting to create or improve a website!
-              </blockquote>
-              <div className="mt-6 pt-5 border-t border-white/10 flex items-center gap-3">
-                <div className="w-8 h-px bg-blue-400" />
-                <p className="text-blue-300 font-semibold">Greg Sutmiller</p>
-                <span className="text-white/30 text-sm">·</span>
-                <p className="text-blue-200/70 text-sm">Evolution Mental Health</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
-        {/* Two smaller cards side by side */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 2 */}
-          <div className="rounded-2xl p-7 flex flex-col"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}>
-            <StarRating />
-            <div className="text-white/15 text-6xl leading-none font-serif mb-1 -mt-2 select-none">"</div>
-            <blockquote
-              className="text-white text-base md:text-lg leading-relaxed font-medium flex-1 -mt-3"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-            >
-              I am just SO VERY OBSESSED with the new logo and website. I cannot tell you how much I love it!!!! Your team put so much time, energy and HEART into capturing our family business and telling our story so well.
-            </blockquote>
-            <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-3">
-              <div className="w-6 h-px bg-blue-400" />
-              <div>
-                <p className="text-blue-300 font-semibold text-sm">Sunni Petty</p>
-                <p className="text-blue-200/60 text-xs">Petty Family Floors</p>
-              </div>
-            </div>
-            <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
-              <div className="h-5 flex items-center gap-1 px-2.5"
-                style={{ background: "rgba(0,0,0,0.5)" }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400/80" />
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/80" />
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400/80" />
-              </div>
-              <img src={pettyFloorsSiteImg} alt="Petty Family Floors website" className="w-full h-40 object-cover object-top" />
-            </div>
+        {/* Navigation */}
+        <div className="flex items-center justify-between mt-8">
+          <button
+            onClick={() => setIdx(i => Math.max(0, i - 1))}
+            disabled={idx === 0}
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.18)" }}
+            aria-label="Previous"
+          >
+            <ChevronLeft className="w-5 h-5 text-white" />
+          </button>
+
+          {/* Dot indicators */}
+          <div className="flex gap-2.5 items-center">
+            {Array.from({ length: maxIdx + 1 }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setIdx(i)}
+                className="rounded-full transition-all duration-300"
+                style={{
+                  width: idx === i ? 24 : 8,
+                  height: 8,
+                  background: idx === i ? "rgba(255,255,255,0.9)" : "rgba(255,255,255,0.3)",
+                }}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
           </div>
 
-          {/* Card 3 */}
-          <div className="rounded-2xl p-7 flex flex-col"
-            style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.10)" }}>
-            <StarRating />
-            <div className="text-white/15 text-6xl leading-none font-serif mb-1 -mt-2 select-none">"</div>
-            <blockquote
-              className="text-white text-base md:text-lg leading-relaxed font-medium flex-1 -mt-3"
-              style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-            >
-              They have taken my business to the next level. First impression is everything and with the design of our website they helped us showcase our business better than ever. The team goes above and beyond!
-            </blockquote>
-            <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-3">
-              <div className="w-6 h-px bg-blue-400" />
-              <div>
-                <p className="text-blue-300 font-semibold text-sm">Alyssa Hobbs</p>
-                <p className="text-blue-200/60 text-xs">Hobbs Salon + Med Spa</p>
-              </div>
-            </div>
-            <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
-              <div className="h-5 flex items-center gap-1 px-2.5"
-                style={{ background: "rgba(0,0,0,0.5)" }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400/80" />
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/80" />
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400/80" />
-              </div>
-              <img src={hobbsSiteImg} alt="Hobbs Salon + Med Spa website" className="w-full h-40 object-cover object-top" />
-            </div>
-          </div>
+          <button
+            onClick={() => setIdx(i => Math.min(maxIdx, i + 1))}
+            disabled={idx === maxIdx}
+            className="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed"
+            style={{ background: "rgba(255,255,255,0.10)", border: "1px solid rgba(255,255,255,0.18)" }}
+            aria-label="Next"
+          >
+            <ChevronRight className="w-5 h-5 text-white" />
+          </button>
         </div>
       </div>
     </section>
