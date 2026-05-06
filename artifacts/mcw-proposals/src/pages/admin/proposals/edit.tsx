@@ -29,7 +29,7 @@ const formSchema = z.object({
   clientName: z.string().min(1),
   businessName: z.string().min(1),
   clientEmail: z.string().email(),
-  projectType: z.enum(["web", "marketing", "print", "tiered", "ala-carte"]),
+  projectType: z.enum(["web", "tiered", "ala-carte", "marketing", "print"]),
   clientStrategist: z.string().optional(),
   totalAmount: z.coerce.number().min(0).optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
@@ -43,7 +43,7 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Panel = "client" | "pages" | "content" | "pricing" | "settings" | null;
+type Panel = "client" | "content" | "pricing" | "settings" | null;
 
 function SlidePanel({ open, onClose, title, children, onSave, saving }: {
   open: boolean; onClose: () => void; title: string;
@@ -260,7 +260,6 @@ export default function EditProposal() {
   const isAlaCarte = watched.projectType === "ala-carte";
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
-    ...(!isTiered && !isAlaCarte ? [{ panel: "pages" as Panel, label: "Edit Pages", icon: Layout }] : []),
     { panel: "content", label: "Intro Text", icon: FileText },
     { panel: "pricing", label: "Pricing", icon: DollarSign },
     { panel: "settings", label: "Settings", icon: ExternalLink },
@@ -462,10 +461,8 @@ export default function EditProposal() {
                   <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                   <SelectContent>
                     <SelectItem value="web">Website</SelectItem>
-                    <SelectItem value="marketing">Marketing</SelectItem>
-                    <SelectItem value="print">Print</SelectItem>
                     <SelectItem value="tiered">Tiered Marketing</SelectItem>
-                    <SelectItem value="ala-carte">Ala Carte Marketing</SelectItem>
+                    <SelectItem value="ala-carte">A La Carte Marketing</SelectItem>
                   </SelectContent>
                 </Select>
               </FormItem>
@@ -486,32 +483,6 @@ export default function EditProposal() {
         </Form>
       </SlidePanel>
 
-      {/* ── PAGES PANEL ── */}
-      <SlidePanel open={activePanel === "pages"} onClose={() => setActivePanel(null)} title="Web Pages" onSave={savePanel} saving={saving}>
-        <Form {...form}>
-          <div className="space-y-6">
-            <FormField control={form.control} name="numberOfPages" render={({ field }) => (
-              <FormItem>
-                <FormLabel>Number of Pages</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number" min={1} placeholder="e.g. 5"
-                    value={field.value ?? ""}
-                    onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
-                  />
-                </FormControl>
-                <p className="text-xs text-gray-500">This drives the page count and pricing in the proposal.</p>
-              </FormItem>
-            )} />
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Page Names</label>
-              <Controller control={form.control} name="pageNames" render={({ field }) => (
-                <PageChips value={field.value || ""} onChange={field.onChange} />
-              )} />
-            </div>
-          </div>
-        </Form>
-      </SlidePanel>
 
       {/* ── INTRO CONTENT PANEL ── */}
       <SlidePanel open={activePanel === "content"} onClose={() => setActivePanel(null)} title="Intro / Thank You Text" onSave={savePanel} saving={saving}>
