@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, CheckCircle2, FileSignature, Lock, CreditCard } from "lucide-react";
+import { Loader2, CheckCircle2, FileSignature, Lock, CreditCard, ShieldCheck, Eye, Trash2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import SignatureCanvas from "react-signature-canvas";
 import { PublicHeader } from "@/components/layout/public-header";
@@ -49,6 +49,7 @@ export default function ContractPortal() {
   const [accountNumber, setAccountNumber] = useState("");
   const [accountType, setAccountType] = useState("checking");
   const [achErrors, setAchErrors] = useState<Record<string, string>>({});
+  const [achAuthorized, setAchAuthorized] = useState(false);
 
   if (isLoading) {
     return (
@@ -108,6 +109,7 @@ export default function ContractPortal() {
     if (!bankName.trim()) errs.bankName = "Bank name is required";
     if (!/^\d{9}$/.test(routingNumber.trim())) errs.routingNumber = "Routing number must be 9 digits";
     if (!/^\d{4,17}$/.test(accountNumber.trim())) errs.accountNumber = "Account number must be 4–17 digits";
+    if (!achAuthorized) errs.achAuthorized = "You must authorize the ACH debit to continue";
     return errs;
   };
 
@@ -257,25 +259,54 @@ export default function ContractPortal() {
             <div className="bg-[#061e57] px-8 py-5 text-white">
               <h2 className="text-lg font-bold uppercase tracking-wide flex items-center gap-2">
                 <CreditCard className="w-5 h-5" />
-                Payment Information
+                ACH Payment Authorization
               </h2>
-              <p className="text-blue-200 text-sm mt-1">Your contract is signed — submit ACH details to get started</p>
+              <p className="text-blue-200 text-sm mt-1">Your contract is signed — authorize your deposit to get started</p>
             </div>
 
-            <div className="px-8 py-6">
-              <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div className="px-8 py-6 space-y-6">
+
+              {/* Signed success banner */}
+              <div className="flex items-start gap-3 bg-green-50 border border-green-200 rounded-lg p-4">
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold text-green-900 text-sm">Agreement signed successfully!</p>
-                  <p className="text-green-700 text-sm mt-0.5">Please provide your ACH bank details below so we can collect your deposit of <strong>${Number(contract.depositAmount).toLocaleString()}</strong> and get your project started.</p>
+                  <p className="text-green-700 text-sm mt-0.5">Please provide your ACH bank details below to authorize your deposit of <strong>${Number(contract.depositAmount).toLocaleString()}</strong> and get your project underway.</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 mb-6">
-                <Lock className="w-3.5 h-3.5 shrink-0" />
-                <span>Your banking information is transmitted securely and is never stored on our servers. It is sent directly to our team for one-time ACH processing.</span>
+              {/* Security & Compliance Disclosure */}
+              <div className="border border-[#b3cee1] rounded-xl overflow-hidden">
+                <div className="bg-[#eef4f9] px-5 py-3 flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4 text-[#061e57]" />
+                  <span className="text-sm font-semibold text-[#061e57] uppercase tracking-wide">Security &amp; Compliance</span>
+                </div>
+                <div className="px-5 py-4 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <Lock className="w-4 h-4 text-[#3a4856] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Encrypted Transmission (SSL/TLS)</p>
+                      <p className="text-xs text-gray-500 mt-0.5">This page is served over HTTPS. All data you enter is encrypted in transit between your browser and our server — it cannot be intercepted in plain text.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Trash2 className="w-4 h-4 text-[#3a4856] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Never Stored — Deleted After Processing</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Your banking details are <strong>not saved</strong> to our database. They are securely transmitted to our accounting team for a one-time ACH entry and then permanently deleted per our data retention policy.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Eye className="w-4 h-4 text-[#3a4856] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">NACHA Rules &amp; Limited Access</p>
+                      <p className="text-xs text-gray-500 mt-0.5">McWilliams Media handles ACH information in accordance with NACHA's Reasonable Security requirements. Access to your banking details is strictly limited to authorized personnel responsible for payment processing.</p>
+                    </div>
+                  </div>
+                </div>
               </div>
 
+              {/* Bank Details Form */}
               <div className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -344,6 +375,33 @@ export default function ContractPortal() {
                   {achErrors.accountNumber && <p className="text-red-500 text-xs mt-1">{achErrors.accountNumber}</p>}
                 </div>
               </div>
+
+              {/* ACH Authorization (NACHA-required) */}
+              <div className={`border-2 rounded-xl p-5 transition-colors ${achErrors.achAuthorized ? "border-red-400 bg-red-50" : achAuthorized ? "border-[#061e57] bg-[#eef4f9]" : "border-gray-200 bg-gray-50"}`}>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={achAuthorized}
+                    onChange={(e) => {
+                      setAchAuthorized(e.target.checked);
+                      if (e.target.checked && achErrors.achAuthorized) {
+                        setAchErrors((prev) => { const n = {...prev}; delete n.achAuthorized; return n; });
+                      }
+                    }}
+                    className="mt-0.5 w-4 h-4 rounded border-gray-300 accent-[#061e57] shrink-0"
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800 mb-1">ACH Debit Authorization</p>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      By checking this box, I, <strong>{contract.clientName}</strong>, authorize <strong>McWilliams Media Inc.</strong> to initiate a one-time ACH debit of <strong>${Number(contract.depositAmount).toLocaleString()}</strong> from the bank account provided above. I understand this deposit is non-refundable per the signed Development Agreement. I may revoke this authorization at any time by contacting{" "}
+                      <a href="mailto:info@mcwilliamsmedia.com" className="text-[#061e57] underline">info@mcwilliamsmedia.com</a>{" "}
+                      before the transaction is processed.
+                    </p>
+                  </div>
+                </label>
+                {achErrors.achAuthorized && <p className="text-red-600 text-xs mt-2 ml-7">{achErrors.achAuthorized}</p>}
+              </div>
+
             </div>
 
             <div className="px-8 py-5 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -362,7 +420,7 @@ export default function ContractPortal() {
                 {achLoading ? (
                   <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
                 ) : (
-                  <><Lock className="w-4 h-4 mr-2" /> Submit Payment Info</>
+                  <><Lock className="w-4 h-4 mr-2" /> Authorize &amp; Submit</>
                 )}
               </Button>
             </div>

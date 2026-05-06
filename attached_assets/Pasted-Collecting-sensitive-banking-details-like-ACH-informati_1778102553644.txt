@@ -1,0 +1,38 @@
+Collecting sensitive banking details like ACH information (routing and account numbers) requires a high level of trust and technical security, even if you aren't processing the actual transaction on-site. Since you are acting as a "pass-through" for this data, your website becomes a high-value target.
+
+To protect your clients and mitigate your own liability, you should implement the following security measures and disclosures:
+
+1. Data Encryption and Transport
+SSL/TLS Certificate: This is non-negotiable. Your site must use HTTPS to ensure that data is encrypted while traveling from the client’s browser to your server.
+
+Encryption at Rest: If you are storing this data—even temporarily—before manually entering it into your processor, it must be encrypted in your database using strong industry standards (like AES-256).
+
+2. Secure Intake Methods
+Avoid Standard Web Forms: Never use basic contact forms or unencrypted plugins to collect bank details. These often store data in plain text or send it via unsecure email notifications.
+
+Client Portals: Use a secure, authenticated portal where clients must log in to submit information.
+
+Third-Party Vaults: Consider using a "tokenization" service or a secure form provider (like JotForm or Typeform with HIPAA/PCI compliance levels) that specializes in secure data collection.
+
+3. Required Security Documentation
+You should clearly link to or display the following on your intake page:
+
+Privacy Policy: Explicitly state how the data is used, who has access to it, and how long it is retained.
+
+Data Retention Policy: Inform clients that their sensitive data is deleted from your web server immediately after being transferred to the payment processor.
+
+Compliance Logos: Displaying trust badges (like SSL certificates or PCI-DSS compliance markers) can help build confidence, provided they are legitimate.
+
+4. Regulatory Compliance
+NACHA Compliance: Since you are handling ACH data, you must adhere to NACHA (National Auchorized Clearing House Association) rules. This includes "Reasonable Security" requirements for protecting the transmission and storage of banking information.
+
+PCI-DSS: While ACH isn't credit card data, following PCI standards is the gold standard for any financial data handling.
+
+5. Clear Authorization
+You must obtain a signed ACH Authorization. This is a legal requirement that must include:
+
+The client's explicit permission to store and use the data.
+
+The frequency of payments (even if handled elsewhere).
+
+A clear process for how the client can revoke that authorization.
