@@ -39,7 +39,9 @@ import {
   Link2,
   ClipboardCheck,
   GripVertical,
+  Sparkles,
 } from "lucide-react";
+import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { format } from "date-fns";
 import { useState, KeyboardEvent } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -470,6 +472,7 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
   const [newTaskLabel, setNewTaskLabel] = useState("");
   const [adding, setAdding] = useState(false);
   const [localOrder, setLocalOrder] = useState<number[] | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const { data: tasks, isLoading: loadingTasks } = useListOnboardingTasks(client.id, {
     query: { queryKey: getListOnboardingTasksQueryKey(client.id) },
@@ -601,6 +604,13 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
               </div>
             </div>
             <button
+              onClick={() => setReviewOpen(true)}
+              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground/40 hover:text-violet-600 transition-all"
+              title="AI Review"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+            </button>
+            <button
               onClick={handleDeleteClient}
               className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground/40 hover:text-red-500 transition-all"
               title="Remove onboarding"
@@ -702,6 +712,22 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
           </button>
         </div>
       </div>
+
+      <AiReviewDrawer
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        reviewType="onboarding"
+        title={`${client.clientName} — Onboarding Review`}
+        data={{
+          clientName: client.clientName,
+          businessName: client.businessName,
+          services: client.services,
+          clientStrategist: client.clientStrategist,
+          status: client.status,
+          createdAt: client.createdAt,
+          tasks: (tasks ?? []).map(t => ({ label: t.label, completed: t.completed })),
+        }}
+      />
     </div>
   );
 }

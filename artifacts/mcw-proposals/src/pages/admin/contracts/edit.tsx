@@ -30,9 +30,10 @@ import {
 } from "@/components/ui/select";
 import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, Eye, CheckCircle2, Rocket } from "lucide-react";
+import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 
@@ -61,6 +62,8 @@ export default function EditContract() {
   const id = params?.id || "";
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const { data: contract, isLoading } = useGetContract(id, {
     query: { enabled: !!id, queryKey: getGetContractQueryKey(id) },
@@ -163,6 +166,14 @@ export default function EditContract() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setReviewOpen(true)}
+            className="border-violet-200 text-violet-700 hover:bg-violet-50"
+          >
+            <Sparkles className="w-4 h-4 mr-2" />
+            AI Review
+          </Button>
           <Button
             variant="outline"
             onClick={() => window.open(`/contract/${id}`, "_blank")}
@@ -274,6 +285,22 @@ export default function EditContract() {
           </form>
         </Form>
       </div>
+      <AiReviewDrawer
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        reviewType="contract"
+        data={{
+          clientName: contract.clientName,
+          businessName: contract.businessName,
+          contractType: contract.contractType,
+          totalCost: contract.totalCost,
+          depositAmount: contract.depositAmount,
+          remainingBalance: contract.remainingBalance,
+          hostingOption: contract.hostingOption,
+          scheduleA: contract.scheduleA,
+          status: contract.status,
+        }}
+      />
     </AdminLayout>
   );
 }

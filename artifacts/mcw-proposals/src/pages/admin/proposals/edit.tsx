@@ -19,6 +19,7 @@ import { Controller } from "react-hook-form";
 import { FullProposalTemplate, PricingLineItem } from "@/components/proposal/proposal-template";
 import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
 import { AlaCarteMarketingTemplate } from "@/components/proposal/ala-carte-marketing-template";
+import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { cn } from "@/lib/utils";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
@@ -218,6 +219,7 @@ export default function EditProposal() {
   };
 
   const [linkCopied, setLinkCopied] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const handleCopyLink = async () => {
     try {
@@ -348,6 +350,14 @@ export default function EditProposal() {
             >
               <Download className="w-3.5 h-3.5" />
               PDF
+            </button>
+            <button
+              onClick={() => setReviewOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide bg-violet-600 hover:bg-violet-700 text-white transition-all"
+              title="AI Review"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              AI Review
             </button>
             {confirmDelete ? (
               <span className="flex items-center gap-1.5">
@@ -754,6 +764,24 @@ export default function EditProposal() {
         </Form>
       </SlidePanel>
 
+      <AiReviewDrawer
+        open={reviewOpen}
+        onClose={() => setReviewOpen(false)}
+        reviewType="proposal"
+        data={{
+          clientName: watched.clientName || proposal.clientName,
+          businessName: watched.businessName || proposal.businessName,
+          projectType: watched.projectType || proposal.projectType,
+          totalAmount: watched.totalAmount ?? proposal.totalAmount,
+          content: watched.content || proposal.content,
+          specialContext: watched.specialContext || proposal.specialContext,
+          numberOfPages: watched.numberOfPages || proposal.numberOfPages,
+          pageNames: watched.pageNames || proposal.pageNames,
+          status: proposal.status,
+          selectedTier: proposal.selectedTier,
+          clientStrategist: watched.clientStrategist || proposal.clientStrategist,
+        }}
+      />
     </div>
   );
 }

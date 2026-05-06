@@ -188,6 +188,163 @@ router.post("/gemini/conversations/:id/messages", async (req, res) => {
   res.end();
 });
 
+// ── AI Review — context-aware streaming analysis ──────────────────────────────
+
+router.post("/gemini/review", async (req, res) => {
+  const { type, data } = req.body as {
+    type: "proposal" | "contract" | "onboarding";
+    data: Record<string, unknown>;
+  };
+
+  if (!type || !data) {
+    res.status(400).json({ error: "type and data are required" });
+    return;
+  }
+
+  let prompt = "";
+
+  if (type === "proposal") {
+    const p = data as {
+      clientName?: string; businessName?: string; projectType?: string;
+      totalAmount?: number; content?: string; specialContext?: string;
+      numberOfPages?: number; pageNames?: string; status?: string;
+      selectedTier?: string; clientStrategist?: string;
+    };
+    prompt = `You are a senior strategist at McWilliams Media reviewing a client proposal before it's sent. Be specific, actionable, and concise. Use markdown with headers.
+
+Review this proposal and provide:
+
+## Overall Impression
+Is this proposal strong? What's the first thing a client would feel reading it?
+
+## Content Quality
+Evaluate the writing — is it compelling, professional, and persuasive? Quote specific weak phrases if any.
+
+## Completeness
+Any missing sections, empty fields, or important gaps?
+
+## Value Proposition
+Does it clearly communicate why McWilliams Media is the right choice for this specific client?
+
+## Action Items
+List 2–4 specific improvements to make before sending.
+
+---
+**Proposal Data:**
+- Client: ${p.clientName ?? "Unknown"} at ${p.businessName ?? "Unknown"}
+- Project Type: ${p.projectType ?? "Unknown"}
+- Total Amount: $${p.totalAmount ?? 0}
+- Status: ${p.status ?? "draft"}
+- Strategist: ${p.clientStrategist ?? "Unassigned"}
+${p.selectedTier ? `- Selected Tier: ${p.selectedTier}` : ""}
+${p.numberOfPages ? `- Pages: ${p.numberOfPages}${p.pageNames ? ` (${p.pageNames})` : ""}` : ""}
+${p.specialContext ? `\n**Special Context:**\n${p.specialContext}` : ""}
+${p.content ? `\n**Proposal Content:**\n${p.content}` : "\n*(No content written yet)*"}`;
+  } else if (type === "contract") {
+    const c = data as {
+      clientName?: string; businessName?: string; contractType?: string;
+      totalCost?: number; depositAmount?: number; remainingBalance?: number;
+      hostingOption?: string; scheduleA?: string; status?: string;
+    };
+    prompt = `You are a senior strategist at McWilliams Media reviewing a client contract before it's sent. Be specific and practical. Use markdown with headers.
+
+Review this contract and provide:
+
+## Completeness
+Is all required information filled in? Note any blank or suspicious fields.
+
+## Scope of Work (Schedule A)
+Is the project scope clear, comprehensive, and specific enough to protect both parties?
+
+## Financial Terms
+Do the numbers make sense? Deposit, total cost, remaining balance — any concerns?
+
+## Risk Flags
+Any unclear terms, missing clauses, or potential issues?
+
+## Readiness
+Is this contract ready to send, or does it need work first?
+
+---
+**Contract Data:**
+- Client: ${c.clientName ?? "Unknown"} at ${c.businessName ?? "Unknown"}
+- Type: ${c.contractType ?? "Unknown"}
+- Total: $${c.totalCost ?? 0} | Deposit: $${c.depositAmount ?? 0} | Remaining: $${c.remainingBalance ?? 0}
+- Hosting: ${c.hostingOption ?? "none"}
+- Status: ${c.status ?? "draft"}
+${c.scheduleA ? `\n**Schedule A — Scope of Work:**\n${c.scheduleA}` : "\n*(No scope of work written yet)*"}`;
+  } else if (type === "onboarding") {
+    const o = data as {
+      clientName?: string; businessName?: string; services?: string[];
+      clientStrategist?: string; status?: string; createdAt?: string;
+      tasks?: Array<{ label: string; completed: boolean }>;
+    };
+    const tasks = o.tasks ?? [];
+    const done = tasks.filter(t => t.completed);
+    const pending = tasks.filter(t => !t.completed);
+    prompt = `You are a senior strategist at McWilliams Media reviewing an active client onboarding. Be direct and practical. Use markdown with headers.
+
+Review this onboarding and provide:
+
+## Progress Summary
+Where is this client in the onboarding process? Is the pace on track?
+
+## Blockers & Risks
+Which pending tasks are most critical? Any red flags?
+
+## Next Priority
+What single action should the strategist take today?
+
+## Client Experience
+Based on what's completed and pending, is this client likely having a positive onboarding experience?
+
+## Recommendations
+2–3 specific actions to keep this onboarding moving smoothly.
+
+---
+**Onboarding Data:**
+- Client: ${o.clientName ?? "Unknown"} at ${o.businessName ?? "Unknown"}
+- Services: ${(o.services ?? []).join(", ") || "None"}
+- Strategist: ${o.clientStrategist ?? "Unassigned"}
+- Started: ${o.createdAt ? new Date(o.createdAt).toLocaleDateString() : "Unknown"}
+- Progress: ${done.length}/${tasks.length} tasks complete
+
+**Completed Tasks:**
+${done.length > 0 ? done.map(t => `✓ ${t.label}`).join("\n") : "*(none)*"}
+
+**Pending Tasks:**
+${pending.length > 0 ? pending.map(t => `○ ${t.label}`).join("\n") : "*(none)*"}`;
+  } else {
+    res.status(400).json({ error: "Invalid review type" });
+    return;
+  }
+
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
+  try {
+    const stream = await ai.models.generateContentStream({
+      model: "gemini-3-flash-preview",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: { maxOutputTokens: 4096 },
+    });
+
+    for await (const chunk of stream) {
+      const text = chunk.text;
+      if (text) {
+        res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
+      }
+    }
+  } catch (err) {
+    req.log.error({ err }, "AI review generation failed");
+    res.write(`data: ${JSON.stringify({ content: "\n\n*Review failed — please try again.*" })}\n\n`);
+  }
+
+  res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+  res.end();
+});
+
 router.post("/gemini/generate-image", async (req, res) => {
   const parsed = GenerateGeminiImageBody.safeParse(req.body);
   if (!parsed.success) {
