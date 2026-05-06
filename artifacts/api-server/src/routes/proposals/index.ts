@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, desc, asc } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable } from "@workspace/db";
+import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable, contractsTable } from "@workspace/db";
 import {
   CreateProposalBody,
   UpdateProposalBody,
@@ -113,6 +113,83 @@ async function seedDefaultTasks(proposalUuid: string) {
     completed: false,
   }));
   await db.insert(onboardingTasksTable).values(tasks);
+}
+
+function mapContractType(projectType: string): "website" | "marketing" | "print" {
+  if (projectType === "web") return "website";
+  if (projectType === "marketing" || projectType === "tiered" || projectType === "ala-carte") return "marketing";
+  if (projectType === "print") return "print";
+  return "website";
+}
+
+function mapHostingOption(selectedTier: string | null | undefined): "none" | "basic" | "platinum" {
+  if (selectedTier === "gold") return "basic";
+  if (selectedTier === "platinum") return "platinum";
+  return "none";
+}
+
+function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
+  const total = Number(p.totalAmount ?? 0);
+  const formatted = total.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
+
+  if (p.projectType === "web") {
+    const pages = p.numberOfPages ?? 5;
+    const pageList = p.pageNames
+      ? p.pageNames.split("|").map((pg) => pg.trim()).join(", ")
+      : "Home, About, Services, Contact";
+    return [
+      `Website Design & Development — ${pages}-Page WordPress Website`,
+      "",
+      `Pages: ${pageList}`,
+      "",
+      "Deliverables:",
+      "• Mobile-responsive design built on WordPress",
+      "• Content integration and proofing",
+      "• Google Analytics & Search Console setup",
+      "• Social media links and contact form integration",
+      "• Screen-recorded backend training session",
+      "• Privacy Policy, Terms & Conditions, and Site Map pages",
+      "",
+      `Total Investment: ${formatted}`,
+      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
+    ].filter((l) => l !== undefined).join("\n").trimEnd();
+  }
+
+  if (p.projectType === "tiered") {
+    const tier = p.selectedTier ?? "selected";
+    return [
+      `Monthly Marketing Retainer — ${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
+      "",
+      "Services include ongoing digital marketing strategy and execution as detailed in the accepted proposal.",
+      "",
+      `Total Investment: ${formatted}/month`,
+      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
+    ].filter((l) => l !== undefined).join("\n").trimEnd();
+  }
+
+  if (p.projectType === "ala-carte" || p.projectType === "marketing") {
+    return [
+      "Monthly Marketing Services — Ala Carte Package",
+      "",
+      "Services selected by client as outlined in the accepted proposal.",
+      "",
+      `Total Investment: ${formatted}/month`,
+      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
+    ].filter((l) => l !== undefined).join("\n").trimEnd();
+  }
+
+  if (p.projectType === "print") {
+    return [
+      "Print & Brand Design Services",
+      "",
+      "Design deliverables as outlined in the accepted proposal.",
+      "",
+      `Total Investment: ${formatted}`,
+      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
+    ].filter((l) => l !== undefined).join("\n").trimEnd();
+  }
+
+  return `Services as outlined in the accepted proposal.\n\nTotal Investment: ${formatted}`;
 }
 
 router.get("/proposals/generate", (req, res) => {
@@ -484,6 +561,40 @@ router.post("/proposals/:id/accept", async (req, res) => {
     .limit(1);
   if (existingTasks.length === 0) {
     await seedDefaultTasks(onboardingId);
+  }
+
+  // Auto-create contract from proposal (idempotent — keyed by proposalId)
+  const existingContract = await db
+    .select({ uuid: contractsTable.uuid })
+    .from(contractsTable)
+    .where(eq(contractsTable.proposalId, id))
+    .limit(1);
+
+  if (existingContract.length === 0) {
+    const total = Number(updated.totalAmount ?? 0);
+    const deposit = Math.round(total * 0.5 * 100) / 100;
+    const remaining = Math.round((total - deposit) * 100) / 100;
+
+    const [newContract] = await db.insert(contractsTable).values({
+      uuid: randomUUID(),
+      proposalId: id,
+      clientName: updated.clientName,
+      businessName: updated.businessName,
+      clientEmail: updated.clientEmail,
+      contractType: mapContractType(updated.projectType),
+      totalCost: String(total),
+      depositAmount: String(deposit),
+      remainingBalance: String(remaining),
+      hostingOption: mapHostingOption(updated.selectedTier),
+      scheduleA: buildScheduleA(updated),
+      status: "draft",
+    }).returning();
+
+    // Link contract to onboarding client
+    await db
+      .update(onboardingClientsTable)
+      .set({ contractId: newContract.uuid, updatedAt: new Date() })
+      .where(eq(onboardingClientsTable.uuid, onboardingId));
   }
 
   // Notify strategist of acceptance
