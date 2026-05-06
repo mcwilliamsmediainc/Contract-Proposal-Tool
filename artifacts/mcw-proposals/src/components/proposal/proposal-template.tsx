@@ -1019,12 +1019,18 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
               Investment of <strong>${totalAmount.toLocaleString()}</strong>.
             </p>
           )}
+          {onAccept && !selectedHosting && (
+            <div className="mb-5 flex items-center gap-2.5 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <span className="text-amber-500 text-base leading-none">↑</span>
+              <p className="text-sm text-amber-700 font-medium">Please select a hosting plan above before accepting.</p>
+            </div>
+          )}
           {onAccept && (
             <div className="no-print">
               <Button
                 onClick={onAccept}
                 disabled={disabled || isPending}
-                className="w-full h-14 bg-[#061e57] hover:bg-[#3a4856] text-white text-base font-bold rounded-xl"
+                className="w-full h-14 bg-[#061e57] hover:bg-[#3a4856] text-white text-base font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                   <span className="flex items-center gap-2">Accept Proposal <ArrowRight className="w-4 h-4" /></span>
@@ -1100,7 +1106,7 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
         totalAmount={Number(data.totalAmount) || 0}
         onAccept={onAccept ? () => onAccept(selectedHosting ?? undefined) : undefined}
         isPending={isPending}
-        disabled={false}
+        disabled={!selectedHosting}
         selectedHosting={selectedHosting}
       />
     </div>

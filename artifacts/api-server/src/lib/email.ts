@@ -61,9 +61,9 @@ function baseUrl() {
 
 function internalLayout(body: string) {
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
-      <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-        <h2 style="color: #d4af37; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
+    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
+      <div style="background: #061e57; padding: 24px 32px; border-radius: 8px 8px 0 0;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
       </div>
       <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e5e5e5; border-top: none;">
         ${body}
@@ -74,9 +74,9 @@ function internalLayout(body: string) {
 
 function clientLayout(body: string) {
   return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; background: #ffffff;">
-      <div style="background: #0a0a0a; padding: 28px 36px; border-radius: 8px 8px 0 0; text-align: center;">
-        <h2 style="color: #d4af37; margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase;">McWilliams Media</h2>
+    <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; background: #ffffff;">
+      <div style="background: #061e57; padding: 28px 36px; border-radius: 8px 8px 0 0; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase;">McWilliams Media</h2>
       </div>
       <div style="padding: 36px; border: 1px solid #e5e5e5; border-top: none; border-radius: 0 0 8px 8px;">
         ${body}
@@ -108,7 +108,7 @@ export async function sendProposalViewedEmail(opts: {
       <h3 style="margin: 0 0 16px; font-size: 18px;">Proposal Viewed</h3>
       <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> just opened their proposal for the first time.</p>
       <p style="margin: 0 0 24px; color: #666; font-size: 14px;">This is a great time to follow up!</p>
-      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Proposal in Dashboard</a>
+      <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Proposal in Dashboard</a>
     `),
   });
 }
@@ -137,7 +137,7 @@ export async function sendProposalAcceptedEmail(opts: {
       <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has accepted and signed their proposal.</p>
       ${tierNote}
       <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Onboarding tasks have been created automatically.</p>
-      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Open in Dashboard</a>
+      <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Open in Dashboard</a>
     `),
   });
 }
@@ -166,13 +166,13 @@ export async function sendProposalAcceptedClientEmail(opts: {
         We've received your signed proposal for <strong>${opts.businessName}</strong>. We're excited to get started and will be in touch shortly to kick things off.
       </p>
       ${tierNote}
-      <div style="background: #f5f5f5; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
-        <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.6;">
+      <div style="background: #eef4f9; border-left: 4px solid #b3cee1; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #3a4856; font-size: 14px; line-height: 1.6;">
           <strong>What happens next?</strong><br>
           Your dedicated strategist will reach out within 1–2 business days to schedule your kickoff call and walk you through the onboarding process.
         </p>
       </div>
-      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reply to your strategist directly or reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #d4af37;">info@mcwilliamsmedia.com</a>.</p>
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reply to your strategist directly or reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
     `),
   });
 }
@@ -199,7 +199,7 @@ export async function sendContractSignedEmail(opts: {
       <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has signed their contract.</p>
       <p style="margin: 0 0 8px;"><strong>Contract Type:</strong> ${opts.contractType}</p>
       <p style="margin: 0 0 24px;"><strong>Total:</strong> $${opts.totalCost.toLocaleString()}</p>
-      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Contracts</a>
+      <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Contracts</a>
     `),
   });
 }
@@ -230,13 +230,13 @@ export async function sendContractSignedClientEmail(opts: {
         <p style="margin: 0 0 8px; font-size: 14px; color: #444;"><strong>Total Investment:</strong> $${opts.totalCost.toLocaleString()}</p>
         <p style="margin: 0; font-size: 14px; color: #444;"><strong>Deposit Due:</strong> $${opts.depositAmount.toLocaleString()}</p>
       </div>
-      <div style="background: #f5f5f5; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
-        <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.6;">
+      <div style="background: #eef4f9; border-left: 4px solid #b3cee1; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #3a4856; font-size: 14px; line-height: 1.6;">
           <strong>Next steps:</strong><br>
           Your strategist will be in touch to confirm your deposit and schedule your project kickoff. Keep an eye on your inbox!
         </p>
       </div>
-      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #d4af37;">info@mcwilliamsmedia.com</a>.</p>
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
     `),
   });
 }
@@ -260,7 +260,7 @@ export async function sendOnboardingSubmittedEmail(opts: {
       <h3 style="margin: 0 0 16px; font-size: 18px;">Onboarding Form Submitted</h3>
       <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has completed and submitted their onboarding questionnaire.</p>
       <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Review their responses and begin onboarding.</p>
-      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Onboarding Pipeline</a>
+      <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Onboarding Pipeline</a>
     `),
   });
 }
@@ -283,13 +283,13 @@ export async function sendOnboardingSubmittedClientEmail(opts: {
       <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
         We've received your completed onboarding questionnaire for <strong>${opts.businessName}</strong>. Our team is reviewing your responses and will use them to make sure your project starts strong.
       </p>
-      <div style="background: #f5f5f5; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
-        <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.6;">
+      <div style="background: #eef4f9; border-left: 4px solid #b3cee1; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #3a4856; font-size: 14px; line-height: 1.6;">
           <strong>What's next:</strong><br>
           Your strategist will review your answers and reach out if they need any clarification before your project kicks off. You're all set!
         </p>
       </div>
-      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #d4af37;">info@mcwilliamsmedia.com</a>.</p>
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
     `),
   });
 }
