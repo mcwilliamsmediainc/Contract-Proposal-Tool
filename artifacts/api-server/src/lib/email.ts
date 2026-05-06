@@ -177,6 +177,78 @@ export async function sendProposalAcceptedClientEmail(opts: {
   });
 }
 
+// ── CLIENT: Contract Ready to Sign ────────────────────────────────────────────
+
+export async function sendContractReadyClientEmail(opts: {
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  contractUuid: string;
+  contractType: string;
+  totalCost: number;
+  depositAmount: number;
+}) {
+  if (!opts.clientEmail) return;
+
+  const signingUrl = `${baseUrl()}/contract/${opts.contractUuid}`;
+  const typeLabel = opts.contractType.charAt(0).toUpperCase() + opts.contractType.slice(1);
+
+  await send({
+    from: FROM_CLIENT,
+    to: [opts.clientEmail],
+    subject: `Your McWilliams Media contract is ready to sign`,
+    html: clientLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 22px; color: #0a0a0a;">Your contract is ready, ${opts.clientName}!</h3>
+      <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
+        Thank you for accepting your proposal. We've prepared your <strong>${typeLabel} Services Agreement</strong> for <strong>${opts.businessName}</strong>. Please review and sign it at your earliest convenience to lock in your project start date.
+      </p>
+      <div style="background: #f9f9fb; border: 1px solid #dde6f0; border-radius: 8px; padding: 20px 24px; margin: 0 0 28px;">
+        <p style="margin: 0 0 6px; font-size: 14px; color: #444;"><strong>Contract Type:</strong> ${typeLabel} Services Agreement</p>
+        <p style="margin: 0 0 6px; font-size: 14px; color: #444;"><strong>Total Investment:</strong> $${opts.totalCost.toLocaleString()}</p>
+        <p style="margin: 0; font-size: 14px; color: #444;"><strong>Deposit Due at Signing:</strong> $${opts.depositAmount.toLocaleString()}</p>
+      </div>
+      <div style="text-align: center; margin: 0 0 28px;">
+        <a href="${signingUrl}" style="background: #061e57; color: #ffffff; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; letter-spacing: 0.3px;">Review &amp; Sign Contract →</a>
+      </div>
+      <div style="background: #eef4f9; border-left: 4px solid #b3cee1; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #3a4856; font-size: 14px; line-height: 1.6;">
+          <strong>What happens next?</strong><br>
+          Once your contract is signed, your strategist will reach out to confirm your deposit and schedule your project kickoff call.
+        </p>
+      </div>
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reply to your strategist directly or reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
+    `),
+  });
+}
+
+// ── INTERNAL: Contract Ready to Sign ──────────────────────────────────────────
+
+export async function sendContractReadyInternalEmail(opts: {
+  clientName: string;
+  businessName: string;
+  contractUuid: string;
+  contractType: string;
+  totalCost: number;
+  clientStrategist?: string | null;
+}) {
+  const to = recipientsFor(opts.clientStrategist);
+  const adminUrl = `${baseUrl()}/admin/contracts/${opts.contractUuid}/edit`;
+  const typeLabel = opts.contractType.charAt(0).toUpperCase() + opts.contractType.slice(1);
+
+  await send({
+    from: FROM_INTERNAL,
+    to,
+    subject: `📄 Contract sent to ${opts.clientName} — ${opts.businessName}`,
+    html: internalLayout(`
+      <h3 style="margin: 0 0 16px; font-size: 18px;">Contract Ready to Sign</h3>
+      <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> accepted their proposal. A <strong>${typeLabel} Services Agreement</strong> has been generated and emailed to the client for signature.</p>
+      <p style="margin: 0 0 8px;"><strong>Total:</strong> $${opts.totalCost.toLocaleString()}</p>
+      <p style="margin: 0 0 24px; color: #666; font-size: 14px;">You'll receive another notification once the client signs.</p>
+      <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Review Contract in Dashboard</a>
+    `),
+  });
+}
+
 // ── INTERNAL: Contract Signed ─────────────────────────────────────────────────
 
 export async function sendContractSignedEmail(opts: {

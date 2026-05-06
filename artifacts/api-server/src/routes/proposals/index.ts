@@ -26,6 +26,8 @@ import {
   sendProposalViewedEmail,
   sendProposalAcceptedEmail,
   sendProposalAcceptedClientEmail,
+  sendContractReadyClientEmail,
+  sendContractReadyInternalEmail,
 } from "../../lib/email";
 
 const router = Router();
@@ -577,19 +579,21 @@ router.post("/proposals/:id/accept", async (req, res) => {
     const deposit = Math.round(total * 0.5 * 100) / 100;
     const remaining = Math.round((total - deposit) * 100) / 100;
 
+    const contractType = mapContractType(updated.projectType);
+
     const [newContract] = await db.insert(contractsTable).values({
       uuid: randomUUID(),
       proposalId: id,
       clientName: updated.clientName,
       businessName: updated.businessName,
       clientEmail: updated.clientEmail,
-      contractType: mapContractType(updated.projectType),
+      contractType,
       totalCost: String(total),
       depositAmount: String(deposit),
       remainingBalance: String(remaining),
       hostingOption: mapHostingOption(updated.selectedTier),
       scheduleA: buildScheduleA(updated),
-      status: "draft",
+      status: "sent",
     }).returning();
 
     // Link contract to onboarding client
@@ -597,6 +601,29 @@ router.post("/proposals/:id/accept", async (req, res) => {
       .update(onboardingClientsTable)
       .set({ contractId: newContract.uuid, updatedAt: new Date() })
       .where(eq(onboardingClientsTable.uuid, onboardingId));
+
+    // Email client: contract ready to sign
+    if (updated.clientEmail) {
+      sendContractReadyClientEmail({
+        clientName: updated.clientName,
+        businessName: updated.businessName ?? updated.clientName,
+        clientEmail: updated.clientEmail,
+        contractUuid: newContract.uuid,
+        contractType,
+        totalCost: total,
+        depositAmount: deposit,
+      }).catch(() => {});
+    }
+
+    // Email internal team: contract generated
+    sendContractReadyInternalEmail({
+      clientName: updated.clientName,
+      businessName: updated.businessName ?? updated.clientName,
+      contractUuid: newContract.uuid,
+      contractType,
+      totalCost: total,
+      clientStrategist: updated.clientStrategist,
+    }).catch(() => {});
   }
 
   // Notify strategist of acceptance
