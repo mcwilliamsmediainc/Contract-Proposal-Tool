@@ -24,7 +24,7 @@ function SidebarLogo({ collapsed }: { collapsed: boolean }) {
       {collapsed ? (
         <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: "#b3cee1", letterSpacing: ".04em", lineHeight: 1 }}>m</span>
       ) : (
-        <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-8 w-auto object-contain" />
+        <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-8 w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
       )}
     </div>
   );
@@ -115,7 +115,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className={cn("flex items-center px-5 border-b h-14", SIDEBAR_BORDER)}>
-          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-7 w-auto object-contain" />
+          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-7 w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
         </div>
         <nav className="flex-1 p-2 space-y-0.5 mt-2">
           <div className="text-[10px] font-semibold tracking-[0.15em] uppercase text-white/30 mb-2 px-3 pt-1">Strategic Portal</div>
