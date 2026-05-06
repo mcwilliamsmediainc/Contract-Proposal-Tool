@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useGetAdminProposal, useUpdateProposal, useDeleteProposal, useGenerateProposalContent, getGetAdminProposalQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
+import { useGetAdminProposal, useUpdateProposal, useDeleteProposal, getGetAdminProposalQueryKey, getListProposalsQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -180,7 +180,7 @@ export default function EditProposal() {
 
   const updateProposal = useUpdateProposal();
   const deleteProposal = useDeleteProposal();
-  const generateContent = useGenerateProposalContent();
+
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const handleDelete = async () => {
@@ -242,24 +242,6 @@ export default function EditProposal() {
       }
     } catch {
       toast({ title: "Error", description: "Could not copy link.", variant: "destructive" });
-    }
-  };
-
-  const handleGenerate = async () => {
-    const values = form.getValues();
-    try {
-      const res = await generateContent.mutateAsync({
-        data: {
-          clientName: values.clientName,
-          businessName: values.businessName,
-          projectType: values.projectType,
-          specialContext: values.specialContext,
-        }
-      });
-      form.setValue("content", res.content);
-      toast({ title: "Generated", description: "AI intro content ready." });
-    } catch {
-      toast({ title: "Failed", description: "Could not generate content.", variant: "destructive" });
     }
   };
 
@@ -535,10 +517,6 @@ export default function EditProposal() {
         <Form {...form}>
           <div className="space-y-4">
             <p className="text-sm text-gray-600">This text appears on page 2 of the proposal, after the cover. Leave blank to use the default McWilliams Media introduction.</p>
-            <Button type="button" variant="outline" size="sm" onClick={handleGenerate} disabled={generateContent.isPending} className="w-full">
-              {generateContent.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
-              AI Generate Custom Intro
-            </Button>
             <Controller control={form.control} name="content" render={({ field }) => (
               <Textarea
                 className="min-h-[280px] resize-y text-sm leading-relaxed"

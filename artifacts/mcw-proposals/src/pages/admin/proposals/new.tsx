@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProposal } from "@workspace/api-client-react";
+import { useCreateProposal, useGenerateProposalContent } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
 
@@ -58,8 +57,27 @@ export default function NewProposal() {
   });
 
   const createProposal = useCreateProposal();
+  const generateContent = useGenerateProposalContent();
 
   const watched = form.watch();
+
+  const handleGenerate = async () => {
+    const values = form.getValues();
+    try {
+      const res = await generateContent.mutateAsync({
+        data: {
+          clientName: values.clientName,
+          businessName: values.businessName,
+          projectType: values.projectType,
+          specialContext: values.specialContext,
+        },
+      });
+      form.setValue("content", res.content);
+      toast({ title: "Generated", description: "AI intro content ready." });
+    } catch {
+      toast({ title: "Failed", description: "Could not generate content.", variant: "destructive" });
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -287,26 +305,42 @@ export default function NewProposal() {
           {/* Content editor */}
           <Card className="bg-card/50 backdrop-blur border-border/50">
             <CardHeader className="pb-3">
-              <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Proposal Content</CardTitle>
+              <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Custom Intro Text</CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...form}>
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Write the proposal content here. You can edit this further after saving the draft..."
-                          className="min-h-[220px] resize-y font-mono text-sm"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground">This text appears on page 2 of the proposal. Leave blank to use the default McWilliams Media introduction.</p>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerate}
+                    disabled={generateContent.isPending}
+                    className="w-full"
+                  >
+                    {generateContent.isPending
+                      ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      : <Sparkles className="w-4 h-4 mr-2" />}
+                    AI Generate Custom Intro
+                  </Button>
+                  <FormField
+                    control={form.control}
+                    name="content"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Write a personalized introduction for this client, or click AI Generate above..."
+                            className="min-h-[200px] resize-y text-sm leading-relaxed"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </Form>
             </CardContent>
           </Card>
