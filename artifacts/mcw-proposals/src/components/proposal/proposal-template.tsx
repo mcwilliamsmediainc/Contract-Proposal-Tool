@@ -426,17 +426,309 @@ export function CustomProjectSection({ projectDetails }: { projectDetails?: stri
 export function TimelineSection() {
   return (
     <section className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
-      <div className="max-w-3xl mx-auto space-y-14">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Website Design Process</h2>
-          <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm bg-white p-4">
-            <img src={processImg} alt="Website Design Process" className="w-full h-auto" />
+      <div className="max-w-2xl mx-auto space-y-14">
+
+        {/* ── Design Process Card ── */}
+        <div className="bg-white rounded-2xl border border-gray-100 p-8 md:p-10" style={{ boxShadow: "0 2px 24px rgba(6,30,87,.08)" }}>
+
+          {/* Header */}
+          <div style={{ marginBottom: 28, paddingBottom: 18, borderBottom: "3px solid #061e57" }}>
+            <p style={{ fontSize: 10, fontWeight: 600, letterSpacing: ".18em", textTransform: "uppercase", color: "#3a4856", marginBottom: 6 }}>McWilliams Media</p>
+            <p style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 32, letterSpacing: ".05em", color: "#061e57" }}>Website Design Process</p>
           </div>
+
+          {/* ══ Phase 1 — Discovery ══ */}
+          <div className="mcw-phase-label" style={{ background: "#061e57" }}>
+            <svg className="mcw-phase-icon" viewBox="0 0 18 18" fill="none">
+              <circle cx="9" cy="9" r="7" stroke="#b3cee1" strokeWidth="1.4"/>
+              <path d="M6 9l2.5 2.5L12 7" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Phase 1 — Discovery
+          </div>
+
+          {/* Step 1 — Kick-off */}
+          <div className="mcw-step" style={{ animationDelay: ".06s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot">
+                <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <rect x="4" y="8" width="20" height="14" rx="2" stroke="#061e57" strokeWidth="1.6" fill="none"/>
+                  <line x1="14" y1="8" x2="14" y2="22" stroke="#061e57" strokeWidth="1.5"/>
+                  <circle cx="9"  cy="14" r="2.2" stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  <circle cx="19" cy="14" r="2.2" stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  <path d="M6 6.5L9 8M22 6.5L19 8"    stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  <path d="M7 19L5 22.5M21 19L23 22.5" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="mcw-connector"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">Project kick-off meeting</p>
+              <p className="mcw-step-desc">We sit down together to align on your goals, audience, timeline, and what success looks like for your new site.</p>
+              <span className="mcw-step-tag mcw-tag-note">You are here</span>
+            </div>
+          </div>
+
+          {/* Step 2 — Wireframe */}
+          <div className="mcw-step" style={{ animationDelay: ".14s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot">
+                <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <rect x="5" y="4" width="18" height="14" rx="2" stroke="#061e57" strokeWidth="1.6" fill="none"/>
+                  <line x1="9" y1="9"  x2="19" y2="9"  stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  <line x1="9" y1="12" x2="15" y2="12" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  <rect x="5" y="18" width="18" height="4.5" rx="1.5" stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  <line x1="14" y1="18" x2="14" y2="22.5" stroke="#061e57" strokeWidth="1.3"/>
+                </svg>
+              </div>
+              <div className="mcw-connector"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">Wireframe</p>
+              <p className="mcw-step-desc">We create a blueprint of your site — page layouts, navigation, and content structure — before any design begins.</p>
+              <span className="mcw-step-tag mcw-tag-days">Goal: 12 business days</span>
+            </div>
+          </div>
+
+          {/* Step 3 — Wireframe sent */}
+          <div className="mcw-step" style={{ animationDelay: ".22s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot">
+                <svg className="mcw-plane-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <polygon points="3,14 25,7 20,14 25,21" stroke="#061e57" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
+                  <line x1="20" y1="14" x2="13" y2="18" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="mcw-connector-dashed"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">Wireframe sent to you</p>
+              <p className="mcw-step-desc">You receive the wireframe to review at your own pace before we move forward.</p>
+            </div>
+          </div>
+
+          {/* Wireframe review loop */}
+          <div className="mcw-loop-wrap" style={{ animationDelay: ".28s" }}>
+            <div className="mcw-loop-box">
+              <div className="mcw-loop-header">
+                <span className="mcw-loop-header-text">Wireframe review &amp; revision cycle</span>
+                <span className="mcw-loop-repeat">Repeats as needed</span>
+              </div>
+              <div className="mcw-loop-row">
+                <div className="mcw-loop-icon-wrap">
+                  <svg className="mcw-dot-pulse" width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <rect x="5" y="8" width="18" height="13" rx="3" stroke="#061e57" strokeWidth="1.6" fill="none"/>
+                    <circle cx="9.5"  cy="14.5" r="1.4" fill="#061e57"/>
+                    <circle cx="14"   cy="14.5" r="1.4" fill="#061e57"/>
+                    <circle cx="18.5" cy="14.5" r="1.4" fill="#061e57"/>
+                    <path d="M10 21L8 25M18 21L20 25" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <path d="M8 8Q14 4 20 8"          stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p className="mcw-loop-row-title">You review &amp; send feedback</p>
+                  <p className="mcw-loop-row-desc">Share notes via MarkUp or written email — no calls required</p>
+                </div>
+                <span className="mcw-loop-days client">5 bus. days</span>
+              </div>
+              <div className="mcw-loop-row">
+                <div className="mcw-loop-icon-wrap">
+                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <rect x="3" y="3" width="13" height="13" rx="2" stroke="#061e57" strokeWidth="1.5" fill="none"/>
+                    <line x1="6" y1="8"  x2="13" y2="8"  stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
+                    <line x1="6" y1="11" x2="11" y2="11" stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
+                    <circle className="mcw-gear-svg" cx="21" cy="21" r="5.5" stroke="#061e57" strokeWidth="1.5" fill="none"/>
+                    <circle cx="21" cy="21" r="1.8" fill="#061e57"/>
+                    <line x1="21" y1="14"   x2="21" y2="16.2" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <line x1="21" y1="25.8" x2="21" y2="28"   stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <line x1="14"   y1="21" x2="16.2" y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <line x1="25.8" y1="21" x2="28"   y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p className="mcw-loop-row-title">We make your revisions</p>
+                  <p className="mcw-loop-row-desc">MCW Media applies your changes and resends for another look</p>
+                </div>
+                <span className="mcw-loop-days mcw">3 bus. days</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Step 4 — Approve wireframe */}
+          <div className="mcw-step" style={{ animationDelay: ".34s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot filled">
+                <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <circle cx="14" cy="14" r="8" stroke="#b3cee1" strokeWidth="1.4" fill="none"/>
+                  <path className="mcw-check-path" d="M9 14L12.5 17.5L19 10.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+              </div>
+              <div className="mcw-connector"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">You approve the wireframe</p>
+              <p className="mcw-step-desc">Once you're happy with the structure, we lock it in and move into the full build.</p>
+            </div>
+          </div>
+
+          {/* ══ Phase 2 — Build ══ */}
+          <div className="mcw-phase-label" style={{ background: "#3a4856" }}>
+            <svg className="mcw-phase-icon" viewBox="0 0 18 18" fill="none">
+              <rect x="2" y="4" width="14" height="10" rx="2" stroke="#b3cee1" strokeWidth="1.4"/>
+              <line x1="2" y1="7" x2="16" y2="7" stroke="#fff" strokeWidth="1.2"/>
+              <circle cx="4.5" cy="5.5" r=".8" fill="#b3cee1"/>
+              <circle cx="7"   cy="5.5" r=".8" fill="#b3cee1"/>
+            </svg>
+            Phase 2 — Build
+          </div>
+
+          {/* Step 5 — Buildout */}
+          <div className="mcw-step" style={{ animationDelay: ".42s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot">
+                <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <rect x="3" y="4" width="22" height="15" rx="2" stroke="#061e57" strokeWidth="1.6" fill="none"/>
+                  <line x1="3" y1="9" x2="25" y2="9" stroke="#061e57" strokeWidth="1.3"/>
+                  <circle cx="6.5"  cy="6.5" r="1" fill="#b3cee1"/>
+                  <circle cx="9.5"  cy="6.5" r="1" fill="#b3cee1"/>
+                  <circle cx="12.5" cy="6.5" r="1" fill="#061e57"/>
+                  <line x1="7" y1="12.5" x2="15" y2="12.5" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  <line x1="7" y1="15.5" x2="22" y2="15.5" stroke="#b3cee1" strokeWidth="1.3" strokeLinecap="round"/>
+                  <rect x="7" y="19" width="14" height="3" rx="1" stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  <line x1="14" y1="19" x2="14" y2="22" stroke="#061e57" strokeWidth="1.3"/>
+                </svg>
+              </div>
+              <div className="mcw-connector"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">Website buildout</p>
+              <p className="mcw-step-desc">We design and build every page of your site based on the approved wireframe — colors, fonts, images, and content all come together here.</p>
+              <span className="mcw-step-tag mcw-tag-days">Goal: 12 business days</span>
+            </div>
+          </div>
+
+          {/* Step 6 — Drafts sent */}
+          <div className="mcw-step" style={{ animationDelay: ".50s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot">
+                <svg className="mcw-plane-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <polygon points="3,14 25,7 20,14 25,21" stroke="#061e57" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
+                  <line x1="20" y1="14" x2="13" y2="18" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                </svg>
+              </div>
+              <div className="mcw-connector-dashed"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">Drafts sent to you</p>
+              <p className="mcw-step-desc">You'll receive up to two full drafts of the site to review before launch.</p>
+            </div>
+          </div>
+
+          {/* Build review loop */}
+          <div className="mcw-loop-wrap" style={{ animationDelay: ".56s" }}>
+            <div className="mcw-loop-box">
+              <div className="mcw-loop-header">
+                <span className="mcw-loop-header-text">Draft review &amp; revision cycle</span>
+                <span className="mcw-loop-repeat">Up to 2 rounds</span>
+              </div>
+              <div className="mcw-loop-row">
+                <div className="mcw-loop-icon-wrap">
+                  <svg className="mcw-dot-pulse" width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <rect x="5" y="8" width="18" height="13" rx="3" stroke="#061e57" strokeWidth="1.6" fill="none"/>
+                    <circle cx="9.5"  cy="14.5" r="1.4" fill="#061e57"/>
+                    <circle cx="14"   cy="14.5" r="1.4" fill="#061e57"/>
+                    <circle cx="18.5" cy="14.5" r="1.4" fill="#061e57"/>
+                    <path d="M10 21L8 25M18 21L20 25" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <path d="M8 8Q14 4 20 8"          stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p className="mcw-loop-row-title">You review &amp; send feedback</p>
+                  <p className="mcw-loop-row-desc">Share notes via MarkUp or written email — no calls required</p>
+                </div>
+                <span className="mcw-loop-days client">5 bus. days</span>
+              </div>
+              <div className="mcw-loop-row">
+                <div className="mcw-loop-icon-wrap">
+                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <rect x="3" y="3" width="13" height="13" rx="2" stroke="#061e57" strokeWidth="1.5" fill="none"/>
+                    <line x1="6" y1="8"  x2="13" y2="8"  stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
+                    <line x1="6" y1="11" x2="11" y2="11" stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
+                    <circle className="mcw-gear-svg" cx="21" cy="21" r="5.5" stroke="#061e57" strokeWidth="1.5" fill="none"/>
+                    <circle cx="21" cy="21" r="1.8" fill="#061e57"/>
+                    <line x1="21" y1="14"   x2="21" y2="16.2" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <line x1="21" y1="25.8" x2="21" y2="28"   stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <line x1="14"   y1="21" x2="16.2" y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                    <line x1="25.8" y1="21" x2="28"   y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  </svg>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <p className="mcw-loop-row-title">We make your revisions</p>
+                  <p className="mcw-loop-row-desc">MCW Media applies your changes and resends a fresh draft</p>
+                </div>
+                <span className="mcw-loop-days mcw">3 bus. days</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ══ Phase 3 — Launch ══ */}
+          <div className="mcw-phase-label" style={{ background: "#7c370c" }}>
+            <svg className="mcw-phase-icon" viewBox="0 0 18 18" fill="none">
+              <path d="M9 2C9 2 14 5 14 11L9 14L4 11C4 5 9 2 9 2Z" stroke="#d8bfa7" strokeWidth="1.3" fill="none"/>
+              <circle cx="9" cy="8.5" r="2" stroke="#fff" strokeWidth="1.2" fill="none"/>
+            </svg>
+            Phase 3 — Launch
+          </div>
+
+          {/* Step 7 — Approve final */}
+          <div className="mcw-step" style={{ animationDelay: ".64s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot filled">
+                <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <circle cx="14" cy="14" r="8" stroke="#b3cee1" strokeWidth="1.4" fill="none"/>
+                  <path className="mcw-check-path" d="M9 14L12.5 17.5L19 10.5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+              </div>
+              <div className="mcw-connector"/>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">You approve the final site</p>
+              <p className="mcw-step-desc">You give the official go-ahead. Nothing goes live without your sign-off.</p>
+            </div>
+          </div>
+
+          {/* Step 8 — Go live */}
+          <div className="mcw-step" style={{ animationDelay: ".72s" }}>
+            <div className="mcw-step-spine">
+              <div className="mcw-step-dot brown">
+                <svg className="mcw-rocket-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <path d="M14 3C14 3 21 7.5 21 16L14 21L7 16C7 7.5 14 3 14 3Z" stroke="#d8bfa7" strokeWidth="1.6" fill="none"/>
+                  <circle cx="14" cy="12" r="2.8" stroke="#d8bfa7" strokeWidth="1.3" fill="none"/>
+                  <path d="M9.5 17L6 21.5L11 20.5Z"  stroke="#d8bfa7" strokeWidth="1.1" fill="none"/>
+                  <path d="M18.5 17L22 21.5L17 20.5Z" stroke="#d8bfa7" strokeWidth="1.1" fill="none"/>
+                  <path d="M11.5 21L10.5 25.5L14 23L17.5 25.5L16.5 21" stroke="#d8bfa7" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                </svg>
+              </div>
+            </div>
+            <div className="mcw-step-body">
+              <p className="mcw-step-label">Website goes live</p>
+              <p className="mcw-step-desc">We publish your site and hand over everything you need — logins, documentation, and next steps.</p>
+            </div>
+          </div>
+
+          {/* Timeline note */}
+          <div className="mcw-timeline-note">
+            <p className="mcw-timeline-note-title">A note on timelines</p>
+            <p className="mcw-timeline-note-body">The faster we receive your feedback within each review window, the faster your project moves. All revision requests must be submitted via <strong>MarkUp</strong> or <strong>written email</strong> so nothing gets lost.</p>
+          </div>
+
         </div>
+
+        {/* Timeline Deposit */}
         <div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Timeline Deposit</h2>
           <p className="text-gray-600 leading-relaxed">We want your website live as quickly as possible. The timeline deposit keeps your project moving without delays — and it's fully refundable when we hit your 90-day goal together.</p>
         </div>
+
       </div>
     </section>
   );
