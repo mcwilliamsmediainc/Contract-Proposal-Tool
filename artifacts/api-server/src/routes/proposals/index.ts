@@ -28,6 +28,7 @@ import {
   sendProposalAcceptedClientEmail,
   sendContractReadyClientEmail,
   sendContractReadyInternalEmail,
+  sendProposalOutreachEmail,
 } from "../../lib/email";
 
 const router = Router();
@@ -686,6 +687,48 @@ router.post("/proposals/:id/view", async (req, res) => {
 
   // Use public formatter: this endpoint is consumed by the client portal to track views
   res.json(formatProposalPublic(updated));
+});
+
+router.post("/proposals/:id/send-email", async (req, res) => {
+  const { id } = req.params;
+  const { emailSubject, emailBody } = req.body as { emailSubject?: string; emailBody?: string };
+
+  if (!emailBody?.trim()) {
+    res.status(400).json({ error: "emailBody is required" });
+    return;
+  }
+
+  const rows = await db
+    .select()
+    .from(proposalsTable)
+    .where(eq(proposalsTable.uuid, id))
+    .limit(1);
+
+  if (!rows[0]) {
+    res.status(404).json({ error: "Proposal not found" });
+    return;
+  }
+
+  const proposal = rows[0];
+
+  await sendProposalOutreachEmail({
+    clientName: proposal.clientName,
+    clientEmail: proposal.clientEmail,
+    proposalUuid: id,
+    clientStrategist: proposal.clientStrategist,
+    emailSubject: emailSubject?.trim() || `Your ${proposal.projectType === "web" ? "Website" : "Marketing"} Proposal — McWilliams Media`,
+    emailBody: emailBody.trim(),
+  });
+
+  // Mark as sent if still draft
+  if (proposal.status === "draft") {
+    await db
+      .update(proposalsTable)
+      .set({ status: "sent", sentAt: new Date(), updatedAt: new Date() })
+      .where(eq(proposalsTable.uuid, id));
+  }
+
+  res.json({ ok: true });
 });
 
 router.patch("/onboarding-tasks/:taskId", async (req, res) => {

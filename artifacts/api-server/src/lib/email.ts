@@ -379,6 +379,51 @@ export async function sendAchPaymentEmail(opts: {
   });
 }
 
+// ── CLIENT: Proposal Outreach (sent by strategist) ────────────────────────────
+
+export async function sendProposalOutreachEmail(opts: {
+  clientName: string;
+  clientEmail: string;
+  proposalUuid: string;
+  clientStrategist: string | null | undefined;
+  emailSubject: string;
+  emailBody: string;
+}) {
+  const strategistName = opts.clientStrategist || "McWilliams Media";
+  const strategistEmail =
+    opts.clientStrategist && STRATEGIST_EMAILS[opts.clientStrategist]
+      ? STRATEGIST_EMAILS[opts.clientStrategist]
+      : FALLBACK;
+
+  const from = `${strategistName} <${strategistEmail}>`;
+
+  const htmlBody = opts.emailBody
+    .split("\n")
+    .map((line) => {
+      const trimmed = line.trim();
+      return trimmed === ""
+        ? `<div style="height:12px"></div>`
+        : `<p style="margin:0;line-height:1.7;font-size:15px;color:#1a1a1a;">${trimmed}</p>`;
+    })
+    .join("\n");
+
+  await send({
+    from,
+    to: [opts.clientEmail],
+    subject: opts.emailSubject,
+    html: `
+      <div style="font-family:'Inter',Arial,sans-serif;max-width:580px;margin:0 auto;padding:32px 0;">
+        ${htmlBody}
+        <div style="height:32px"></div>
+        <p style="margin:0;font-size:13px;color:#999;border-top:1px solid #eee;padding-top:20px;">
+          ${strategistName} &nbsp;·&nbsp; McWilliams Media<br>
+          <a href="mailto:${strategistEmail}" style="color:#061e57;">${strategistEmail}</a>
+        </p>
+      </div>
+    `,
+  });
+}
+
 // ── INTERNAL: Payment Update Received ─────────────────────────────────────────
 
 export async function sendPaymentUpdateEmail(opts: {

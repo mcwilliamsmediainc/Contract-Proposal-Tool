@@ -11,7 +11,7 @@ import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, ArrowLeft, X, Users, FileText,
-  DollarSign, Layout, ExternalLink, Plus, Trash2, Link2, ClipboardCheck, GripVertical, Download
+  DollarSign, Layout, ExternalLink, Plus, Trash2, Link2, ClipboardCheck, GripVertical, Download, Mail
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -43,11 +43,11 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Panel = "client" | "content" | "pricing" | "settings" | null;
+type Panel = "client" | "content" | "pricing" | "settings" | "email" | null;
 
-function SlidePanel({ open, onClose, title, children, onSave, saving }: {
+function SlidePanel({ open, onClose, title, children, onSave, saving, saveLabel }: {
   open: boolean; onClose: () => void; title: string;
-  children: React.ReactNode; onSave: () => void; saving?: boolean;
+  children: React.ReactNode; onSave: () => void; saving?: boolean; saveLabel?: string;
 }) {
   return (
     <>
@@ -68,13 +68,111 @@ function SlidePanel({ open, onClose, title, children, onSave, saving }: {
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3 flex-shrink-0">
           <Button onClick={onSave} disabled={saving} className="flex-1 bg-[#0a1f5c] hover:bg-[#0d3494]">
             {saving ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
-            Save Changes
+            {saveLabel ?? "Save Changes"}
           </Button>
           <Button variant="outline" onClick={onClose}>Cancel</Button>
         </div>
       </div>
     </>
   );
+}
+
+const STRATEGIST_EMAILS: Record<string, string> = {
+  "Matt McWilliams": "matt@mcwilliamsmedia.com",
+  "Tiffany King": "tiffany@mcwilliamsmedia.com",
+  "Elise Johnson": "elise@mcwilliamsmedia.com",
+  "Rachelle Hoover": "rachelle@mcwilliamsmedia.com",
+};
+
+function buildEmailScript(projectType: string, clientName: string, proposalLink: string): { subject: string; body: string } {
+  if (projectType === "web") {
+    return {
+      subject: "Your Website Proposal — McWilliams Media",
+      body: `${clientName},
+
+Below is a link to our Website Proposal for your consideration.
+
+A few notes:
+
+Website project payments are broken into installments: half down, and half broken into three equal installments, automatically billed 30 days apart.
+Timeline Deposit is fully refundable if the project is completed within 90 days.
+
+At the bottom of the proposal is an "Accept" button, and clicking this will let us know you are ready to move forward with this project.
+
+Proposal link:
+${proposalLink}
+
+Let me know if you have any questions. Looking forward to working on this project with you!`,
+    };
+  }
+
+  if (projectType === "tiered") {
+    return {
+      subject: "Your Marketing Proposal — McWilliams Media",
+      body: `${clientName},
+
+Below is a link to our Marketing Proposal for your consideration.
+
+A few notes:
+
+Our marketing packages are billed monthly. You can choose from our Pro, Plus, or Platinum plans based on your goals and budget.
+The first month includes a one-time setup fee of $500 in addition to your monthly plan rate.
+
+At the bottom of the proposal is an "Accept" button — selecting your preferred plan and clicking Accept will let us know you're ready to move forward.
+
+Proposal link:
+${proposalLink}
+
+Let me know if you have any questions. We're excited to start growing your business!`,
+    };
+  }
+
+  if (projectType === "ala-carte") {
+    return {
+      subject: "Your Marketing Proposal — McWilliams Media",
+      body: `${clientName},
+
+Below is a link to our Marketing Proposal for your consideration.
+
+Inside you'll find our full menu of available services. Simply select the ones that best fit your needs and budget — your proposal will update with the monthly total as you choose.
+
+At the bottom of the proposal is an "Accept" button, and clicking this will let us know you are ready to move forward.
+
+Proposal link:
+${proposalLink}
+
+Let me know if you have any questions. We look forward to working with you!`,
+    };
+  }
+
+  if (projectType === "project") {
+    return {
+      subject: "Your Project Proposal — McWilliams Media",
+      body: `${clientName},
+
+Below is a link to our Project Proposal for your consideration.
+
+Please take a moment to review the scope and pricing. At the bottom of the proposal is an "Accept" button, and clicking this will let us know you are ready to move forward.
+
+Proposal link:
+${proposalLink}
+
+Let me know if you have any questions. Looking forward to working on this project with you!`,
+    };
+  }
+
+  // fallback
+  return {
+    subject: "Your Proposal — McWilliams Media",
+    body: `${clientName},
+
+Below is a link to your proposal for your consideration.
+
+Proposal link:
+${proposalLink}
+
+Let me know if you have any questions!`,
+  };
 }
 
 function PageChips({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -230,6 +328,41 @@ export default function EditProposal() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [reviewOpen, setReviewOpen] = useState(false);
 
+  // Email compose state
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [emailSending, setEmailSending] = useState(false);
+
+  const handleOpenEmail = () => {
+    const values = form.getValues();
+    const link = clientUrl(`/proposal/${id}`);
+    const script = buildEmailScript(values.projectType || proposal.projectType, values.clientName || proposal.clientName, link);
+    setEmailSubject(script.subject);
+    setEmailBody(script.body);
+    setActivePanel("email");
+  };
+
+  const handleSendEmail = async () => {
+    if (!emailBody.trim()) return;
+    setEmailSending(true);
+    try {
+      const res = await fetch(`/api/proposals/${id}/send-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emailSubject, emailBody }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      toast({ title: "Email sent!", description: `Proposal link sent to ${proposal.clientEmail}.` });
+      setActivePanel(null);
+      // Refresh proposal so status badge updates
+      queryClient.invalidateQueries({ queryKey: getGetAdminProposalQueryKey(id) });
+    } catch {
+      toast({ title: "Error", description: "Could not send email. Please try again.", variant: "destructive" });
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
   const handleCopyLink = async () => {
     try {
       const url = clientUrl(`/proposal/${id}`);
@@ -341,6 +474,15 @@ export default function EditProposal() {
             >
               <Download className="w-3.5 h-3.5" />
               PDF
+            </button>
+            <button
+              onClick={handleOpenEmail}
+              disabled={proposal.status === "accepted"}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide bg-blue-600 hover:bg-blue-700 text-white transition-all disabled:opacity-50"
+              title="Email Client"
+            >
+              <Mail className="w-3.5 h-3.5" />
+              Email
             </button>
             <button
               onClick={() => setReviewOpen(true)}
@@ -737,6 +879,72 @@ export default function EditProposal() {
             </div>
           </div>
         </Form>
+      </SlidePanel>
+
+      {/* ── EMAIL CLIENT PANEL ── */}
+      <SlidePanel
+        open={activePanel === "email"}
+        onClose={() => setActivePanel(null)}
+        title="Email Client"
+        onSave={handleSendEmail}
+        saving={emailSending}
+        saveLabel="Send Email"
+      >
+        <div className="space-y-5">
+          {/* From / To pills */}
+          <div className="space-y-3">
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">From</p>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-100">
+                <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                <span className="text-sm font-medium text-blue-900">
+                  {(() => {
+                    const strategist = form.getValues("clientStrategist") || proposal.clientStrategist;
+                    if (strategist && strategist !== "unassigned" && STRATEGIST_EMAILS[strategist]) {
+                      return `${strategist} <${STRATEGIST_EMAILS[strategist]}>`;
+                    }
+                    return "McWilliams Media <info@mcwilliamsmedia.com>";
+                  })()}
+                </span>
+              </div>
+              {!(form.getValues("clientStrategist") || proposal.clientStrategist) || (form.getValues("clientStrategist") || proposal.clientStrategist) === "unassigned" ? (
+                <p className="text-xs text-amber-600 mt-1">
+                  No strategist assigned — assign one in Client Info to send from their email.
+                </p>
+              ) : null}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">To</p>
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200">
+                <span className="text-sm text-gray-700">
+                  {form.getValues("clientName") || proposal.clientName} &lt;{proposal.clientEmail}&gt;
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Subject</label>
+            <Input
+              value={emailSubject}
+              onChange={e => setEmailSubject(e.target.value)}
+              className="text-sm"
+            />
+          </div>
+
+          {/* Body */}
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Message</label>
+            <Textarea
+              value={emailBody}
+              onChange={e => setEmailBody(e.target.value)}
+              className="min-h-[340px] resize-y text-sm leading-relaxed font-mono"
+              placeholder="Compose your message..."
+            />
+            <p className="text-xs text-gray-400 mt-1.5">Edit the message above before sending. The proposal link is already included.</p>
+          </div>
+        </div>
       </SlidePanel>
 
       <AiReviewDrawer
