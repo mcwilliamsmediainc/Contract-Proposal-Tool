@@ -102,14 +102,15 @@ export default function NewProposal() {
       </div>
 
       <div className="max-w-xl space-y-6">
-        {/* Client Details */}
-        <Card className="bg-card/50 backdrop-blur border-border/50">
-          <CardHeader>
-            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Client Details</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+            {/* Client Details */}
+            <Card className="bg-card/50 backdrop-blur border-border/50">
+              <CardHeader>
+                <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Client Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-5">
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
@@ -253,20 +254,15 @@ export default function NewProposal() {
                     )}
                   />
                 )}
+              </CardContent>
+            </Card>
 
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-
-        {/* AI Custom Intro */}
-        <Card className="bg-card/50 backdrop-blur border-border/50">
-          <CardHeader className="pb-3">
-            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">The Problem / Their Situation</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <div className="space-y-4">
+            {/* AI Custom Intro */}
+            <Card className="bg-card/50 backdrop-blur border-border/50">
+              <CardHeader className="pb-3">
+                <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">The Problem / Their Situation</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <p className="text-xs text-muted-foreground">The highest-converting section most agencies skip. Describe what the client told you about their situation — the AI will mirror it back in 2–3 sentences that make them feel truly heard.</p>
                 <FormField
                   control={form.control}
@@ -315,20 +311,22 @@ export default function NewProposal() {
                     </FormItem>
                   )}
                 />
-              </div>
-            </Form>
-          </CardContent>
-        </Card>
-        <div className="pb-8">
-          <Button
-            className="w-full"
-            disabled={createProposal.isPending}
-            onClick={form.handleSubmit(onSubmit)}
-          >
-            {createProposal.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-            Save Draft
-          </Button>
-        </div>
+              </CardContent>
+            </Card>
+
+            <div className="pb-8">
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createProposal.isPending}
+              >
+                {createProposal.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                Create Draft
+              </Button>
+            </div>
+
+          </form>
+        </Form>
       </div>
     </AdminLayout>
   );
