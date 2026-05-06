@@ -21,6 +21,7 @@ import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-
 import { AlaCarteMarketingTemplate } from "@/components/proposal/ala-carte-marketing-template";
 import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { cn } from "@/lib/utils";
+import { clientUrl } from "@/lib/client-url";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
 
@@ -231,7 +232,7 @@ export default function EditProposal() {
 
   const handleCopyLink = async () => {
     try {
-      const url = `${window.location.origin}/proposal/${id}`;
+      const url = clientUrl(`/proposal/${id}`);
       await navigator.clipboard.writeText(url);
       setLinkCopied(true);
       toast({ title: "Link copied!", description: "Paste it into your email to share with the client." });
@@ -741,8 +742,8 @@ export default function EditProposal() {
             <div className="pt-4 border-t border-gray-200">
               <p className="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Proposal Links</p>
               <div className="space-y-2">
-                <a href={`/proposal/${id}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
-                  <ExternalLink className="w-4 h-4" /> Client-facing proposal URL
+                <a href={clientUrl(`/proposal/${id}`)} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-blue-600 hover:underline">
+                  <ExternalLink className="w-4 h-4" /> {clientUrl(`/proposal/${id}`)}
                 </a>
               </div>
             </div>

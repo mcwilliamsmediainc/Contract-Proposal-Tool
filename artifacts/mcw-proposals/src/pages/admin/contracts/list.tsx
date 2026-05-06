@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { clientUrl } from "@/lib/client-url";
 import { useListContracts, useDeleteContract, getListContractsQueryKey } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileSignature, Plus, Trash2 } from "lucide-react";
@@ -250,7 +251,7 @@ export default function ContractsList() {
                             EDIT
                           </Link>
                           <a
-                            href={`/contract/${contract.id}`}
+                            href={clientUrl(`/contract/${contract.id}`)}
                             target="_blank"
                             rel="noreferrer"
                             className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono"

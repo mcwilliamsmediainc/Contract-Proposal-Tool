@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { clientUrl } from "@/lib/client-url";
 import {
   useListProposals, useListContracts,
   useDeleteProposal, useDeleteContract,
@@ -361,7 +362,7 @@ export default function AdminDashboard() {
                     ) : (
                       <span className="inline-flex items-center gap-3">
                         <Link href={`/admin/proposals/${proposal.id}/edit`} className="text-primary hover:text-primary/80 font-medium text-xs font-mono">EDIT</Link>
-                        <a href={`/proposal/${proposal.id}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono">PREVIEW</a>
+                        <a href={clientUrl(`/proposal/${proposal.id}`)} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono">PREVIEW</a>
                         {proposal.status === "accepted" && (
                           <Link
                             href={`/admin/contracts/new?proposalId=${proposal.id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(proposal.totalAmount)}`}
@@ -449,7 +450,7 @@ export default function AdminDashboard() {
                     ) : (
                       <span className="inline-flex items-center gap-3">
                         <Link href={`/admin/contracts/${contract.id}/edit`} className="text-primary hover:text-primary/80 font-medium text-xs font-mono">EDIT</Link>
-                        <a href={`/contract/${contract.id}`} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono">VIEW</a>
+                        <a href={clientUrl(`/contract/${contract.id}`)} target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground font-medium text-xs font-mono">VIEW</a>
                         <button onClick={() => setConfirmContract(contract.id)} className="text-muted-foreground hover:text-red-500 transition-colors">
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>

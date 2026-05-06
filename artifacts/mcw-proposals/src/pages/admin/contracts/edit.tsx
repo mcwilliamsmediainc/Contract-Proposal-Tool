@@ -9,6 +9,7 @@ import {
   getListContractsQueryKey,
 } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { clientUrl } from "@/lib/client-url";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -176,7 +177,7 @@ export default function EditContract() {
           </Button>
           <Button
             variant="outline"
-            onClick={() => window.open(`/contract/${id}`, "_blank")}
+            onClick={() => window.open(clientUrl(`/contract/${id}`), "_blank")}
           >
             <Eye className="w-4 h-4 mr-2" />
             Client View

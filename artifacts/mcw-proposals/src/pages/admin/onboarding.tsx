@@ -1,4 +1,5 @@
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { clientUrl } from "@/lib/client-url";
 import {
   useListOnboardingClients,
   useCreateOnboardingClient,
@@ -437,7 +438,7 @@ function ShareFormButton({ clientId }: { clientId: string }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
-    const url = `${window.location.origin}/intake/${clientId}`;
+    const url = clientUrl(`/intake/${clientId}`);
     navigator.clipboard.writeText(url).then(() => {
       setCopied(true);
       toast({ title: "Link copied!", description: "Send this link to your client to complete their intake form." });

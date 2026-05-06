@@ -51,6 +51,7 @@ externalPort = 3000
 
 [userenv.shared]
 VITE_CLERK_PUBLISHABLE_KEY = "pk_test_c3VwZXJiLWFsYmFjb3JlLTgzLmNsZXJrLmFjY291bnRzLmRldiQ"
+VITE_PUBLIC_URL = "https://mcwclients.com"
 
 [nix]
 channel = "stable-25_05"
