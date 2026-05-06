@@ -1,7 +1,8 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FilePlus2, Users, FileSignature, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard } from "lucide-react";
+import { LayoutDashboard, FilePlus2, Users, FileSignature, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { useUser, useClerk } from "@clerk/react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -27,6 +28,49 @@ function SidebarLogo({ collapsed }: { collapsed: boolean }) {
       ) : (
         <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-8 w-auto object-contain" style={{ filter: "brightness(0) invert(1)" }} />
       )}
+    </div>
+  );
+}
+
+function UserFooter({ collapsed }: { collapsed: boolean }) {
+  const { user } = useUser();
+  const { signOut } = useClerk();
+
+  const displayName = user?.fullName || user?.firstName || "Admin";
+  const initials = displayName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return (
+    <div className={cn("border-t p-2", SIDEBAR_BORDER, collapsed ? "flex flex-col items-center gap-1 py-3" : "")}>
+      <div className={cn(
+        "flex items-center gap-2.5 rounded-md",
+        collapsed ? "justify-center px-0 py-1" : "px-3 py-2"
+      )}>
+        <div className="w-7 h-7 rounded-full bg-[#b3cee1]/20 border border-[#b3cee1]/30 flex items-center justify-center text-[#b3cee1] font-bold text-xs flex-shrink-0">
+          {initials}
+        </div>
+        {!collapsed && (
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-white/80 truncate">{displayName}</p>
+            <p className="text-[11px] text-white/35 truncate">{user?.primaryEmailAddress?.emailAddress}</p>
+          </div>
+        )}
+      </div>
+      <button
+        onClick={() => signOut({ redirectUrl: "/" })}
+        title="Sign out"
+        className={cn(
+          "flex items-center gap-2 rounded-md text-white/40 hover:text-white/80 hover:bg-white/10 transition-all text-xs",
+          collapsed ? "p-1.5 justify-center" : "w-full px-3 py-1.5"
+        )}
+      >
+        <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
+        {!collapsed && "Sign out"}
+      </button>
     </div>
   );
 }
@@ -95,18 +139,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* User footer */}
-        <div className={cn("border-t p-2", SIDEBAR_BORDER, collapsed ? "flex justify-center py-3" : "")}>
-          <div className={cn(
-            "flex items-center gap-2.5 rounded-md",
-            collapsed ? "justify-center px-0 py-1" : "px-3 py-2"
-          )}>
-            <div className="w-6 h-6 rounded-full bg-[#b3cee1]/20 border border-[#b3cee1]/30 flex items-center justify-center text-[#b3cee1] font-bold text-xs flex-shrink-0">
-              A
-            </div>
-            {!collapsed && <span className="text-sm font-medium text-white/50">Admin</span>}
-          </div>
-        </div>
+        <UserFooter collapsed={collapsed} />
       </aside>
 
       {/* Mobile drawer */}
@@ -135,12 +168,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className={cn("border-t p-2", SIDEBAR_BORDER)}>
-          <div className="flex items-center gap-2.5 px-3 py-2">
-            <div className="w-6 h-6 rounded-full bg-[#b3cee1]/20 border border-[#b3cee1]/30 flex items-center justify-center text-[#b3cee1] font-bold text-xs">A</div>
-            <span className="text-sm font-medium text-white/50">Admin</span>
-          </div>
-        </div>
+        <UserFooter collapsed={false} />
       </aside>
 
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">

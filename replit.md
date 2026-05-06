@@ -23,7 +23,7 @@ lib/
 ### Tech Stack
 
 - **Frontend**: React 18, Vite, TypeScript, Tailwind CSS, Framer Motion
-- **Auth**: Clerk (Google Sign-in) — admin routes protected, client portal is public
+- **Auth**: Clerk (Google Sign-in + email) — all `/admin/*` routes protected; client portals are public. Team accounts invited: matt@, tiffany@, elise@, rachelle@, info@ (all @mcwilliamsmedia.com)
 - **Backend**: Express.js, TypeScript, Drizzle ORM
 - **Database**: PostgreSQL (Replit-managed)
 - **AI**: Google Gemini via Replit AI Integrations (`gemini-2.5-flash`)

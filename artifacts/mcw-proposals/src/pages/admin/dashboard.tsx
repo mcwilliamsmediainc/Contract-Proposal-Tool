@@ -7,7 +7,7 @@ import {
 } from "@workspace/api-client-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, BarChart3, Briefcase, FileSignature, FileText, Send, Trash2, Filter, FilePlus2 } from "lucide-react";
+import { Activity, BarChart3, Briefcase, FileSignature, FileText, Send, Trash2, Filter, FilePlus2, User, Users } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { Link } from "wouter";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useUser } from "@clerk/react";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
 
@@ -54,6 +55,8 @@ function ConfirmDelete({ onConfirm, onCancel }: { onConfirm: () => void; onCance
 export default function AdminDashboard() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const { user } = useUser();
+  const myName = user?.fullName || "";
   const { data: proposals, isLoading: loadingProposals } = useListProposals(undefined, { query: { queryKey: getListProposalsQueryKey() } });
   const { data: contracts, isLoading: loadingContracts } = useListContracts(undefined, { query: { queryKey: getListContractsQueryKey() } });
 
@@ -64,8 +67,12 @@ export default function AdminDashboard() {
   const [confirmContract, setConfirmContract] = useState<string | null>(null);
 
   const [activeStage, setActiveStage] = useState<StageKey>("all");
+  const [myItemsOnly, setMyItemsOnly] = useState(false);
   const [filterStrategist, setFilterStrategist] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
+
+  // When "My Items" is on, override the strategist filter to the logged-in user's name
+  const effectiveStrategist = myItemsOnly && myName ? myName : filterStrategist;
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(amount);
@@ -74,17 +81,25 @@ export default function AdminDashboard() {
   //    This is the base for deriving stage counts so counts reflect dropdown state.
   const proposalsByDropdowns = useMemo(() => {
     let result = proposals ?? [];
-    if (filterStrategist !== "all") result = result.filter(p => (p.clientStrategist || "") === filterStrategist);
+    if (effectiveStrategist !== "all") result = result.filter(p => (p.clientStrategist || "") === effectiveStrategist);
     if (filterStatus !== "all")     result = result.filter(p => p.status === filterStatus);
     return result;
-  }, [proposals, filterStrategist, filterStatus]);
+  }, [proposals, effectiveStrategist, filterStatus]);
 
   // ── Contracts filtered by strategist only (for stage counts — contracts use teamMember).
   const contractsByStrategist = useMemo(() => {
     let result = contracts ?? [];
-    if (filterStrategist !== "all") result = result.filter(c => (c.teamMember || "") === filterStrategist);
+    if (effectiveStrategist !== "all") result = result.filter(c => (c.teamMember || "") === effectiveStrategist);
     return result;
-  }, [contracts, filterStrategist]);
+  }, [contracts, effectiveStrategist]);
+
+  // ── Contracts visible in the table (respects effectiveStrategist + active stage).
+  const filteredContracts = useMemo(() => {
+    let result = contractsByStrategist;
+    if (activeStage === "contract-out")    result = result.filter(c => c.status === "draft" || c.status === "sent");
+    if (activeStage === "contract-signed") result = result.filter(c => c.status === "signed");
+    return result;
+  }, [contractsByStrategist, activeStage]);
 
   // ── Stage counts derived from dropdown-filtered data so they live-update with selects.
   const stageCounts = useMemo<Record<StageKey, number>>(() => ({
@@ -117,10 +132,10 @@ export default function AdminDashboard() {
     return { total, pipeline, rate, views };
   }, [filteredProposals]);
 
-  const isFiltered = activeStage !== "all" || filterStrategist !== "all" || filterStatus !== "all";
+  const isFiltered = activeStage !== "all" || effectiveStrategist !== "all" || filterStatus !== "all" || myItemsOnly;
   const isContractStage = CONTRACT_STAGES.includes(activeStage);
 
-  const clearFilters = () => { setActiveStage("all"); setFilterStrategist("all"); setFilterStatus("all"); };
+  const clearFilters = () => { setActiveStage("all"); setFilterStrategist("all"); setFilterStatus("all"); setMyItemsOnly(false); };
 
   const handleStageClick = (key: StageKey) => {
     setActiveStage(key);
@@ -250,8 +265,35 @@ export default function AdminDashboard() {
         </h2>
         <div className="flex items-center gap-2 flex-wrap">
           <Filter className="w-3.5 h-3.5 text-muted-foreground flex-shrink-0" />
-          <Select value={filterStrategist} onValueChange={setFilterStrategist}>
-            <SelectTrigger className="h-8 text-xs w-44">
+
+          {/* My Items / All toggle */}
+          <div className="flex items-center rounded-md border border-border overflow-hidden h-8 text-xs">
+            <button
+              onClick={() => setMyItemsOnly(true)}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 h-full transition-colors",
+                myItemsOnly
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              )}
+            >
+              <User className="w-3 h-3" /> My Items
+            </button>
+            <button
+              onClick={() => setMyItemsOnly(false)}
+              className={cn(
+                "flex items-center gap-1.5 px-2.5 h-full border-l border-border transition-colors",
+                !myItemsOnly
+                  ? "bg-primary text-primary-foreground"
+                  : "text-muted-foreground hover:text-foreground hover:bg-accent"
+              )}
+            >
+              <Users className="w-3 h-3" /> All
+            </button>
+          </div>
+
+          <Select value={filterStrategist} onValueChange={v => { setFilterStrategist(v); setMyItemsOnly(false); }} disabled={myItemsOnly}>
+            <SelectTrigger className={cn("h-8 text-xs w-44", myItemsOnly && "opacity-40 pointer-events-none")}>
               <SelectValue placeholder="All Strategists" />
             </SelectTrigger>
             <SelectContent>
@@ -411,9 +453,9 @@ export default function AdminDashboard() {
             <tbody className="divide-y divide-border/50">
               {loadingContracts ? (
                 <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">Loading...</td></tr>
-              ) : contracts?.length === 0 ? (
+              ) : filteredContracts.length === 0 ? (
                 <tr><td colSpan={8} className="px-5 py-8 text-center text-muted-foreground">No contracts yet.</td></tr>
-              ) : contracts?.map((contract) => (
+              ) : filteredContracts.map((contract) => (
                 <tr
                   key={contract.id}
                   className={cn(
