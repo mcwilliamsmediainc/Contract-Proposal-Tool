@@ -207,16 +207,18 @@ router.post("/proposals/generate", async (req, res) => {
 
   const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : projectType === "print" ? "print & brand" : "project";
 
-  const userPrompt = `Write a short, warm, personalized opening for ${clientName} at ${businessName}'s ${projectLabel} proposal.
-${specialContext ? `\nNotes from our team: ${specialContext}` : ""}
+  const userPrompt = `You are writing the opening section of a ${projectLabel} proposal for ${clientName} at ${businessName}, on behalf of McWilliams Media.
 
-Requirements:
-- 2 short paragraphs, 80–100 words total
-- Paragraph 1: Personal welcome that mentions their business name and something specific about why we're excited for this project
-- Paragraph 2: One sentence that bridges naturally to the proposal content ahead
-- Warm, confident, professional tone — never generic
+This section is called "The Problem / Their Situation." It is the highest-converting part of the proposal — it shows the client we truly heard them.
+${specialContext ? `\nHere is what the client told us about their situation:\n"${specialContext}"` : ""}
+
+Write 2–3 sentences that:
+- Mirror back the client's specific situation or pain point in your own words, so they feel deeply understood
+- Are empathetic, specific, and confident — never generic or flattering
+- Naturally set up why a ${projectLabel} solution from McWilliams Media is the right next step
+- Use "you" / "your business" voice, speaking directly to the client
 - NO headers, NO bullet points, NO section titles, NO markdown
-- Return ONLY the two paragraphs, nothing else`;
+- Return ONLY the sentences, nothing else`;
 
   try {
     const response = await ai.models.generateContent({

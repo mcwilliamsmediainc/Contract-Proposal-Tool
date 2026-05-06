@@ -23,6 +23,7 @@ const formSchema = z.object({
   clientStrategist: z.string().optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
+  specialContext: z.string().optional(),
   content: z.string().optional(),
 });
 
@@ -42,6 +43,7 @@ export default function NewProposal() {
       clientStrategist: "",
       numberOfPages: undefined,
       pageNames: "",
+      specialContext: "",
       content: "",
     },
   });
@@ -60,6 +62,7 @@ export default function NewProposal() {
           clientName: values.clientName,
           businessName: values.businessName,
           projectType: values.projectType,
+          specialContext: values.specialContext || undefined,
         },
       });
       form.setValue("content", res.content);
@@ -77,6 +80,7 @@ export default function NewProposal() {
           clientStrategist: values.clientStrategist || null,
           numberOfPages: values.numberOfPages ?? null,
           pageNames: values.pageNames || null,
+          specialContext: values.specialContext || null,
           content: values.content || null,
         },
       });
@@ -241,12 +245,29 @@ export default function NewProposal() {
         {/* AI Custom Intro */}
         <Card className="bg-card/50 backdrop-blur border-border/50">
           <CardHeader className="pb-3">
-            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Custom Intro Text</CardTitle>
+            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">The Problem / Their Situation</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <div className="space-y-3">
-                <p className="text-xs text-muted-foreground">This text appears on page 2 of the proposal. Leave blank to use the default McWilliams Media introduction.</p>
+              <div className="space-y-4">
+                <p className="text-xs text-muted-foreground">The highest-converting section most agencies skip. Describe what the client told you about their situation — the AI will mirror it back in 2–3 sentences that make them feel truly heard.</p>
+                <FormField
+                  control={form.control}
+                  name="specialContext"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client's Situation / Notes</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="e.g. They've been struggling with low website traffic. Their current site is outdated and doesn't reflect the quality of their work. They've tried running Google Ads before but didn't see results..."
+                          className="min-h-[100px] resize-y text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <Button
                   type="button"
                   variant="outline"
@@ -265,10 +286,11 @@ export default function NewProposal() {
                   name="content"
                   render={({ field }) => (
                     <FormItem>
+                      <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Generated Intro</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Write a personalized introduction for this client, or click AI Generate above..."
-                          className="min-h-[200px] resize-y text-sm leading-relaxed"
+                          placeholder="AI-generated intro will appear here. You can also write or edit it manually."
+                          className="min-h-[120px] resize-y text-sm leading-relaxed"
                           {...field}
                         />
                       </FormControl>
