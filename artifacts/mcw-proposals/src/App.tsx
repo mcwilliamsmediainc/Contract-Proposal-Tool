@@ -15,6 +15,8 @@ import EditContract from "@/pages/admin/contracts/edit";
 import ClientPortal from "@/pages/portal/proposal";
 import ContractPortal from "@/pages/portal/contract";
 import OnboardingFormPortal from "@/pages/portal/onboarding-form";
+import UpdatePayment from "@/pages/portal/update-payment";
+import PaymentLink from "@/pages/admin/payment-link";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ export default function App() {
             <Route path="/admin/contracts" component={ContractsList} />
             <Route path="/admin/contracts/new" component={NewContract} />
             <Route path="/admin/contracts/:id/edit" component={EditContract} />
+            <Route path="/admin/payment-link" component={PaymentLink} />
+            <Route path="/update-payment" component={UpdatePayment} />
             <Route path="/intake/:id" component={OnboardingFormPortal} />
             <Route path="/proposal/:id" component={ClientPortal} />
             <Route path="/contract/:id" component={ContractPortal} />

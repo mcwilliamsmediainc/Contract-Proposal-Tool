@@ -5,6 +5,7 @@ import contractsRouter from "./contracts";
 import adminRouter from "./admin";
 import geminiRouter from "./gemini";
 import onboardingFormRouter from "./onboarding-form";
+import paymentUpdateRouter from "./payment-update";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(contractsRouter);
 router.use(adminRouter);
 router.use(geminiRouter);
 router.use(onboardingFormRouter);
+router.use(paymentUpdateRouter);
 
 export default router;

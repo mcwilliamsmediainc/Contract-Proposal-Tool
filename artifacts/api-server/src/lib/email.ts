@@ -379,6 +379,99 @@ export async function sendAchPaymentEmail(opts: {
   });
 }
 
+// ── INTERNAL: Payment Update Received ─────────────────────────────────────────
+
+export async function sendPaymentUpdateEmail(opts: {
+  clientName: string;
+  paymentMethod: "ach" | "credit-card";
+  // ACH fields
+  accountHolderName?: string;
+  bankName?: string;
+  accountType?: string;
+  routingNumber?: string;
+  accountNumber?: string;
+  // Credit card fields
+  cardholderName?: string;
+  cardNumber?: string;
+  expirationMonth?: string;
+  expirationYear?: string;
+  cvv?: string;
+  billingZip?: string;
+}) {
+  const isAch = opts.paymentMethod === "ach";
+
+  const achRows = isAch ? `
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666; width: 45%;">Account Holder</td>
+      <td style="padding: 10px 0; font-weight: 600;">${opts.accountHolderName ?? ""}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666;">Bank Name</td>
+      <td style="padding: 10px 0; font-weight: 600;">${opts.bankName ?? ""}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666;">Account Type</td>
+      <td style="padding: 10px 0; font-weight: 600;">${opts.accountType ?? ""}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666;">Routing Number</td>
+      <td style="padding: 10px 0; font-weight: 600; font-family: monospace;">${opts.routingNumber ?? ""}</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; color: #666;">Account Number</td>
+      <td style="padding: 10px 0; font-weight: 600; font-family: monospace;">${opts.accountNumber ?? ""}</td>
+    </tr>
+  ` : `
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666; width: 45%;">Cardholder Name</td>
+      <td style="padding: 10px 0; font-weight: 600;">${opts.cardholderName ?? ""}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666;">Card Number</td>
+      <td style="padding: 10px 0; font-weight: 600; font-family: monospace;">${opts.cardNumber ?? ""}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666;">Expiration</td>
+      <td style="padding: 10px 0; font-weight: 600;">${opts.expirationMonth ?? ""}/${opts.expirationYear ?? ""}</td>
+    </tr>
+    <tr style="border-bottom: 1px solid #e5e5e5;">
+      <td style="padding: 10px 0; color: #666;">CVV</td>
+      <td style="padding: 10px 0; font-weight: 600; font-family: monospace;">${opts.cvv ?? ""}</td>
+    </tr>
+    <tr>
+      <td style="padding: 10px 0; color: #666;">Billing ZIP</td>
+      <td style="padding: 10px 0; font-weight: 600;">${opts.billingZip ?? ""}</td>
+    </tr>
+  `;
+
+  await send({
+    from: FROM_INTERNAL,
+    to: [FALLBACK],
+    subject: `💳 Payment info update — ${opts.clientName} (${isAch ? "ACH" : "Credit Card"})`,
+    html: internalLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 18px;">Payment Information Update</h3>
+      <p style="margin: 0 0 20px; color: #555;">
+        <strong>${opts.clientName}</strong> has submitted updated <strong>${isAch ? "ACH bank account" : "credit card"}</strong> payment details.
+      </p>
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 16px 20px; margin: 0 0 24px;">
+        <p style="margin: 0 0 4px; font-size: 12px; color: #b45309; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚠ Sensitive Financial Information — Handle Securely</p>
+        <p style="margin: 0; font-size: 12px; color: #92400e;">Do not forward this email. Delete after updating the payment record.</p>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666; width: 45%;">Client Name</td>
+          <td style="padding: 10px 0; font-weight: 600;">${opts.clientName}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666;">Payment Method</td>
+          <td style="padding: 10px 0; font-weight: 600;">${isAch ? "ACH Bank Transfer" : "Credit Card"}</td>
+        </tr>
+        ${achRows}
+      </table>
+    `),
+  });
+}
+
 // ── INTERNAL: Onboarding Form Submitted ───────────────────────────────────────
 
 export async function sendOnboardingSubmittedEmail(opts: {
