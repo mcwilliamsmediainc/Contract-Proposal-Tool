@@ -19,7 +19,7 @@ const formSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
-  projectType: z.enum(["web", "tiered", "ala-carte"]),
+  projectType: z.enum(["web", "tiered", "ala-carte", "project"]),
   clientStrategist: z.string().optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
@@ -53,6 +53,7 @@ export default function NewProposal() {
 
   const watched = form.watch();
   const isWebsite = watched.projectType === "web";
+  const isProject = watched.projectType === "project";
 
   const handleGenerate = async () => {
     const values = form.getValues();
@@ -158,6 +159,7 @@ export default function NewProposal() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="web">Website</SelectItem>
+                          <SelectItem value="project">Project</SelectItem>
                           <SelectItem value="tiered">Tiered Marketing</SelectItem>
                           <SelectItem value="ala-carte">A La Carte Marketing</SelectItem>
                         </SelectContent>
@@ -229,6 +231,27 @@ export default function NewProposal() {
                       )}
                     />
                   </>
+                )}
+
+                {/* Project-only fields */}
+                {isProject && (
+                  <FormField
+                    control={form.control}
+                    name="pageNames"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project Details</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Describe the scope of this project — what will be built, key deliverables, or any special requirements..."
+                            className="min-h-[100px] resize-y text-sm"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 )}
 
                 <div className="pt-2 border-t border-border/50">

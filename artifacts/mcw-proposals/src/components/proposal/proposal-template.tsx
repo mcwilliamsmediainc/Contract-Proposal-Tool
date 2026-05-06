@@ -51,7 +51,7 @@ function CheckItem({ children }: { children: React.ReactNode }) {
 export function ProposalCover({ clientName, businessName, projectType, date }: {
   clientName: string; businessName: string; projectType: string; date: string;
 }) {
-  const label = projectType === "tiered" ? "Marketing" : projectType === "ala-carte" ? "Ala Carte Marketing" : projectType === "marketing" ? "Marketing" : projectType === "print" ? "Print" : "Website";
+  const label = projectType === "tiered" ? "Marketing" : projectType === "ala-carte" ? "Ala Carte Marketing" : projectType === "marketing" ? "Marketing" : projectType === "print" ? "Print" : projectType === "project" ? "Project" : "Website";
   return (
     <section id="section-cover" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden"
       style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 35%, #1a5bb8 65%, #0d3494 85%, #0a1f5c 100%)" }}>
@@ -346,6 +346,46 @@ export function CustomWebsiteSection({ numberOfPages, pageNames }: { numberOfPag
         <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
           <h3 className="text-lg font-bold text-gray-900 mb-2">Website Training</h3>
           <p className="text-gray-600 text-sm leading-relaxed">This add-on service includes a training session with a member of our team to help you learn how to operate and navigate the backend of your website.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export function CustomProjectSection({ projectDetails }: { projectDetails?: string | null }) {
+  return (
+    <section id="section-project" className="bg-white py-20 px-6 border-t border-gray-100">
+      <div className="max-w-3xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Your Project</h2>
+        <p className="text-gray-600 mb-10 text-lg">Thank you for taking the time to share your goals, challenges, and vision with us.</p>
+        {projectDetails && (
+          <div className="mb-10 bg-blue-50 rounded-xl p-6 border border-blue-100">
+            <h3 className="text-lg font-bold text-gray-900 mb-3">Project Details</h3>
+            <p className="text-gray-700 leading-relaxed">{projectDetails}</p>
+          </div>
+        )}
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Deliverables — What to Expect:</h3>
+          <ul className="space-y-3">
+            <CheckItem>Project built to your specifications and brand standards</CheckItem>
+            <CheckItem>Mobile responsive and optimized for all devices</CheckItem>
+            <CheckItem>Modern design with a polished look and feel</CheckItem>
+            <CheckItem>Content proofed and refined by our team</CheckItem>
+            <CheckItem>Backend access with training on how to manage your project</CheckItem>
+            <CheckItem>Screen-recorded walkthrough of your completed project</CheckItem>
+          </ul>
+        </div>
+        <div className="mb-10">
+          <h3 className="text-lg font-bold text-gray-900 mb-4">Integrations</h3>
+          <ul className="space-y-3">
+            <CheckItem>Social media links and call-to-action elements</CheckItem>
+            <CheckItem>Contact form and lead capture setup</CheckItem>
+            <CheckItem>Analytics and performance tracking (optional)</CheckItem>
+          </ul>
+        </div>
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+          <h3 className="text-lg font-bold text-gray-900 mb-2">Training & Handoff</h3>
+          <p className="text-gray-600 text-sm leading-relaxed">Includes a dedicated handoff session with a member of our team so you feel confident managing and updating your project going forward.</p>
         </div>
       </div>
     </section>
@@ -698,14 +738,20 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
       {/* 5. Your solution */}
       <StrategySection />
       {/* 6. Deliverables */}
-      <CustomWebsiteSection numberOfPages={data.numberOfPages} pageNames={data.pageNames} />
-      {/* 7. Process / Timeline */}
-      <TimelineSection />
-      <BrandShootSection />
-      <EssentialsSection
-        selectedHosting={onAccept ? selectedHosting : null}
-        onSelectHosting={onAccept ? setSelectedHosting : undefined}
-      />
+      {data.projectType === "project" ? (
+        <CustomProjectSection projectDetails={data.pageNames} />
+      ) : (
+        <>
+          <CustomWebsiteSection numberOfPages={data.numberOfPages} pageNames={data.pageNames} />
+          {/* 7. Process / Timeline */}
+          <TimelineSection />
+          <BrandShootSection />
+          <EssentialsSection
+            selectedHosting={onAccept ? selectedHosting : null}
+            onSelectHosting={onAccept ? setSelectedHosting : undefined}
+          />
+        </>
+      )}
       {/* 8. Investment — pricing after value is established */}
       <PricingSection numberOfPages={data.numberOfPages} totalAmount={data.totalAmount} pricingItems={data.pricingItems} />
       {/* 9. Team */}

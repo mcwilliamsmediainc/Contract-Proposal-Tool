@@ -990,7 +990,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print, tiered, ala-carte]
+          enum: [web, marketing, print, tiered, ala-carte, project]
         status:
           type: string
           enum: [draft, sent, accepted, archived]
@@ -1090,7 +1090,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print, tiered, ala-carte]
+          enum: [web, marketing, print, tiered, ala-carte, project]
         totalAmount:
           type: number
         specialContext:
@@ -1135,7 +1135,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print, tiered, ala-carte]
+          enum: [web, marketing, print, tiered, ala-carte, project]
         totalAmount:
           type: number
         status:
@@ -1193,7 +1193,7 @@ components:
           type: string
         projectType:
           type: string
-          enum: [web, marketing, print, tiered, ala-carte]
+          enum: [web, marketing, print, tiered, ala-carte, project]
         totalAmount:
           type: number
         specialContext:

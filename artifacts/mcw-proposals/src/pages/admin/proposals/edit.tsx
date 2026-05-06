@@ -29,7 +29,7 @@ const formSchema = z.object({
   clientName: z.string().min(1),
   businessName: z.string().min(1),
   clientEmail: z.string().email(),
-  projectType: z.enum(["web", "tiered", "ala-carte", "marketing", "print"]),
+  projectType: z.enum(["web", "tiered", "ala-carte", "marketing", "print", "project"]),
   clientStrategist: z.string().optional(),
   totalAmount: z.coerce.number().min(0).optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
@@ -258,6 +258,7 @@ export default function EditProposal() {
   const isSent = proposal.status === "sent" || proposal.status === "accepted";
   const isTiered = watched.projectType === "tiered";
   const isAlaCarte = watched.projectType === "ala-carte";
+  const isProject = watched.projectType === "project";
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
     { panel: "content", label: "Intro Text", icon: FileText },
@@ -461,6 +462,7 @@ export default function EditProposal() {
                   <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                   <SelectContent>
                     <SelectItem value="web">Website</SelectItem>
+                    <SelectItem value="project">Project</SelectItem>
                     <SelectItem value="tiered">Tiered Marketing</SelectItem>
                     <SelectItem value="ala-carte">A La Carte Marketing</SelectItem>
                   </SelectContent>
@@ -479,6 +481,21 @@ export default function EditProposal() {
                 </Select>
               </FormItem>
             )} />
+            {isProject && (
+              <FormField control={form.control} name="pageNames" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Details</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      className="min-h-[120px] resize-y text-sm"
+                      placeholder="Describe the scope of this project — what will be built, key deliverables, or any special requirements..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )} />
+            )}
           </div>
         </Form>
       </SlidePanel>
