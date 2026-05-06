@@ -1,30 +1,68 @@
 import { Link } from "wouter";
-import { PublicHeader } from "@/components/layout/public-header";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/30">
-      <PublicHeader variant="light" subtitle="Premium Digital Agency" />
+    <div className="min-h-screen flex flex-col" style={{ background: "#061e57" }}>
 
-      <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')] opacity-5 bg-cover bg-center pointer-events-none" />
-      <div className="absolute inset-0 bg-gradient-to-t from-background via-background/90 to-background/50 pointer-events-none" />
+      {/* Header */}
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 backdrop-blur-md bg-[#061e57]/90">
+        <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
+          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-7 w-auto object-contain" />
+          <a
+            href="https://mcwilliamsmedia.com"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs tracking-wider uppercase text-white/40 hover:text-white/70 transition-colors hidden sm:block"
+          >
+            mcwilliamsmedia.com
+          </a>
+        </div>
+      </header>
 
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center max-w-4xl mx-auto px-6 py-20">
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 font-sans">
-          Strategic Architecture.<br />
-          <span className="text-primary">Digital Execution.</span>
-        </h1>
+      {/* Diagonal texture overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 40px,
+            rgba(179,206,225,0.03) 40px,
+            rgba(179,206,225,0.03) 41px
+          )`,
+        }}
+      />
 
-        <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-relaxed">
-          McWilliams Media builds premium, high-converting digital ecosystems for visionary brands. We don't just design websites; we architect growth.
+      {/* Hero */}
+      <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-24 max-w-4xl mx-auto w-full">
+
+        <p className="text-xs font-semibold tracking-[0.2em] uppercase text-[#b3cee1]/70 mb-6">
+          McWilliams Media — Strategic Portal
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-          <Link href="/admin" className="inline-flex h-14 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50">
-            Access Portal
-          </Link>
-        </div>
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-4 leading-[1.05]">
+          Strategic Architecture.
+        </h1>
+        <h2 className="text-4xl md:text-6xl font-extrabold tracking-tight text-[#b3cee1] mb-8 leading-[1.05]">
+          Digital Execution.
+        </h2>
+
+        <p className="text-base md:text-lg text-white/50 max-w-xl mx-auto mb-12 leading-relaxed">
+          McWilliams Media builds premium, high-converting digital ecosystems for visionary brands.
+        </p>
+
+        <Link
+          href="/admin"
+          className="inline-flex h-12 items-center justify-center rounded-md bg-white px-8 text-sm font-semibold text-[#061e57] shadow-lg transition-all hover:bg-[#b3cee1] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/30"
+        >
+          Access Portal
+        </Link>
       </main>
+
+      {/* Bottom rule */}
+      <div className="border-t border-white/10 py-5 text-center">
+        <p className="text-xs text-white/25 tracking-wider">© {new Date().getFullYear()} McWilliams Media. All rights reserved.</p>
+      </div>
     </div>
   );
 }

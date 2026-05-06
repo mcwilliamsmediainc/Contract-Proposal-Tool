@@ -15,66 +15,41 @@ export function PublicHeader({ variant = "light", subtitle, className }: PublicH
       className={cn(
         "sticky top-0 z-50 w-full border-b backdrop-blur-md transition-colors",
         isDark
-          ? "bg-zinc-950/90 border-zinc-800/70"
-          : "bg-white/90 border-gray-200",
+          ? "bg-[#061e57]/90 border-white/10"
+          : "bg-white/95 border-gray-200/80",
         className
       )}
     >
       <div className="max-w-6xl mx-auto px-5 h-14 flex items-center justify-between">
         <Link href="/">
-          <div className="flex items-center gap-3 cursor-pointer group">
-            <div
-              className={cn(
-                "w-8 h-8 rounded flex items-center justify-center font-mono font-bold text-base flex-shrink-0 transition-opacity group-hover:opacity-80",
-                isDark
-                  ? "bg-white text-black"
-                  : "bg-blue-600 text-white"
-              )}
-            >
-              M
-            </div>
-            <div className="flex flex-col leading-none">
-              <span
-                className={cn(
-                  "font-bold text-sm tracking-tight leading-none",
-                  isDark ? "text-white" : "text-gray-900"
-                )}
-              >
-                McWilliams Media
-              </span>
-              {subtitle ? (
-                <span
-                  className={cn(
-                    "font-mono text-[10px] tracking-widest uppercase mt-0.5",
-                    isDark ? "text-zinc-500" : "text-gray-400"
-                  )}
-                >
-                  {subtitle}
-                </span>
-              ) : (
-                <span
-                  className={cn(
-                    "font-mono text-[10px] tracking-widest uppercase mt-0.5",
-                    isDark ? "text-zinc-500" : "text-gray-400"
-                  )}
-                >
-                  Strategic Portal
-                </span>
-              )}
-            </div>
+          <div className="flex items-center cursor-pointer group opacity-100 hover:opacity-80 transition-opacity">
+            <img
+              src="/mcwilliams-logo.png"
+              alt="McWilliams Media"
+              className="h-7 w-auto object-contain"
+              style={isDark ? {} : { filter: "brightness(0) saturate(100%) invert(12%) sepia(74%) saturate(1200%) hue-rotate(210deg)" }}
+            />
           </div>
         </Link>
 
         <div className="flex items-center gap-4">
+          {subtitle && (
+            <span className={cn(
+              "text-xs tracking-[0.15em] uppercase font-medium hidden sm:block",
+              isDark ? "text-white/40" : "text-[#3a4856]/50"
+            )}>
+              {subtitle}
+            </span>
+          )}
           <a
             href="https://mcwilliamsmedia.com"
             target="_blank"
             rel="noreferrer"
             className={cn(
-              "text-xs font-mono tracking-wider uppercase transition-colors hidden sm:block",
+              "text-xs tracking-wider uppercase transition-colors hidden sm:block",
               isDark
-                ? "text-zinc-500 hover:text-zinc-300"
-                : "text-gray-400 hover:text-gray-700"
+                ? "text-white/35 hover:text-white/65"
+                : "text-[#3a4856]/40 hover:text-[#061e57]"
             )}
           >
             mcwilliamsmedia.com

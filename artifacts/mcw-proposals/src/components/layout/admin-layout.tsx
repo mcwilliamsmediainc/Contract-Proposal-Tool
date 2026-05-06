@@ -11,13 +11,32 @@ const NAV_ITEMS = [
   { href: "/admin/clients", label: "Clients", icon: BookUser },
 ];
 
+const SIDEBAR_BG = "bg-[#061e57]";
+const SIDEBAR_BORDER = "border-[#0d2a6b]";
+
+function SidebarLogo({ collapsed }: { collapsed: boolean }) {
+  return (
+    <div className={cn(
+      "flex items-center border-b h-[57px] flex-shrink-0 relative",
+      SIDEBAR_BORDER,
+      collapsed ? "justify-center px-0" : "px-5"
+    )}>
+      {collapsed ? (
+        <span style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 26, color: "#b3cee1", letterSpacing: ".04em", lineHeight: 1 }}>m</span>
+      ) : (
+        <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-8 w-auto object-contain" />
+      )}
+    </div>
+  );
+}
+
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground selection:bg-primary/30">
+    <div className="flex min-h-screen bg-background text-foreground selection:bg-primary/20">
 
       {/* Mobile overlay */}
       {mobileOpen && (
@@ -27,29 +46,19 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — desktop */}
       <aside className={cn(
-        "flex-col border-r border-border bg-card transition-all duration-200 ease-in-out z-50",
+        "flex-col transition-all duration-200 ease-in-out z-50 border-r",
+        SIDEBAR_BG, SIDEBAR_BORDER,
         "hidden md:flex",
-        collapsed ? "w-16" : "w-64",
+        collapsed ? "w-16" : "w-60",
       )}>
         {/* Logo */}
-        <div className={cn(
-          "flex items-center border-b border-border h-[57px] flex-shrink-0 relative",
-          collapsed ? "justify-center px-0" : "px-5 gap-3"
-        )}>
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-mono font-bold text-lg flex-shrink-0">
-            M
-          </div>
-          {!collapsed && (
-            <span className="font-bold tracking-tight text-sm truncate">MCWILLIAMS</span>
-          )}
-          {/* Collapse toggle */}
+        <div className="relative">
+          <SidebarLogo collapsed={collapsed} />
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className={cn(
-              "absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-border bg-card flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shadow-sm z-10"
-            )}
+            className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full border border-[#0d2a6b] bg-[#061e57] flex items-center justify-center text-white/50 hover:text-white transition-colors shadow-md z-10"
             title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
             {collapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
@@ -57,9 +66,11 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 p-2 space-y-0.5 mt-1">
+        <nav className="flex-1 p-2 space-y-0.5 mt-2">
           {!collapsed && (
-            <div className="text-xs font-mono text-muted-foreground mb-3 px-3 pt-2">STRATEGIC PORTAL</div>
+            <div className="text-[10px] font-semibold tracking-[0.15em] uppercase text-white/30 mb-2 px-3 pt-1">
+              Strategic Portal
+            </div>
           )}
           {NAV_ITEMS.map((item) => {
             const isActive = location === item.href || (item.href !== "/admin" && location.startsWith(item.href));
@@ -68,12 +79,14 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 <div
                   title={collapsed ? item.label : undefined}
                   className={cn(
-                    "flex items-center gap-3 rounded-md text-sm font-medium transition-colors cursor-pointer",
+                    "flex items-center gap-3 rounded-md text-sm font-medium transition-all cursor-pointer",
                     collapsed ? "px-0 py-2.5 justify-center" : "px-3 py-2",
-                    isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    isActive
+                      ? "bg-white/15 text-white"
+                      : "text-white/55 hover:bg-white/10 hover:text-white/90"
                   )}
                 >
-                  <item.icon className="w-4 h-4 flex-shrink-0" />
+                  <item.icon className={cn("flex-shrink-0", collapsed ? "w-5 h-5" : "w-4 h-4")} />
                   {!collapsed && item.label}
                 </div>
               </Link>
@@ -81,38 +94,38 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        {/* User */}
-        <div className={cn("border-t border-border p-2", collapsed ? "flex justify-center py-3" : "")}>
+        {/* User footer */}
+        <div className={cn("border-t p-2", SIDEBAR_BORDER, collapsed ? "flex justify-center py-3" : "")}>
           <div className={cn(
-            "flex items-center gap-3 rounded-md",
+            "flex items-center gap-2.5 rounded-md",
             collapsed ? "justify-center px-0 py-1" : "px-3 py-2"
           )}>
-            <div className="w-7 h-7 bg-primary/20 rounded flex items-center justify-center text-primary font-mono font-bold text-xs flex-shrink-0">
-              M
+            <div className="w-6 h-6 rounded-full bg-[#b3cee1]/20 border border-[#b3cee1]/30 flex items-center justify-center text-[#b3cee1] font-bold text-xs flex-shrink-0">
+              A
             </div>
-            {!collapsed && <span className="text-sm font-medium text-muted-foreground">Admin</span>}
+            {!collapsed && <span className="text-sm font-medium text-white/50">Admin</span>}
           </div>
         </div>
       </aside>
 
       {/* Mobile drawer */}
       <aside className={cn(
-        "fixed inset-y-0 left-0 w-64 border-r border-border bg-card flex flex-col z-50 transition-transform duration-200 md:hidden",
+        "fixed inset-y-0 left-0 w-60 border-r flex flex-col z-50 transition-transform duration-200 md:hidden",
+        SIDEBAR_BG, SIDEBAR_BORDER,
         mobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        <div className="flex items-center gap-3 px-5 border-b border-border h-14">
-          <div className="w-8 h-8 bg-primary rounded flex items-center justify-center text-primary-foreground font-mono font-bold text-lg">M</div>
-          <span className="font-bold tracking-tight text-sm">MCWILLIAMS</span>
+        <div className={cn("flex items-center px-5 border-b h-14", SIDEBAR_BORDER)}>
+          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-7 w-auto object-contain" />
         </div>
-        <nav className="flex-1 p-2 space-y-0.5 mt-1">
-          <div className="text-xs font-mono text-muted-foreground mb-3 px-3 pt-2">STRATEGIC PORTAL</div>
+        <nav className="flex-1 p-2 space-y-0.5 mt-2">
+          <div className="text-[10px] font-semibold tracking-[0.15em] uppercase text-white/30 mb-2 px-3 pt-1">Strategic Portal</div>
           {NAV_ITEMS.map((item) => {
             const isActive = location === item.href || (item.href !== "/admin" && location.startsWith(item.href));
             return (
               <Link key={item.href} href={item.href}>
                 <div onClick={() => setMobileOpen(false)} className={cn(
-                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer",
-                  isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all cursor-pointer",
+                  isActive ? "bg-white/15 text-white" : "text-white/55 hover:bg-white/10 hover:text-white/90"
                 )}>
                   <item.icon className="w-4 h-4" />
                   {item.label}
@@ -121,10 +134,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div className="border-t border-border p-2">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-7 h-7 bg-primary/20 rounded flex items-center justify-center text-primary font-mono font-bold text-xs">M</div>
-            <span className="text-sm font-medium text-muted-foreground">Admin</span>
+        <div className={cn("border-t p-2", SIDEBAR_BORDER)}>
+          <div className="flex items-center gap-2.5 px-3 py-2">
+            <div className="w-6 h-6 rounded-full bg-[#b3cee1]/20 border border-[#b3cee1]/30 flex items-center justify-center text-[#b3cee1] font-bold text-xs">A</div>
+            <span className="text-sm font-medium text-white/50">Admin</span>
           </div>
         </div>
       </aside>
@@ -135,10 +148,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <button onClick={() => setMobileOpen(true)} className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors">
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded flex items-center justify-center text-primary-foreground font-mono font-bold text-sm">M</div>
-            <span className="font-bold text-sm tracking-tight">McWilliams Media</span>
-          </div>
+          <img src="/mcwilliams-logo.png" alt="McWilliams Media" className="h-6 w-auto object-contain" style={{ filter: "brightness(0) saturate(100%) invert(12%) sepia(74%) saturate(1200%) hue-rotate(210deg)" }} />
           <div className="w-8" />
         </header>
 
