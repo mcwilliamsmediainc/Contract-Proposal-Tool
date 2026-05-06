@@ -2,6 +2,7 @@ import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, contractsTable, onboardingClientsTable, onboardingTasksTable } from "@workspace/db";
+import { sendContractSignedEmail } from "../../lib/email";
 import {
   CreateContractBody,
   UpdateContractBody,
@@ -279,6 +280,15 @@ router.post("/contracts/:id/sign", async (req, res) => {
       }))
     );
   }
+
+  // Notify all strategists of contract signing
+  sendContractSignedEmail({
+    clientName: updated.clientName,
+    businessName: updated.businessName,
+    contractUuid: updated.uuid ?? String(updated.id),
+    contractType: updated.contractType,
+    totalCost: Number(updated.totalCost),
+  }).catch(() => {});
 
   res.json(formatContract(updated));
 });

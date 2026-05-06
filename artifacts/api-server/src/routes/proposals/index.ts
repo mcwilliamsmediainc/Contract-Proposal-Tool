@@ -22,6 +22,10 @@ import {
   CreateOnboardingClientBody,
 } from "@workspace/api-zod";
 import { ai } from "@workspace/integrations-gemini-ai";
+import {
+  sendProposalViewedEmail,
+  sendProposalAcceptedEmail,
+} from "../../lib/email";
 
 const router = Router();
 
@@ -502,6 +506,15 @@ router.post("/proposals/:id/accept", async (req, res) => {
     await seedDefaultTasks(onboardingId);
   }
 
+  // Notify strategist of acceptance
+  sendProposalAcceptedEmail({
+    clientName: updated.clientName,
+    businessName: updated.businessName ?? updated.clientName,
+    proposalUuid: updated.uuid ?? String(updated.id),
+    clientStrategist: updated.clientStrategist,
+    selectedTier: updated.selectedTier,
+  }).catch(() => {});
+
   res.json(formatProposal(updated));
 });
 
@@ -534,6 +547,16 @@ router.post("/proposals/:id/view", async (req, res) => {
     })
     .where(eq(proposalsTable.uuid, id))
     .returning();
+
+  // Send email notification on first view only
+  if ((existing[0].viewCount ?? 0) === 0) {
+    sendProposalViewedEmail({
+      clientName: updated.clientName,
+      businessName: updated.businessName ?? updated.clientName,
+      proposalUuid: updated.uuid ?? String(updated.id),
+      clientStrategist: updated.clientStrategist,
+    }).catch(() => {});
+  }
 
   // Use public formatter: this endpoint is consumed by the client portal to track views
   res.json(formatProposalPublic(updated));

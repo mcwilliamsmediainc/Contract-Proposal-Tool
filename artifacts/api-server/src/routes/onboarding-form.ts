@@ -2,6 +2,7 @@ import { Router } from "express";
 import { eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, onboardingClientsTable, onboardingFormResponsesTable } from "@workspace/db";
+import { sendOnboardingSubmittedEmail } from "../lib/email";
 
 const router = Router();
 
@@ -94,6 +95,16 @@ router.post("/onboarding-form/:id", async (req, res) => {
       })
       .returning();
     form = created;
+  }
+
+  // Notify strategist when form is first submitted
+  if (submitted && !existing?.submittedAt) {
+    sendOnboardingSubmittedEmail({
+      clientName: client.clientName,
+      businessName: client.businessName,
+      onboardingId: id,
+      clientStrategist: client.clientStrategist,
+    }).catch(() => {});
   }
 
   res.json(formatFormState(client, form));
