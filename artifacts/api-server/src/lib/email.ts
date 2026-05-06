@@ -12,7 +12,6 @@ const STRATEGIST_EMAILS: Record<string, string> = {
   "Rachelle Hoover": "rachelle@mcwilliamsmedia.com",
 };
 
-const ALL_STRATEGISTS = Object.values(STRATEGIST_EMAILS);
 const FALLBACK = "info@mcwilliamsmedia.com";
 
 function getMailgunClient() {
@@ -49,10 +48,11 @@ async function send(opts: {
 }
 
 function recipientsFor(strategist: string | null | undefined): string[] {
-  if (strategist && STRATEGIST_EMAILS[strategist]) {
-    return [STRATEGIST_EMAILS[strategist]];
+  const recipients: string[] = [FALLBACK];
+  if (strategist && STRATEGIST_EMAILS[strategist] && STRATEGIST_EMAILS[strategist] !== FALLBACK) {
+    recipients.push(STRATEGIST_EMAILS[strategist]);
   }
-  return [FALLBACK];
+  return recipients;
 }
 
 function baseUrl() {
@@ -185,12 +185,14 @@ export async function sendContractSignedEmail(opts: {
   contractUuid: string;
   contractType: string;
   totalCost: number;
+  clientStrategist?: string | null;
 }) {
+  const to = recipientsFor(opts.clientStrategist);
   const adminUrl = `${baseUrl()}/admin/contracts`;
 
   await send({
     from: FROM_INTERNAL,
-    to: ALL_STRATEGISTS,
+    to,
     subject: `📝 ${opts.clientName} signed their contract`,
     html: internalLayout(`
       <h3 style="margin: 0 0 16px; font-size: 18px;">Contract Signed ✓</h3>

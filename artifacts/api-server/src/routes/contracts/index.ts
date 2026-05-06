@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, contractsTable, onboardingClientsTable, onboardingTasksTable } from "@workspace/db";
+import { db, contractsTable, onboardingClientsTable, onboardingTasksTable, proposalsTable } from "@workspace/db";
 import { sendContractSignedEmail, sendContractSignedClientEmail } from "../../lib/email";
 import {
   CreateContractBody,
@@ -281,13 +281,25 @@ router.post("/contracts/:id/sign", async (req, res) => {
     );
   }
 
-  // Notify all strategists of contract signing
+  // Look up linked proposal to get the assigned client strategist
+  let clientStrategist: string | null = null;
+  if (updated.proposalId) {
+    const [linkedProposal] = await db
+      .select({ clientStrategist: proposalsTable.clientStrategist })
+      .from(proposalsTable)
+      .where(eq(proposalsTable.uuid, updated.proposalId))
+      .limit(1);
+    clientStrategist = linkedProposal?.clientStrategist ?? null;
+  }
+
+  // Notify info@ (always) + strategist (if assigned)
   sendContractSignedEmail({
     clientName: updated.clientName,
     businessName: updated.businessName,
     contractUuid: updated.uuid ?? String(updated.id),
     contractType: updated.contractType,
     totalCost: Number(updated.totalCost),
+    clientStrategist,
   }).catch(() => {});
 
   // Send confirmation to client
