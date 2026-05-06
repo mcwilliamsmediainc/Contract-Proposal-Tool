@@ -1,14 +1,15 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProposal } from "@workspace/api-client-react";
+import { useCreateProposal, useGenerateProposalContent } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -20,6 +21,9 @@ const formSchema = z.object({
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "tiered", "ala-carte"]),
   clientStrategist: z.string().optional(),
+  numberOfPages: z.coerce.number().int().min(1).optional(),
+  pageNames: z.string().optional(),
+  content: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -36,10 +40,34 @@ export default function NewProposal() {
       clientEmail: "",
       projectType: "web",
       clientStrategist: "",
+      numberOfPages: undefined,
+      pageNames: "",
+      content: "",
     },
   });
 
   const createProposal = useCreateProposal();
+  const generateContent = useGenerateProposalContent();
+
+  const watched = form.watch();
+  const isWebsite = watched.projectType === "web";
+
+  const handleGenerate = async () => {
+    const values = form.getValues();
+    try {
+      const res = await generateContent.mutateAsync({
+        data: {
+          clientName: values.clientName,
+          businessName: values.businessName,
+          projectType: values.projectType,
+        },
+      });
+      form.setValue("content", res.content);
+      toast({ title: "Generated", description: "AI intro content ready." });
+    } catch {
+      toast({ title: "Failed", description: "Could not generate content.", variant: "destructive" });
+    }
+  };
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -47,6 +75,9 @@ export default function NewProposal() {
         data: {
           ...values,
           clientStrategist: values.clientStrategist || null,
+          numberOfPages: values.numberOfPages ?? null,
+          pageNames: values.pageNames || null,
+          content: values.content || null,
         },
       });
       toast({ title: "Draft Saved", description: "Proposal draft created successfully." });
@@ -65,7 +96,8 @@ export default function NewProposal() {
         </div>
       </div>
 
-      <div className="max-w-xl">
+      <div className="max-w-xl space-y-6">
+        {/* Client Details */}
         <Card className="bg-card/50 backdrop-blur border-border/50">
           <CardHeader>
             <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Client Details</CardTitle>
@@ -151,6 +183,50 @@ export default function NewProposal() {
                   )}
                 />
 
+                {/* Website-only fields */}
+                {isWebsite && (
+                  <>
+                    <div className="grid grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="numberOfPages"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Number of Pages</FormLabel>
+                            <FormControl>
+                              <Input
+                                type="number"
+                                min={1}
+                                placeholder="e.g. 5"
+                                value={field.value ?? ""}
+                                onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <div className="flex items-end">
+                        <p className="text-xs text-muted-foreground pb-2">Total number of web pages in the project.</p>
+                      </div>
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="pageNames"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Page Names</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Home | About | Services | Contact" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </>
+                )}
+
                 <div className="pt-2 border-t border-border/50">
                   <Button type="submit" className="w-full" disabled={createProposal.isPending}>
                     {createProposal.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
@@ -158,6 +234,49 @@ export default function NewProposal() {
                   </Button>
                 </div>
               </form>
+            </Form>
+          </CardContent>
+        </Card>
+
+        {/* AI Custom Intro */}
+        <Card className="bg-card/50 backdrop-blur border-border/50">
+          <CardHeader className="pb-3">
+            <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Custom Intro Text</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <div className="space-y-3">
+                <p className="text-xs text-muted-foreground">This text appears on page 2 of the proposal. Leave blank to use the default McWilliams Media introduction.</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerate}
+                  disabled={generateContent.isPending}
+                  className="w-full"
+                >
+                  {generateContent.isPending
+                    ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    : <Sparkles className="w-4 h-4 mr-2" />}
+                  AI Generate Custom Intro
+                </Button>
+                <FormField
+                  control={form.control}
+                  name="content"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Write a personalized introduction for this client, or click AI Generate above..."
+                          className="min-h-[200px] resize-y text-sm leading-relaxed"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </Form>
           </CardContent>
         </Card>
