@@ -25,6 +25,7 @@ import { ai } from "@workspace/integrations-gemini-ai";
 import {
   sendProposalViewedEmail,
   sendProposalAcceptedEmail,
+  sendProposalAcceptedClientEmail,
 } from "../../lib/email";
 
 const router = Router();
@@ -514,6 +515,16 @@ router.post("/proposals/:id/accept", async (req, res) => {
     clientStrategist: updated.clientStrategist,
     selectedTier: updated.selectedTier,
   }).catch(() => {});
+
+  // Send confirmation to client
+  if (updated.clientEmail) {
+    sendProposalAcceptedClientEmail({
+      clientName: updated.clientName,
+      businessName: updated.businessName ?? updated.clientName,
+      clientEmail: updated.clientEmail,
+      selectedTier: updated.selectedTier,
+    }).catch(() => {});
+  }
 
   res.json(formatProposal(updated));
 });

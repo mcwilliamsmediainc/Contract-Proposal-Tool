@@ -2,7 +2,8 @@ import Mailgun from "mailgun.js";
 import FormData from "form-data";
 import { logger } from "./logger";
 
-const FROM = "McWilliams Media <notifications@mcwilliamsmedia.com>";
+const FROM_INTERNAL = "McWilliams Media <notifications@mcwilliamsmedia.com>";
+const FROM_CLIENT = "McWilliams Media <noreply@mcwclients.com>";
 
 const STRATEGIST_EMAILS: Record<string, string> = {
   "Matt McWilliams": "matt@mcwilliamsmedia.com",
@@ -26,6 +27,7 @@ function getMailgunClient() {
 }
 
 async function send(opts: {
+  from: string;
   to: string[];
   subject: string;
   html: string;
@@ -35,7 +37,7 @@ async function send(opts: {
 
   try {
     await mg.client.messages.create(mg.domain, {
-      from: FROM,
+      from: opts.from,
       to: opts.to,
       subject: opts.subject,
       html: opts.html,
@@ -53,7 +55,41 @@ function recipientsFor(strategist: string | null | undefined): string[] {
   return [FALLBACK];
 }
 
-// ── Proposal: First View ──────────────────────────────────────────────────────
+function baseUrl() {
+  return `https://${process.env["REPLIT_DOMAINS"]?.split(",")[0] ?? "localhost"}`;
+}
+
+function internalLayout(body: string) {
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
+      <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 8px 8px 0 0;">
+        <h2 style="color: #d4af37; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
+      </div>
+      <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e5e5e5; border-top: none;">
+        ${body}
+      </div>
+    </div>
+  `;
+}
+
+function clientLayout(body: string) {
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a; background: #ffffff;">
+      <div style="background: #0a0a0a; padding: 28px 36px; border-radius: 8px 8px 0 0; text-align: center;">
+        <h2 style="color: #d4af37; margin: 0; font-size: 22px; letter-spacing: 2px; text-transform: uppercase;">McWilliams Media</h2>
+      </div>
+      <div style="padding: 36px; border: 1px solid #e5e5e5; border-top: none; border-radius: 0 0 8px 8px;">
+        ${body}
+      </div>
+      <div style="text-align: center; padding: 24px; color: #999; font-size: 12px; line-height: 1.6;">
+        McWilliams Media &nbsp;·&nbsp; Premium Digital Agency<br>
+        This is an automated confirmation — please do not reply to this email.
+      </div>
+    </div>
+  `;
+}
+
+// ── INTERNAL: Proposal First View ─────────────────────────────────────────────
 
 export async function sendProposalViewedEmail(opts: {
   clientName: string;
@@ -62,28 +98,22 @@ export async function sendProposalViewedEmail(opts: {
   clientStrategist?: string | null;
 }) {
   const to = recipientsFor(opts.clientStrategist);
-  const adminUrl = `https://${process.env["REPLIT_DOMAINS"]?.split(",")[0] ?? "localhost"}/admin/proposals/${opts.proposalUuid}/edit`;
+  const adminUrl = `${baseUrl()}/admin/proposals/${opts.proposalUuid}/edit`;
 
   await send({
+    from: FROM_INTERNAL,
     to,
     subject: `👀 ${opts.clientName} just viewed their proposal`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
-        <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-          <h2 style="color: #d4af37; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
-        </div>
-        <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e5e5e5; border-top: none;">
-          <h3 style="margin: 0 0 16px; font-size: 18px;">Proposal Viewed</h3>
-          <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> just opened their proposal for the first time.</p>
-          <p style="margin: 0 0 24px; color: #666; font-size: 14px;">This is a great time to follow up!</p>
-          <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Proposal in Dashboard</a>
-        </div>
-      </div>
-    `,
+    html: internalLayout(`
+      <h3 style="margin: 0 0 16px; font-size: 18px;">Proposal Viewed</h3>
+      <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> just opened their proposal for the first time.</p>
+      <p style="margin: 0 0 24px; color: #666; font-size: 14px;">This is a great time to follow up!</p>
+      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Proposal in Dashboard</a>
+    `),
   });
 }
 
-// ── Proposal: Accepted / Signed ───────────────────────────────────────────────
+// ── INTERNAL: Proposal Accepted ───────────────────────────────────────────────
 
 export async function sendProposalAcceptedEmail(opts: {
   clientName: string;
@@ -93,30 +123,61 @@ export async function sendProposalAcceptedEmail(opts: {
   selectedTier?: string | null;
 }) {
   const to = recipientsFor(opts.clientStrategist);
-  const adminUrl = `https://${process.env["REPLIT_DOMAINS"]?.split(",")[0] ?? "localhost"}/admin/proposals/${opts.proposalUuid}/edit`;
-  const tierNote = opts.selectedTier ? `<p style="margin: 0 0 8px;"><strong>Selected Plan:</strong> ${opts.selectedTier}</p>` : "";
+  const adminUrl = `${baseUrl()}/admin/proposals/${opts.proposalUuid}/edit`;
+  const tierNote = opts.selectedTier
+    ? `<p style="margin: 0 0 8px;"><strong>Selected Plan:</strong> ${opts.selectedTier}</p>`
+    : "";
 
   await send({
+    from: FROM_INTERNAL,
     to,
     subject: `🎉 ${opts.clientName} accepted their proposal!`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
-        <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-          <h2 style="color: #d4af37; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
-        </div>
-        <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e5e5e5; border-top: none;">
-          <h3 style="margin: 0 0 16px; font-size: 18px;">Proposal Signed ✓</h3>
-          <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has accepted and signed their proposal.</p>
-          ${tierNote}
-          <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Onboarding tasks have been created automatically.</p>
-          <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Open in Dashboard</a>
-        </div>
-      </div>
-    `,
+    html: internalLayout(`
+      <h3 style="margin: 0 0 16px; font-size: 18px;">Proposal Signed ✓</h3>
+      <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has accepted and signed their proposal.</p>
+      ${tierNote}
+      <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Onboarding tasks have been created automatically.</p>
+      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">Open in Dashboard</a>
+    `),
   });
 }
 
-// ── Contract: Signed ──────────────────────────────────────────────────────────
+// ── CLIENT: Proposal Accepted Confirmation ────────────────────────────────────
+
+export async function sendProposalAcceptedClientEmail(opts: {
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  selectedTier?: string | null;
+}) {
+  if (!opts.clientEmail) return;
+
+  const tierNote = opts.selectedTier
+    ? `<p style="margin: 0 0 8px; color: #444;"><strong>Selected Plan:</strong> ${opts.selectedTier}</p>`
+    : "";
+
+  await send({
+    from: FROM_CLIENT,
+    to: [opts.clientEmail],
+    subject: `Your proposal has been signed — welcome to McWilliams Media`,
+    html: clientLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 22px; color: #0a0a0a;">Thank you, ${opts.clientName}!</h3>
+      <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
+        We've received your signed proposal for <strong>${opts.businessName}</strong>. We're excited to get started and will be in touch shortly to kick things off.
+      </p>
+      ${tierNote}
+      <div style="background: #f5f5f5; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.6;">
+          <strong>What happens next?</strong><br>
+          Your dedicated strategist will reach out within 1–2 business days to schedule your kickoff call and walk you through the onboarding process.
+        </p>
+      </div>
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reply to your strategist directly or reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #d4af37;">info@mcwilliamsmedia.com</a>.</p>
+    `),
+  });
+}
+
+// ── INTERNAL: Contract Signed ─────────────────────────────────────────────────
 
 export async function sendContractSignedEmail(opts: {
   clientName: string;
@@ -125,29 +186,60 @@ export async function sendContractSignedEmail(opts: {
   contractType: string;
   totalCost: number;
 }) {
-  const adminUrl = `https://${process.env["REPLIT_DOMAINS"]?.split(",")[0] ?? "localhost"}/admin/contracts`;
+  const adminUrl = `${baseUrl()}/admin/contracts`;
 
   await send({
+    from: FROM_INTERNAL,
     to: ALL_STRATEGISTS,
     subject: `📝 ${opts.clientName} signed their contract`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
-        <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-          <h2 style="color: #d4af37; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
-        </div>
-        <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e5e5e5; border-top: none;">
-          <h3 style="margin: 0 0 16px; font-size: 18px;">Contract Signed ✓</h3>
-          <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has signed their contract.</p>
-          <p style="margin: 0 0 8px;"><strong>Contract Type:</strong> ${opts.contractType}</p>
-          <p style="margin: 0 0 24px;"><strong>Total:</strong> $${opts.totalCost.toLocaleString()}</p>
-          <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Contracts</a>
-        </div>
-      </div>
-    `,
+    html: internalLayout(`
+      <h3 style="margin: 0 0 16px; font-size: 18px;">Contract Signed ✓</h3>
+      <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has signed their contract.</p>
+      <p style="margin: 0 0 8px;"><strong>Contract Type:</strong> ${opts.contractType}</p>
+      <p style="margin: 0 0 24px;"><strong>Total:</strong> $${opts.totalCost.toLocaleString()}</p>
+      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Contracts</a>
+    `),
   });
 }
 
-// ── Onboarding Form: Submitted ────────────────────────────────────────────────
+// ── CLIENT: Contract Signed Confirmation ──────────────────────────────────────
+
+export async function sendContractSignedClientEmail(opts: {
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  contractType: string;
+  totalCost: number;
+  depositAmount: number;
+}) {
+  if (!opts.clientEmail) return;
+
+  await send({
+    from: FROM_CLIENT,
+    to: [opts.clientEmail],
+    subject: `Your contract is signed — let's build something great`,
+    html: clientLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 22px; color: #0a0a0a;">Contract confirmed, ${opts.clientName}!</h3>
+      <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
+        Your signed contract with McWilliams Media for <strong>${opts.businessName}</strong> has been received. A copy is on file and your project is officially underway.
+      </p>
+      <div style="background: #f5f5f5; border-radius: 8px; padding: 20px 24px; margin: 0 0 24px;">
+        <p style="margin: 0 0 8px; font-size: 14px; color: #444;"><strong>Contract Type:</strong> ${opts.contractType}</p>
+        <p style="margin: 0 0 8px; font-size: 14px; color: #444;"><strong>Total Investment:</strong> $${opts.totalCost.toLocaleString()}</p>
+        <p style="margin: 0; font-size: 14px; color: #444;"><strong>Deposit Due:</strong> $${opts.depositAmount.toLocaleString()}</p>
+      </div>
+      <div style="background: #f5f5f5; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.6;">
+          <strong>Next steps:</strong><br>
+          Your strategist will be in touch to confirm your deposit and schedule your project kickoff. Keep an eye on your inbox!
+        </p>
+      </div>
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #d4af37;">info@mcwilliamsmedia.com</a>.</p>
+    `),
+  });
+}
+
+// ── INTERNAL: Onboarding Form Submitted ───────────────────────────────────────
 
 export async function sendOnboardingSubmittedEmail(opts: {
   clientName: string;
@@ -156,23 +248,46 @@ export async function sendOnboardingSubmittedEmail(opts: {
   clientStrategist?: string | null;
 }) {
   const to = recipientsFor(opts.clientStrategist);
-  const adminUrl = `https://${process.env["REPLIT_DOMAINS"]?.split(",")[0] ?? "localhost"}/admin/onboarding`;
+  const adminUrl = `${baseUrl()}/admin/onboarding`;
 
   await send({
+    from: FROM_INTERNAL,
     to,
     subject: `✅ ${opts.clientName} completed their onboarding form`,
-    html: `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
-        <div style="background: #0a0a0a; padding: 24px 32px; border-radius: 8px 8px 0 0;">
-          <h2 style="color: #d4af37; margin: 0; font-size: 20px; letter-spacing: 1px;">McWilliams Media</h2>
-        </div>
-        <div style="background: #f9f9f9; padding: 32px; border-radius: 0 0 8px 8px; border: 1px solid #e5e5e5; border-top: none;">
-          <h3 style="margin: 0 0 16px; font-size: 18px;">Onboarding Form Submitted</h3>
-          <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has completed and submitted their onboarding questionnaire.</p>
-          <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Review their responses and begin onboarding.</p>
-          <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Onboarding Pipeline</a>
-        </div>
+    html: internalLayout(`
+      <h3 style="margin: 0 0 16px; font-size: 18px;">Onboarding Form Submitted</h3>
+      <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has completed and submitted their onboarding questionnaire.</p>
+      <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Review their responses and begin onboarding.</p>
+      <a href="${adminUrl}" style="background: #d4af37; color: #0a0a0a; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Onboarding Pipeline</a>
+    `),
+  });
+}
+
+// ── CLIENT: Onboarding Form Submitted Confirmation ────────────────────────────
+
+export async function sendOnboardingSubmittedClientEmail(opts: {
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+}) {
+  if (!opts.clientEmail) return;
+
+  await send({
+    from: FROM_CLIENT,
+    to: [opts.clientEmail],
+    subject: `Onboarding form received — we're on it`,
+    html: clientLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 22px; color: #0a0a0a;">Got it, ${opts.clientName}!</h3>
+      <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
+        We've received your completed onboarding questionnaire for <strong>${opts.businessName}</strong>. Our team is reviewing your responses and will use them to make sure your project starts strong.
+      </p>
+      <div style="background: #f5f5f5; border-left: 4px solid #d4af37; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #444; font-size: 14px; line-height: 1.6;">
+          <strong>What's next:</strong><br>
+          Your strategist will review your answers and reach out if they need any clarification before your project kicks off. You're all set!
+        </p>
       </div>
-    `,
+      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #d4af37;">info@mcwilliamsmedia.com</a>.</p>
+    `),
   });
 }
