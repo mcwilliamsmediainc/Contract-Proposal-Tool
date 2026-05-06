@@ -198,9 +198,17 @@ export default function EditProposal() {
     setSaving(true);
     try {
       const values = form.getValues();
+      // If totalAmount override is blank, compute from pricingItems line items
+      let effectiveTotal = values.totalAmount ?? 0;
+      if (!effectiveTotal && values.pricingItems) {
+        try {
+          const items = JSON.parse(values.pricingItems) as { price: number }[];
+          effectiveTotal = items.reduce((s, r) => s + Number(r.price), 0);
+        } catch { /* keep 0 */ }
+      }
       const data = await updateProposal.mutateAsync({
         id,
-        data: { ...values, totalAmount: values.totalAmount ?? 0 }
+        data: { ...values, totalAmount: effectiveTotal }
       });
       queryClient.setQueryData(getGetAdminProposalQueryKey(id), data);
       toast({ title: "Saved", description: "Changes saved to draft." });
@@ -774,6 +782,7 @@ export default function EditProposal() {
           businessName: watched.businessName || proposal.businessName,
           projectType: watched.projectType || proposal.projectType,
           totalAmount: watched.totalAmount ?? proposal.totalAmount,
+          pricingItems: watched.pricingItems ?? proposal.pricingItems,
           content: watched.content || proposal.content,
           specialContext: watched.specialContext || proposal.specialContext,
           numberOfPages: watched.numberOfPages || proposal.numberOfPages,

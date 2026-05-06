@@ -247,10 +247,20 @@ router.post("/gemini/review", async (req, res) => {
   if (type === "proposal") {
     const p = data as {
       clientName?: string; businessName?: string; projectType?: string;
-      totalAmount?: number; content?: string; specialContext?: string;
+      totalAmount?: number; pricingItems?: string; content?: string; specialContext?: string;
       numberOfPages?: number; pageNames?: string; status?: string;
       selectedTier?: string; clientStrategist?: string;
     };
+
+    // Compute effective total: use override if set, otherwise sum pricingItems
+    let effectiveTotal = p.totalAmount ?? 0;
+    if (!effectiveTotal && p.pricingItems) {
+      try {
+        const items = JSON.parse(p.pricingItems) as { price: number }[];
+        effectiveTotal = items.reduce((s, r) => s + Number(r.price), 0);
+      } catch { /* keep 0 */ }
+    }
+
     prompt = `You are a senior strategist at McWilliams Media reviewing a client proposal before it's sent. Be specific, actionable, and concise. Use markdown with headers.
 
 Review this proposal and provide:
@@ -274,7 +284,7 @@ List 2–4 specific improvements to make before sending.
 **Proposal Data:**
 - Client: ${p.clientName ?? "Unknown"} at ${p.businessName ?? "Unknown"}
 - Project Type: ${p.projectType ?? "Unknown"}
-- Total Amount: $${p.totalAmount ?? 0}
+- Total Amount: $${effectiveTotal.toLocaleString()}
 - Status: ${p.status ?? "draft"}
 - Strategist: ${p.clientStrategist ?? "Unassigned"}
 ${p.selectedTier ? `- Selected Tier: ${p.selectedTier}` : ""}
