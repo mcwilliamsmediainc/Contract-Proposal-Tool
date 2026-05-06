@@ -40,7 +40,7 @@ export interface ProposalData {
 function CheckItem({ children }: { children: React.ReactNode }) {
   return (
     <li className="flex items-start gap-3">
-      <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center">
+      <div className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full bg-[#061e57] flex items-center justify-center">
         <Check className="w-3 h-3 text-white" />
       </div>
       <span className="text-gray-700">{children}</span>
@@ -54,7 +54,7 @@ export function ProposalCover({ clientName, businessName, projectType, date }: {
   const label = projectType === "tiered" ? "Marketing" : projectType === "ala-carte" ? "Ala Carte Marketing" : projectType === "marketing" ? "Marketing" : projectType === "print" ? "Print" : projectType === "project" ? "Project" : "Website";
   return (
     <section id="section-cover" className="min-h-screen flex flex-col items-center justify-center text-center px-6 relative overflow-hidden"
-      style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 35%, #1a5bb8 65%, #0d3494 85%, #0a1f5c 100%)" }}>
+      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 45%, #061e57 100%)" }}>
       <div className="absolute inset-0 opacity-10" style={{
         backgroundImage: "radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.15) 0%, transparent 60%), radial-gradient(ellipse at 70% 80%, rgba(255,255,255,0.08) 0%, transparent 50%)"
       }} />
@@ -76,7 +76,7 @@ export function SectionIntro({ clientName, businessName }: { clientName?: string
   return (
     <section id="section-intro" className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-6">A Personal Note</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-6">A Personal Note</p>
         <div className="max-w-none text-gray-700 leading-relaxed">
           <p className="text-xl leading-relaxed mb-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {clientName ? `Dear ${clientName},` : "Dear [Client Name],"}
@@ -89,7 +89,7 @@ export function SectionIntro({ clientName, businessName }: { clientName?: string
           </p>
         </div>
         <div className="mt-10 pt-8 border-t border-gray-200 flex items-center gap-5">
-          <img src={mattDarkPhoto} alt="Matt McWilliams" className="w-16 h-16 rounded-full object-cover object-top flex-shrink-0 border-2 border-blue-100 shadow-md" />
+          <img src={mattDarkPhoto} alt="Matt McWilliams" className="w-16 h-16 rounded-full object-cover object-top flex-shrink-0 border-2 border-[#b3cee1]/40 shadow-md" />
           <div>
             <p className="text-gray-500 italic mb-1 text-sm">Warmly,</p>
             <p className="text-gray-800 font-semibold text-lg">Matt McWilliams</p>
@@ -106,7 +106,7 @@ export function SituationSection({ content }: { content?: string | null }) {
   return (
     <section id="section-situation" className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-4">Where You Are Right Now</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-4">Where You Are Right Now</p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
           The Problem / Your Situation
         </h2>
@@ -185,12 +185,12 @@ export function SocialProofSection() {
     <section
       id="section-social-proof"
       className="py-24 px-6"
-      style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 40%, #1a5bb8 70%, #0d3494 85%, #0a1f5c 100%)" }}
+      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 45%, #061e57 100%)" }}
     >
       <div className="max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-14">
-          <p className="text-sm font-semibold uppercase tracking-widest text-blue-300 mb-3">Real Results</p>
+          <p className="text-sm font-semibold uppercase tracking-widest text-[#b3cee1] mb-3">Real Results</p>
           <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             What Our Clients Say
           </h2>
@@ -201,7 +201,7 @@ export function SocialProofSection() {
               </svg>
             ))}
           </div>
-          <p className="text-blue-300 text-sm mt-2">Trusted by businesses across the country</p>
+          <p className="text-[#b3cee1] text-sm mt-2">Trusted by businesses across the country</p>
         </div>
 
         {/* Carousel track */}
@@ -222,10 +222,10 @@ export function SocialProofSection() {
                 </blockquote>
                 <div className="mt-auto">
                   <div className="mt-5 pt-4 border-t border-white/10 flex items-center gap-3">
-                    <div className="w-6 h-px bg-blue-400" />
+                    <div className="w-6 h-px bg-[#b3cee1]" />
                     <div>
-                      <p className="text-blue-300 font-semibold text-sm">{t.author}</p>
-                      <p className="text-blue-200/60 text-xs">{t.company}</p>
+                      <p className="text-[#b3cee1] font-semibold text-sm">{t.author}</p>
+                      <p className="text-[#b3cee1]/60 text-xs">{t.company}</p>
                     </div>
                   </div>
                   <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
@@ -290,7 +290,7 @@ export function TestimonialSection({ quote, author, websiteImg, websiteAlt, dark
   quote: string; author: string; websiteImg?: string; websiteAlt?: string; dark?: boolean;
 }) {
   return (
-    <section id="section-client-success" className={`py-20 px-6 ${dark ? "bg-[#0a1f5c]" : "bg-[#f8f9fc]"}`}>
+    <section id="section-client-success" className={`py-20 px-6 ${dark ? "bg-[#061e57]" : "bg-[#f8f9fc]"}`}>
       <div className="max-w-4xl mx-auto">
         <div className={`grid gap-8 items-center ${websiteImg ? "grid-cols-1 lg:grid-cols-[5fr_8fr]" : "grid-cols-1"}`}>
           {websiteImg && (
@@ -302,7 +302,7 @@ export function TestimonialSection({ quote, author, websiteImg, websiteAlt, dark
             <blockquote className={`text-xl md:text-2xl leading-relaxed font-medium ${dark ? "text-white" : "text-gray-800"}`} style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
               "{quote}"
             </blockquote>
-            <p className={`mt-6 text-base font-medium ${dark ? "text-blue-200" : "text-blue-700"}`}>— {author}</p>
+            <p className={`mt-6 text-base font-medium ${dark ? "text-[#b3cee1]/80" : "text-[#061e57]"}`}>— {author}</p>
           </div>
         </div>
       </div>
@@ -316,7 +316,7 @@ export function StrategySection() {
   return (
     <section className="bg-white py-20 px-6">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-4">Your Solution</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-4">Your Solution</p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
           What we're building — and why it's right for you.
         </h2>
@@ -349,11 +349,11 @@ export function CustomWebsiteSection({ numberOfPages, pageNames }: { numberOfPag
             <CheckItem>Screen-recorded training on how to edit your own site</CheckItem>
           </ul>
         </div>
-        <div className="mb-10 bg-blue-50 rounded-xl p-6 border border-blue-100">
+        <div className="mb-10 bg-[#eef4f9] rounded-xl p-6 border border-[#b3cee1]/40">
           <h3 className="text-lg font-bold text-gray-900 mb-2">Web Pages — {pageCount}</h3>
           <p className="text-gray-600 mb-4 text-sm leading-relaxed">Your web pages carry the bulk of who you are as a company. These will be built around your business and customized with care and detail that reflects your brand.</p>
-          <p className="font-semibold text-blue-700 text-sm">{pages}</p>
-          <div className="mt-4 pt-4 border-t border-blue-200">
+          <p className="font-semibold text-[#061e57] text-sm">{pages}</p>
+          <div className="mt-4 pt-4 border-t border-[#b3cee1]/50">
             <p className="text-xs font-bold text-gray-700 mb-1">Required Pages</p>
             <p className="text-sm text-gray-600">Privacy Policy | Term &amp; Conditions | Site Map</p>
           </div>
@@ -384,7 +384,7 @@ export function CustomProjectSection({ projectDetails }: { projectDetails?: stri
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Your Project</h2>
         <p className="text-gray-600 mb-10 text-lg">Thank you for taking the time to share your goals, challenges, and vision with us.</p>
         {projectDetails && (
-          <div className="mb-10 bg-blue-50 rounded-xl p-6 border border-blue-100">
+          <div className="mb-10 bg-[#eef4f9] rounded-xl p-6 border border-[#b3cee1]/40">
             <h3 className="text-lg font-bold text-gray-900 mb-3">Project Details</h3>
             <p className="text-gray-700 leading-relaxed">{projectDetails}</p>
           </div>
@@ -441,8 +441,8 @@ export function BrandShootSection() {
     <section className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Brand Shoot</h2>
-        <p className="text-blue-700 font-semibold mb-2">$850 one-time for pro photos only</p>
-        <p className="text-blue-600 text-sm mb-6">+ $150 one-time iPhone Video B-Roll Clip Add-On</p>
+        <p className="text-[#061e57] font-semibold mb-2">$850 one-time for pro photos only</p>
+        <p className="text-[#3a4856] text-sm mb-6">+ $150 one-time iPhone Video B-Roll Clip Add-On</p>
         <p className="text-gray-600 leading-relaxed mb-6">While not required, it's often a valuable investment as high-quality, branded images and videos can significantly elevate the look and credibility of your website.</p>
         <ul className="space-y-3 mb-6">
           <CheckItem>1 Location · Up to 2 hours · 50+ edited images</CheckItem>
@@ -482,7 +482,7 @@ export function EssentialsSection({ selectedHosting, onSelectHosting }: {
         <div className="space-y-10">
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-3">Domain Name (URL)</h3>
-            <p className="text-gray-600 leading-relaxed">Your domain name is your website's www address. Visit <span className="text-blue-600 font-medium">mcwdomains.com</span> to explore available options.</p>
+            <p className="text-gray-600 leading-relaxed">Your domain name is your website's www address. Visit <span className="text-[#3a4856] font-medium">mcwdomains.com</span> to explore available options.</p>
           </div>
           <div>
             <h3 className="text-xl font-bold text-gray-900 mb-2">Website Hosting</h3>
@@ -500,27 +500,27 @@ export function EssentialsSection({ selectedHosting, onSelectHosting }: {
                       "rounded-xl border p-5 transition-all",
                       interactive && "cursor-pointer",
                       isSelected
-                        ? "border-blue-600 bg-blue-50 shadow-lg ring-2 ring-blue-500"
+                        ? "border-[#061e57] bg-[#eef4f9] shadow-lg ring-2 ring-[#061e57]"
                         : plan.recommended && !interactive
-                        ? "border-blue-400 bg-blue-50 shadow-md"
+                        ? "border-[#3a4856] bg-[#eef4f9] shadow-md"
                         : plan.recommended
-                        ? "border-blue-300 bg-blue-50/60 shadow-sm hover:border-blue-500 hover:shadow-md"
-                        : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                        ? "border-[#b3cee1] bg-[#eef4f9]/60 shadow-sm hover:border-[#061e57] hover:shadow-md"
+                        : "border-gray-200 bg-white hover:border-[#b3cee1] hover:shadow-sm"
                     )}
                   >
                     <div className="flex items-start justify-between mb-1">
-                      <p className={cn("font-bold text-lg", isSelected || plan.recommended ? "text-blue-700" : "text-gray-900")}>
+                      <p className={cn("font-bold text-lg", isSelected || plan.recommended ? "text-[#061e57]" : "text-gray-900")}>
                         {plan.name}
                       </p>
-                      {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />}
+                      {isSelected && <CheckCircle2 className="w-5 h-5 text-[#3a4856] flex-shrink-0" />}
                     </div>
-                    <p className={cn("text-2xl font-bold mb-4", isSelected || plan.recommended ? "text-blue-600" : "text-gray-700")}>
+                    <p className={cn("text-2xl font-bold mb-4", isSelected || plan.recommended ? "text-[#3a4856]" : "text-gray-700")}>
                       {plan.price}
                     </p>
                     <ul className="space-y-1.5">
                       {plan.features.map(f => (
                         <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                          <Check className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />{f}
+                          <Check className="w-3.5 h-3.5 text-[#3a4856] mt-0.5 flex-shrink-0" />{f}
                         </li>
                       ))}
                     </ul>
@@ -563,7 +563,7 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
       <div className="max-w-3xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Project Quote</h2>
         <div className="mt-8 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-          <div className="bg-[#0a1f5c] px-6 py-4 flex justify-between items-center">
+          <div className="bg-[#061e57] px-6 py-4 flex justify-between items-center">
             <p className="text-white font-bold text-lg">Website Design</p>
             <p className="text-white font-bold text-xl">${displayTotal.toLocaleString()}</p>
           </div>
@@ -589,7 +589,7 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
             <tfoot>
               <tr className="border-t-2 border-gray-300 bg-gray-50">
                 <td colSpan={3} className="px-6 py-4 text-right font-bold text-gray-900">Total</td>
-                <td className="px-6 py-4 text-right font-bold text-blue-700 text-lg">${displayTotal.toLocaleString()}.00</td>
+                <td className="px-6 py-4 text-right font-bold text-[#061e57] text-lg">${displayTotal.toLocaleString()}.00</td>
               </tr>
             </tfoot>
           </table>
@@ -612,19 +612,19 @@ export function TeamSection() {
     { name: "Chloe Brunner", title: "Designer", photo: chloePhoto, bio: "I design websites that are both beautiful and built to perform — staying true to your brand every step of the way." },
   ];
   return (
-    <section className="bg-[#0a1f5c] py-20 px-6">
+    <section className="bg-[#061e57] py-20 px-6">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Meet Our Team</h2>
-        <p className="text-blue-200 mb-6 italic">Professional, Knowledgeable, Collaborative, Passionate</p>
-        <p className="text-blue-100 mb-12 leading-relaxed max-w-2xl">At the heart of our success is a talented team committed to helping you achieve your business goals. Together, we're dedicated to delivering results that make a difference for your business.</p>
+        <p className="text-[#b3cee1]/80 mb-6 italic">Professional, Knowledgeable, Collaborative, Passionate</p>
+        <p className="text-white/85 mb-12 leading-relaxed max-w-2xl">At the heart of our success is a talented team committed to helping you achieve your business goals. Together, we're dedicated to delivering results that make a difference for your business.</p>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {team.map((member) => (
             <div key={member.name} className="bg-white/10 backdrop-blur rounded-xl p-5 border border-white/10 flex gap-4">
-              <img src={member.photo} alt={member.name} className="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border-2 border-blue-300/30" />
+              <img src={member.photo} alt={member.name} className="w-14 h-14 rounded-full object-cover object-top flex-shrink-0 border-2 border-[#b3cee1]/30" />
               <div>
                 <p className="text-white font-bold">{member.name}</p>
-                <p className="text-blue-300 text-xs mb-2 font-medium">{member.title}</p>
-                <p className="text-blue-100 text-sm leading-relaxed">{member.bio}</p>
+                <p className="text-[#b3cee1] text-xs mb-2 font-medium">{member.title}</p>
+                <p className="text-white/85 text-sm leading-relaxed">{member.bio}</p>
               </div>
             </div>
           ))}
@@ -661,13 +661,13 @@ export function WhatsNextSection() {
   return (
     <section className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <p className="text-sm font-semibold uppercase tracking-widest text-blue-600 mb-4">One Clear Next Step</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-[#3a4856] mb-4">One Clear Next Step</p>
         <h2 className="text-3xl font-bold text-gray-900 mb-4" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>What happens when you say yes.</h2>
         <p className="text-gray-500 mb-12 text-lg">Here's exactly what to expect — no ambiguity, no chasing people down.</p>
         <div className="space-y-8 mb-14">
           {steps.map((step) => (
             <div key={step.number} className="flex gap-6 items-start">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#0a1f5c] flex items-center justify-center">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-[#061e57] flex items-center justify-center">
                 <span className="text-white text-xs font-bold">{step.number}</span>
               </div>
               <div>
@@ -677,7 +677,7 @@ export function WhatsNextSection() {
             </div>
           ))}
         </div>
-        <div className="bg-blue-50 rounded-xl p-6 border border-blue-100 mb-8">
+        <div className="bg-[#eef4f9] rounded-xl p-6 border border-[#b3cee1]/40 mb-8">
           <p className="font-bold text-gray-800 mb-2">Payment Schedule</p>
           <p className="text-gray-600">Half is due upon signing and the remaining balance is divided equally over the following three months.</p>
         </div>
@@ -700,16 +700,16 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
     : null;
 
   return (
-    <section className="py-20 px-6" style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 50%, #1a5bb8 100%)" }}>
+    <section className="py-20 px-6" style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 100%)" }}>
       <div className="max-w-xl mx-auto text-center">
         <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Ready to work together?</h2>
-        <p className="text-blue-200 mb-2">Click below to accept this proposal and secure your spot on our project calendar.</p>
-        <p className="text-blue-300 text-sm mb-10">Our team will follow up with a contract.</p>
+        <p className="text-[#b3cee1]/80 mb-2">Click below to accept this proposal and secure your spot on our project calendar.</p>
+        <p className="text-[#b3cee1] text-sm mb-10">Our team will follow up with a contract.</p>
         <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
           {hostingLabel && (
-            <div className="mb-6 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
-              <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
-              <p className="text-sm font-semibold text-blue-800">{hostingLabel} selected</p>
+            <div className="mb-6 flex items-center justify-center gap-2 px-4 py-2.5 bg-[#eef4f9] border border-[#b3cee1]/50 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-[#3a4856] flex-shrink-0" />
+              <p className="text-sm font-semibold text-[#061e57]">{hostingLabel} selected</p>
             </div>
           )}
           {totalAmount > 0 && (
@@ -722,7 +722,7 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
               <Button
                 onClick={onAccept}
                 disabled={disabled || isPending}
-                className="w-full h-14 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl"
+                className="w-full h-14 bg-[#061e57] hover:bg-[#3a4856] text-white text-base font-bold rounded-xl"
               >
                 {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : (
                   <span className="flex items-center gap-2">Accept Proposal <ArrowRight className="w-4 h-4" /></span>

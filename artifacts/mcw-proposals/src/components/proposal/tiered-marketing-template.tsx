@@ -262,7 +262,7 @@ function TierSection({
     <section
       className="py-24 px-6"
       style={{
-        background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 40%, #1a5bb8 80%, #0a1f5c 100%)",
+        background: "linear-gradient(160deg, #061e57 0%, #3a4856 40%, #3a4856 80%, #061e57 100%)",
       }}
     >
       <div className="max-w-6xl mx-auto">
@@ -324,8 +324,8 @@ function BrandShootAddon() {
   return (
     <section className="bg-white py-16 px-6">
       <div className="max-w-3xl mx-auto">
-        <div className="bg-blue-50 rounded-2xl p-8 border border-blue-100">
-          <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2">
+        <div className="bg-[#eef4f9] rounded-2xl p-8 border border-[#b3cee1]/40">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#3a4856] mb-2">
             Optional Add-On
           </p>
           <h3
@@ -334,7 +334,7 @@ function BrandShootAddon() {
           >
             Your Brand Shoot
           </h3>
-          <p className="text-blue-700 font-semibold mb-5 text-sm">
+          <p className="text-[#061e57] font-semibold mb-5 text-sm">
             $850 one-time for professional photos &nbsp;·&nbsp; +$150 for iPhone Video B-Roll add-on
           </p>
           <p className="text-gray-600 leading-relaxed mb-5">
@@ -351,7 +351,7 @@ function BrandShootAddon() {
               "Coordinate directly with the photographer for scheduling & payment",
             ].map((item) => (
               <li key={item} className="flex items-start gap-2.5">
-                <Check className="w-4 h-4 text-blue-500 flex-shrink-0 mt-0.5" />
+                <Check className="w-4 h-4 text-[#3a4856] flex-shrink-0 mt-0.5" />
                 <span>{item}</span>
               </li>
             ))}
@@ -413,7 +413,7 @@ function MarketingWhatsNextSection() {
           the signed contract, we'll schedule your onboarding call to kick off your strategy the
           right way.
         </p>
-        <div className="bg-blue-50 rounded-xl p-6 border border-blue-100 mb-8">
+        <div className="bg-[#eef4f9] rounded-xl p-6 border border-[#b3cee1]/40 mb-8">
           <p className="font-bold text-gray-800 mb-2">Monthly Billing</p>
           <p className="text-gray-600">
             Your selected plan is billed monthly. The one-time $500 setup fee is due upon signing
@@ -453,7 +453,7 @@ function TieredAcceptSection({
   return (
     <section
       className="py-20 px-6"
-      style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 50%, #1a5bb8 100%)" }}
+      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 50%, #3a4856 100%)" }}
     >
       <div className="max-w-xl mx-auto text-center">
         <h2
@@ -462,16 +462,16 @@ function TieredAcceptSection({
         >
           Ready to work together?
         </h2>
-        <p className="text-blue-200 mb-2">Click below to accept this proposal.</p>
-        <p className="text-blue-300 text-sm mb-10">Our team will follow up with a contract.</p>
+        <p className="text-[#b3cee1]/80 mb-2">Click below to accept this proposal.</p>
+        <p className="text-[#b3cee1] text-sm mb-10">Our team will follow up with a contract.</p>
 
         <div className="bg-white rounded-2xl p-8 shadow-2xl">
           {selectedTier ? (
-            <div className="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
-              <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">
+            <div className="mb-6 p-4 bg-[#eef4f9] rounded-xl border border-[#b3cee1]/40">
+              <p className="text-xs font-bold text-[#3a4856] uppercase tracking-widest mb-1">
                 Selected Plan
               </p>
-              <p className="text-xl font-bold text-blue-900">{tierLabel} Plan</p>
+              <p className="text-xl font-bold text-[#061e57]">{tierLabel} Plan</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">
                 ${tierPrice?.toLocaleString()}
                 <span className="text-gray-400 text-base font-normal"> / month</span>
@@ -495,7 +495,7 @@ function TieredAcceptSection({
             <Button
               onClick={onAccept}
               disabled={!selectedTier || isPending}
-              className="w-full h-14 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl disabled:opacity-40"
+              className="w-full h-14 bg-[#061e57] hover:bg-[#3a4856] text-white text-base font-bold rounded-xl disabled:opacity-40"
             >
               {isPending ? (
                 <Loader2 className="w-5 h-5 animate-spin" />

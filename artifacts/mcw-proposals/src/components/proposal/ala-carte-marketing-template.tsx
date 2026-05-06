@@ -311,7 +311,7 @@ const CATEGORIES: Category[] = [
     subtitle: "SEO",
     description: "Boost your website's visibility and rank higher on search engines. Select the SEO plan that works best for your business goals.",
     serviceIds: ["seo-pro", "seo-plus", "seo-platinum", "seo-blog", "seo-gbp-setup"],
-    accent: "#0d3494",
+    accent: "#3a4856",
   },
   {
     id: "google-ads",
@@ -319,7 +319,7 @@ const CATEGORIES: Category[] = [
     subtitle: "Google Ads",
     description: "Harness the power of Pay-Per-Click and Local Service Ads to drive traffic and generate leads.",
     serviceIds: ["ppc-397", "ppc-497", "ppc-647", "lsa"],
-    accent: "#1a5bb8",
+    accent: "#3a4856",
   },
   {
     id: "sm-ads",
@@ -327,7 +327,7 @@ const CATEGORIES: Category[] = [
     subtitle: "Facebook & Instagram Ads",
     description: "Take your social media advertising to the next level with visually compelling ads tailored to your audience.",
     serviceIds: ["sm-ads-497", "sm-ads-597", "sm-ads-697"],
-    accent: "#0a1f5c",
+    accent: "#061e57",
   },
   {
     id: "sm-posting",
@@ -335,7 +335,7 @@ const CATEGORIES: Category[] = [
     subtitle: "Organic Social",
     description: "Build audience loyalty, drive engagement, and enhance brand awareness with our managed organic social media plans.",
     serviceIds: ["sm-post-pro", "sm-post-plus", "sm-post-platinum", "sm-video"],
-    accent: "#0d3494",
+    accent: "#3a4856",
   },
   {
     id: "email",
@@ -343,7 +343,7 @@ const CATEGORIES: Category[] = [
     subtitle: "Email",
     description: "Stay top of mind and enhance brand awareness with professionally crafted monthly email campaigns.",
     serviceIds: ["email-pro", "email-plus", "email-platinum"],
-    accent: "#1a5bb8",
+    accent: "#3a4856",
   },
   {
     id: "brand-shoot",
@@ -351,7 +351,7 @@ const CATEGORIES: Category[] = [
     subtitle: "Brand Shoot",
     description: "High-quality branded images and video can significantly elevate the effectiveness of your marketing.",
     serviceIds: ["brand-photos", "brand-photos-video"],
-    accent: "#0a1f5c",
+    accent: "#061e57",
   },
 ];
 
@@ -415,13 +415,13 @@ function ServiceCard({
         readOnly ? "" : "cursor-pointer",
         isSelected
           ? "ring-4 ring-amber-400 shadow-xl shadow-amber-400/20 bg-white scale-[1.01]"
-          : "ring-1 ring-gray-200 bg-white hover:ring-blue-300 hover:shadow-md"
+          : "ring-1 ring-gray-200 bg-white hover:ring-[#b3cee1] hover:shadow-md"
       )}
     >
       {/* Header */}
       <div className={cn(
         "px-5 pt-5 pb-4 rounded-t-2xl transition-colors",
-        isSelected ? "bg-blue-50" : "bg-gray-50"
+        isSelected ? "bg-[#eef4f9]" : "bg-gray-50"
       )}>
         {service.isAddon && (
           <span className="inline-block px-2 py-0.5 text-[10px] font-bold tracking-widest uppercase bg-amber-100 text-amber-700 rounded-full mb-2">
@@ -436,7 +436,7 @@ function ServiceCard({
         </div>
         <p className={cn(
           "text-2xl font-bold mt-2",
-          isSelected ? "text-blue-700" : "text-gray-800"
+          isSelected ? "text-[#061e57]" : "text-gray-800"
         )}>
           {service.priceLabel}
         </p>
@@ -451,7 +451,7 @@ function ServiceCard({
             "mt-3 w-full py-2 px-3 rounded-xl text-sm font-semibold text-center transition-colors",
             isSelected
               ? "bg-amber-400 text-amber-900"
-              : "bg-blue-600 text-white hover:bg-blue-700"
+              : "bg-[#061e57] text-white hover:bg-[#061e57]"
           )}>
             {isSelected ? "✓ Selected" : "Select"}
           </div>
@@ -462,7 +462,7 @@ function ServiceCard({
         <ul className="space-y-2">
           {service.features.map((f) => (
             <li key={f} className="flex items-start gap-2 text-sm text-gray-600 leading-snug">
-              <Check className="w-3.5 h-3.5 text-blue-500 flex-shrink-0 mt-0.5" />
+              <Check className="w-3.5 h-3.5 text-[#3a4856] flex-shrink-0 mt-0.5" />
               <span>{f}</span>
             </li>
           ))}
@@ -491,7 +491,7 @@ function CategorySection({
       <div className="max-w-6xl mx-auto">
         {/* Category header */}
         <div className="mb-10">
-          <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mb-2">{category.subtitle}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-[#3a4856] mb-2">{category.subtitle}</p>
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             {category.title}
           </h2>
@@ -557,17 +557,17 @@ function FloatingTotalBar({ monthly, oneTime, setupFees, count }: {
   return (
     <div className="no-print fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
       <div className="max-w-4xl mx-auto px-4 pb-4">
-        <div className="pointer-events-auto bg-[#0a1f5c] border border-white/10 rounded-2xl shadow-2xl px-6 py-3 flex items-center justify-between gap-4 text-white">
-          <div className="flex items-center gap-2 text-sm text-blue-200">
+        <div className="pointer-events-auto bg-[#061e57] border border-white/10 rounded-2xl shadow-2xl px-6 py-3 flex items-center justify-between gap-4 text-white">
+          <div className="flex items-center gap-2 text-sm text-[#b3cee1]/80">
             <ShoppingCart className="w-4 h-4" />
             <span>{count} service{count !== 1 ? "s" : ""} selected</span>
           </div>
           <div className="flex items-center gap-6 text-sm">
             {monthly > 0 && (
-              <span className="text-white font-semibold">{fmt(monthly)}<span className="text-blue-300 font-normal">/mo</span></span>
+              <span className="text-white font-semibold">{fmt(monthly)}<span className="text-[#b3cee1] font-normal">/mo</span></span>
             )}
             {(oneTime + setupFees) > 0 && (
-              <span className="text-amber-300 font-semibold">{fmt(oneTime + setupFees)}<span className="text-blue-300 font-normal text-xs"> one-time</span></span>
+              <span className="text-amber-300 font-semibold">{fmt(oneTime + setupFees)}<span className="text-[#b3cee1] font-normal text-xs"> one-time</span></span>
             )}
           </div>
         </div>
@@ -592,14 +592,14 @@ function AlaCarteAcceptSection({
   return (
     <section
       className="py-20 px-6"
-      style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 50%, #1a5bb8 100%)" }}
+      style={{ background: "linear-gradient(160deg, #061e57 0%, #3a4856 50%, #3a4856 100%)" }}
     >
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
           <h2 className="text-3xl font-bold text-white mb-3" style={{ fontFamily: "'Montserrat', sans-serif" }}>
             Ready to work together?
           </h2>
-          <p className="text-blue-200">Review your selected services below and click Accept to move forward.</p>
+          <p className="text-[#b3cee1]/80">Review your selected services below and click Accept to move forward.</p>
         </div>
 
         <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -645,7 +645,7 @@ function AlaCarteAcceptSection({
               {totals.monthly > 0 && (totals.oneTime + totals.setupFees) > 0 && (
                 <div className="flex justify-between items-center pt-3 border-t border-gray-200">
                   <span className="text-gray-700 text-sm font-semibold">First Month Total</span>
-                  <span className="text-2xl font-bold text-blue-700">{fmt(totals.monthly + totals.oneTime + totals.setupFees)}</span>
+                  <span className="text-2xl font-bold text-[#061e57]">{fmt(totals.monthly + totals.oneTime + totals.setupFees)}</span>
                 </div>
               )}
             </div>
@@ -660,7 +660,7 @@ function AlaCarteAcceptSection({
               <Button
                 onClick={onAccept}
                 disabled={selectedServices.length === 0 || isPending}
-                className="w-full h-14 bg-[#0a1f5c] hover:bg-[#0d3494] text-white text-base font-bold rounded-xl disabled:opacity-40"
+                className="w-full h-14 bg-[#061e57] hover:bg-[#3a4856] text-white text-base font-bold rounded-xl disabled:opacity-40"
               >
                 {isPending ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
@@ -684,7 +684,7 @@ function AlaCarteStrategySection() {
   return (
     <section className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <p className="text-xs font-bold uppercase tracking-widest text-blue-500 mb-3">Your Marketing Strategy</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-[#3a4856] mb-3">Your Marketing Strategy</p>
         <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "'Montserrat', sans-serif" }}>
           A proven strategy customized for your business goals.
         </h2>
@@ -717,7 +717,7 @@ function AlaCarteWhatsNextSection() {
           Upon approval, we'll send over a contract for your marketing partnership. Once we receive
           the signed contract, we'll schedule your onboarding call to kick off your strategy the right way.
         </p>
-        <div className="bg-blue-50 rounded-xl p-6 border border-blue-100 mb-8">
+        <div className="bg-[#eef4f9] rounded-xl p-6 border border-[#b3cee1]/40 mb-8">
           <p className="font-bold text-gray-800 mb-2">Monthly Billing</p>
           <p className="text-gray-600">
             Your selected services are billed monthly. Any one-time setup fees are due upon signing the contract.
