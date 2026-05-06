@@ -157,22 +157,22 @@ export function SocialProofSection() {
         {/* Featured testimonial — full width hero card */}
         <div className="relative rounded-2xl overflow-hidden mb-6"
           style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.12)", backdropFilter: "blur(10px)" }}>
-          <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] items-stretch">
             {/* Website screenshot */}
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent to-transparent lg:to-white/5" />
-              <img
-                src={evolutionSiteImg}
-                alt="Evolution Mental Health website"
-                className="w-full h-full object-cover object-top min-h-[220px] lg:min-h-0"
-                style={{ maxHeight: 320 }}
-              />
-              {/* Browser chrome top bar */}
-              <div className="absolute top-0 left-0 right-0 h-6 flex items-center gap-1.5 px-3"
-                style={{ background: "rgba(0,0,0,0.4)" }}>
-                <span className="w-2 h-2 rounded-full bg-red-400/80" />
-                <span className="w-2 h-2 rounded-full bg-yellow-400/80" />
-                <span className="w-2 h-2 rounded-full bg-green-400/80" />
+            <div className="flex flex-col overflow-hidden">
+              {/* Browser chrome bar — sits above the image, not over it */}
+              <div className="flex-shrink-0 h-7 flex items-center gap-1.5 px-3"
+                style={{ background: "rgba(0,0,0,0.55)" }}>
+                <span className="w-2.5 h-2.5 rounded-full bg-red-400/90" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-400/90" />
+                <span className="w-2.5 h-2.5 rounded-full bg-green-400/90" />
+              </div>
+              <div className="flex-1 min-h-[240px] lg:min-h-0">
+                <img
+                  src={evolutionSiteImg}
+                  alt="Evolution Mental Health website"
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
             </div>
 
@@ -216,14 +216,14 @@ export function SocialProofSection() {
                 <p className="text-blue-200/60 text-xs">Petty Family Floors</p>
               </div>
             </div>
-            <div className="mt-4 rounded-lg overflow-hidden border border-white/10 relative">
-              <div className="absolute top-0 left-0 right-0 h-4 flex items-center gap-1 px-2"
-                style={{ background: "rgba(0,0,0,0.35)" }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+            <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
+              <div className="h-5 flex items-center gap-1 px-2.5"
+                style={{ background: "rgba(0,0,0,0.5)" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400/80" />
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/80" />
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400/80" />
               </div>
-              <img src={pettyFloorsSiteImg} alt="Petty Family Floors website" className="w-full h-28 object-cover object-top" />
+              <img src={pettyFloorsSiteImg} alt="Petty Family Floors website" className="w-full h-40 object-cover object-top" />
             </div>
           </div>
 
@@ -245,14 +245,14 @@ export function SocialProofSection() {
                 <p className="text-blue-200/60 text-xs">Hobbs Salon + Med Spa</p>
               </div>
             </div>
-            <div className="mt-4 rounded-lg overflow-hidden border border-white/10 relative">
-              <div className="absolute top-0 left-0 right-0 h-4 flex items-center gap-1 px-2"
-                style={{ background: "rgba(0,0,0,0.35)" }}>
-                <span className="w-1.5 h-1.5 rounded-full bg-red-400/70" />
-                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/70" />
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400/70" />
+            <div className="mt-4 rounded-lg overflow-hidden border border-white/10">
+              <div className="h-5 flex items-center gap-1 px-2.5"
+                style={{ background: "rgba(0,0,0,0.5)" }}>
+                <span className="w-1.5 h-1.5 rounded-full bg-red-400/80" />
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400/80" />
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400/80" />
               </div>
-              <img src={hobbsSiteImg} alt="Hobbs Salon + Med Spa website" className="w-full h-28 object-cover object-top" />
+              <img src={hobbsSiteImg} alt="Hobbs Salon + Med Spa website" className="w-full h-40 object-cover object-top" />
             </div>
           </div>
         </div>
