@@ -1,4 +1,6 @@
-import { Check, ArrowRight, Loader2 } from "lucide-react";
+import { useState } from "react";
+import { Check, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { SignaturePad } from "@/components/ui/signature-pad";
 
@@ -223,7 +225,28 @@ export function BrandShootSection() {
   );
 }
 
-export function EssentialsSection() {
+const HOSTING_PLANS = [
+  {
+    id: "gold",
+    name: "Gold",
+    price: "$60/mo",
+    recommended: true,
+    features: ["Dedicated server", "High speed server", "Software updates", "Free SSL certificate", "Monthly backups", "Advanced security", "Basic site maintenance"],
+  },
+  {
+    id: "platinum",
+    name: "Platinum",
+    price: "$100/mo",
+    recommended: false,
+    features: ["Everything in Gold", "1 hour of Monthly Updates"],
+  },
+];
+
+export function EssentialsSection({ selectedHosting, onSelectHosting }: {
+  selectedHosting?: string | null;
+  onSelectHosting?: (id: string) => void;
+}) {
+  const interactive = !!onSelectHosting;
   return (
     <section className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
@@ -235,24 +258,48 @@ export function EssentialsSection() {
             <p className="text-gray-600 leading-relaxed">Your domain name is your website's www address. Visit <span className="text-blue-600 font-medium">mcwdomains.com</span> to explore available options.</p>
           </div>
           <div>
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Website Hosting</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Website Hosting</h3>
+            {interactive && (
+              <p className="text-sm text-gray-500 mb-5">Select a hosting plan that fits your needs.</p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { name: "Gold", price: "$60/mo", features: ["Dedicated server", "High speed server", "Software updates", "Free SSL certificate", "Monthly backups", "Advanced security", "Basic site maintenance"], highlight: true },
-                { name: "Platinum", price: "$100/mo", features: ["Everything in Gold", "1 hour of Monthly Updates"] },
-              ].map((plan) => (
-                <div key={plan.name} className={`rounded-xl border p-5 ${plan.highlight ? "border-blue-400 bg-blue-50 shadow-md" : "border-gray-200 bg-white"}`}>
-                  <p className={`font-bold text-lg mb-1 ${plan.highlight ? "text-blue-700" : "text-gray-900"}`}>{plan.name}</p>
-                  <p className={`text-2xl font-bold mb-4 ${plan.highlight ? "text-blue-600" : "text-gray-700"}`}>{plan.price}</p>
-                  <ul className="space-y-1.5">
-                    {plan.features.map(f => (
-                      <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
-                        <Check className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />{f}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+              {HOSTING_PLANS.map((plan) => {
+                const isSelected = selectedHosting === plan.id;
+                return (
+                  <div
+                    key={plan.id}
+                    onClick={() => interactive && onSelectHosting(plan.id)}
+                    className={cn(
+                      "rounded-xl border p-5 transition-all",
+                      interactive && "cursor-pointer",
+                      isSelected
+                        ? "border-blue-600 bg-blue-50 shadow-lg ring-2 ring-blue-500"
+                        : plan.recommended && !interactive
+                        ? "border-blue-400 bg-blue-50 shadow-md"
+                        : plan.recommended
+                        ? "border-blue-300 bg-blue-50/60 shadow-sm hover:border-blue-500 hover:shadow-md"
+                        : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-sm"
+                    )}
+                  >
+                    <div className="flex items-start justify-between mb-1">
+                      <p className={cn("font-bold text-lg", isSelected || plan.recommended ? "text-blue-700" : "text-gray-900")}>
+                        {plan.name}
+                      </p>
+                      {isSelected && <CheckCircle2 className="w-5 h-5 text-blue-600 flex-shrink-0" />}
+                    </div>
+                    <p className={cn("text-2xl font-bold mb-4", isSelected || plan.recommended ? "text-blue-600" : "text-gray-700")}>
+                      {plan.price}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {plan.features.map(f => (
+                        <li key={f} className="flex items-start gap-2 text-sm text-gray-600">
+                          <Check className="w-3.5 h-3.5 text-blue-500 mt-0.5 flex-shrink-0" />{f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -380,10 +427,14 @@ export function WhatsNextSection() {
   );
 }
 
-export function AcceptSection({ clientName, totalAmount, onAccept, isPending, disabled }: {
+export function AcceptSection({ clientName, totalAmount, onAccept, isPending, disabled, selectedHosting }: {
   clientName: string; totalAmount: number; onAccept?: () => void;
-  isPending?: boolean; disabled?: boolean;
+  isPending?: boolean; disabled?: boolean; selectedHosting?: string | null;
 }) {
+  const hostingLabel = selectedHosting === "gold" ? "Gold Hosting — $60/mo"
+    : selectedHosting === "platinum" ? "Platinum Hosting — $100/mo"
+    : null;
+
   return (
     <section className="py-20 px-6" style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #0d3494 50%, #1a5bb8 100%)" }}>
       <div className="max-w-xl mx-auto text-center">
@@ -391,6 +442,12 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
         <p className="text-blue-200 mb-2">Click below to accept this proposal and secure your spot on our project calendar.</p>
         <p className="text-blue-300 text-sm mb-10">Our team will follow up with a contract.</p>
         <div className="bg-white rounded-2xl p-8 text-center shadow-2xl">
+          {hostingLabel && (
+            <div className="mb-6 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-xl">
+              <CheckCircle2 className="w-4 h-4 text-blue-600 flex-shrink-0" />
+              <p className="text-sm font-semibold text-blue-800">{hostingLabel} selected</p>
+            </div>
+          )}
           {totalAmount > 0 && (
             <p className="text-gray-600 text-sm mb-8">
               Investment of <strong>${totalAmount.toLocaleString()}</strong>.
@@ -417,9 +474,10 @@ export function AcceptSection({ clientName, totalAmount, onAccept, isPending, di
 
 export function FullProposalTemplate({ data, onAccept, isPending }: {
   data: ProposalData;
-  onAccept?: () => void;
+  onAccept?: (selectedHosting?: string) => void;
   isPending?: boolean;
 }) {
+  const [selectedHosting, setSelectedHosting] = useState<string | null>(null);
   const proposalDate = data.createdAt ? new Date(data.createdAt) : new Date();
   const dateStr = proposalDate.toLocaleDateString("en-US", { month: "long", day: "numeric" });
 
@@ -449,7 +507,10 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
       <CustomWebsiteSection numberOfPages={data.numberOfPages} pageNames={data.pageNames} />
       <TimelineSection />
       <BrandShootSection />
-      <EssentialsSection />
+      <EssentialsSection
+        selectedHosting={onAccept ? selectedHosting : null}
+        onSelectHosting={onAccept ? setSelectedHosting : undefined}
+      />
       <PricingSection numberOfPages={data.numberOfPages} totalAmount={data.totalAmount} pricingItems={data.pricingItems} />
       <TeamSection />
       <TestimonialSection
@@ -472,9 +533,10 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
       <AcceptSection
         clientName={data.clientName}
         totalAmount={Number(data.totalAmount) || 0}
-        onAccept={onAccept}
+        onAccept={onAccept ? () => onAccept(selectedHosting ?? undefined) : undefined}
         isPending={isPending}
         disabled={false}
+        selectedHosting={selectedHosting}
       />
     </div>
   );

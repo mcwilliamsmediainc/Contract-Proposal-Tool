@@ -717,6 +717,7 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         reviewType="onboarding"
+        storageKey={`onboarding:${client.id}`}
         title={`${client.clientName} — Onboarding Review`}
         data={{
           clientName: client.clientName,

@@ -768,6 +768,7 @@ export default function EditProposal() {
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         reviewType="proposal"
+        storageKey={`proposal:${id}`}
         data={{
           clientName: watched.clientName || proposal.clientName,
           businessName: watched.businessName || proposal.businessName,

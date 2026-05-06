@@ -191,13 +191,54 @@ router.post("/gemini/conversations/:id/messages", async (req, res) => {
 // ── AI Review — context-aware streaming analysis ──────────────────────────────
 
 router.post("/gemini/review", async (req, res) => {
-  const { type, data } = req.body as {
+  const { type, data, history, userMessage } = req.body as {
     type: "proposal" | "contract" | "onboarding";
     data: Record<string, unknown>;
+    history?: Array<{ role: "user" | "assistant"; content: string }>;
+    userMessage?: string;
   };
 
   if (!type || !data) {
     res.status(400).json({ error: "type and data are required" });
+    return;
+  }
+
+  // ── Chat follow-up ──────────────────────────────────────────────────────────
+  if (typeof userMessage === "string") {
+    const historyArr = history ?? [];
+    const contextNote = `You are a senior strategist at McWilliams Media. You previously reviewed a ${type} and the team member has a follow-up question. Here is the data about the ${type} you reviewed:\n\n${JSON.stringify(data, null, 2)}\n\nAnswer the follow-up question based on your expertise and the context above. Be specific, helpful, and concise. Use markdown where it helps readability.`;
+
+    const contents = [
+      { role: "user" as const, parts: [{ text: contextNote }] },
+      ...historyArr.map(m => ({
+        role: m.role === "assistant" ? "model" as const : "user" as const,
+        parts: [{ text: m.content }],
+      })),
+      { role: "user" as const, parts: [{ text: userMessage }] },
+    ];
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    try {
+      const stream = await ai.models.generateContentStream({
+        model: "gemini-3-flash-preview",
+        contents,
+        config: { maxOutputTokens: 2048 },
+      });
+
+      for await (const chunk of stream) {
+        const text = chunk.text;
+        if (text) res.write(`data: ${JSON.stringify({ content: text })}\n\n`);
+      }
+    } catch (err) {
+      req.log.error({ err }, "AI review chat failed");
+      res.write(`data: ${JSON.stringify({ content: "\n\n*Something went wrong. Please try again.*" })}\n\n`);
+    }
+
+    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.end();
     return;
   }
 

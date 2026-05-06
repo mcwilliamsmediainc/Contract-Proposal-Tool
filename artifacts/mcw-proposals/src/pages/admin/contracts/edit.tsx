@@ -289,6 +289,7 @@ export default function EditContract() {
         open={reviewOpen}
         onClose={() => setReviewOpen(false)}
         reviewType="contract"
+        storageKey={`contract:${id}`}
         data={{
           clientName: contract.clientName,
           businessName: contract.businessName,

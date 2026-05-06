@@ -18,6 +18,7 @@ export default function ClientPortal() {
   const viewedRef = useRef(false);
   const [accepted, setAccepted] = useState(false);
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
+  const [acceptedHosting, setAcceptedHosting] = useState<string | null>(null);
 
   useEffect(() => {
     if (id && !viewedRef.current) { viewedRef.current = true; recordView.mutate({ id }); }
@@ -27,16 +28,17 @@ export default function ClientPortal() {
     if (proposal?.status === "accepted") setAccepted(true);
   }, [proposal?.status]);
 
-  const handleAccept = async () => {
+  const handleAccept = async (selectedHosting?: string) => {
     try {
       const data = await acceptProposal.mutateAsync({
         id,
         data: {
           signatureData: "",
-          ...(selectedTier ? { selectedTier } : {}),
+          ...(selectedTier ? { selectedTier } : selectedHosting ? { selectedTier: selectedHosting } : {}),
         } as { signatureData: string },
       });
       queryClient.setQueryData(getGetProposalQueryKey(id), data);
+      if (selectedHosting) setAcceptedHosting(selectedHosting);
       setAccepted(true);
     } catch {}
   };
@@ -67,6 +69,11 @@ export default function ClientPortal() {
         {selectedTier && (
           <p className="text-sm text-blue-600 font-semibold mt-3">
             Selected: {selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Plan
+          </p>
+        )}
+        {acceptedHosting && (
+          <p className="text-sm text-blue-600 font-semibold mt-2">
+            Hosting: {acceptedHosting === "gold" ? "Gold ($60/mo)" : "Platinum ($100/mo)"}
           </p>
         )}
         <p className="text-xs text-gray-400 mt-6">Transaction: {proposal.id}</p>

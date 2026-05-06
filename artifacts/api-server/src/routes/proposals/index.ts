@@ -128,47 +128,26 @@ router.post("/proposals/generate", async (req, res) => {
 
   const { clientName, businessName, projectType, specialContext } = parsed.data;
 
-  const systemPrompt = `You are a senior strategist at McWilliams Media, a premium digital marketing agency. 
-You craft high-stakes, cinematic proposal documents that close deals.
-Your writing is authoritative, specific, and vision-focused.
-Write in flowing paragraphs, not bullet points. Use strategic language that speaks to business outcomes.
-Format your response in Markdown with clear sections.`;
+  const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : projectType === "print" ? "print & brand" : "project";
 
-  const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : "print materials";
+  const userPrompt = `Write a short, warm, personalized opening for ${clientName} at ${businessName}'s ${projectLabel} proposal.
+${specialContext ? `\nNotes from our team: ${specialContext}` : ""}
 
-  const userPrompt = `Create a complete strategic proposal for ${clientName} at ${businessName}.
-
-Project Type: ${projectType}
-${specialContext ? `Special Context & Notes: ${specialContext}` : ""}
-
-Write a full proposal with these sections:
-# Strategic Vision
-A compelling 2-3 paragraph overview of the transformation we'll achieve together.
-
-## The Discovery Process
-How we'll uncover deep insights about their business, audience, and competitive landscape.
-
-## Design & Development Framework
-Our approach to building their ${projectLabel} — methodology, tools, quality standards.
-
-## Deliverables
-Specific outcomes and deliverables they can expect from this engagement.
-
-## Timeline & Next Steps
-What the timeline looks like and what happens after they sign.
-
-## Why McWilliams Media
-A closing paragraph on why we're the right partner for this specific vision.
-
-Keep the tone confident, premium, and strategic. Speak to business outcomes, not just technical features.`;
+Requirements:
+- 2 short paragraphs, 80–100 words total
+- Paragraph 1: Personal welcome that mentions their business name and something specific about why we're excited for this project
+- Paragraph 2: One sentence that bridges naturally to the proposal content ahead
+- Warm, confident, professional tone — never generic
+- NO headers, NO bullet points, NO section titles, NO markdown
+- Return ONLY the two paragraphs, nothing else`;
 
   try {
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: [
-        { role: "user", parts: [{ text: systemPrompt + "\n\n" + userPrompt }] },
+        { role: "user", parts: [{ text: userPrompt }] },
       ],
-      config: { maxOutputTokens: 8192 },
+      config: { maxOutputTokens: 512 },
     });
 
     const content = response.text ?? "";
