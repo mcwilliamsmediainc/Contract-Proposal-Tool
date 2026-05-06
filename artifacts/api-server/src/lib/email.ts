@@ -313,6 +313,72 @@ export async function sendContractSignedClientEmail(opts: {
   });
 }
 
+// ── INTERNAL: ACH Payment Info Received ───────────────────────────────────────
+
+export async function sendAchPaymentEmail(opts: {
+  clientName: string;
+  businessName: string;
+  contractUuid: string;
+  totalCost: number;
+  depositAmount: number;
+  accountHolderName: string;
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
+  accountType: string;
+}) {
+  const adminUrl = `${baseUrl()}/admin/contracts/${opts.contractUuid}/edit`;
+
+  await send({
+    from: FROM_INTERNAL,
+    to: [FALLBACK],
+    subject: `🏦 ACH payment info received — ${opts.clientName} (${opts.businessName})`,
+    html: internalLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 18px;">ACH Payment Information Received</h3>
+      <p style="margin: 0 0 20px; color: #555;">
+        <strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has submitted their ACH payment details for deposit collection.
+      </p>
+      <div style="background: #fff8e1; border: 1px solid #ffe082; border-radius: 8px; padding: 16px 20px; margin: 0 0 24px;">
+        <p style="margin: 0 0 4px; font-size: 12px; color: #b45309; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">⚠ Sensitive Financial Information — Handle Securely</p>
+        <p style="margin: 0; font-size: 12px; color: #92400e;">Do not forward this email. Delete after processing the ACH transaction.</p>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666; width: 45%;">Account Holder</td>
+          <td style="padding: 10px 0; font-weight: 600;">${opts.accountHolderName}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666;">Bank Name</td>
+          <td style="padding: 10px 0; font-weight: 600;">${opts.bankName}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666;">Account Type</td>
+          <td style="padding: 10px 0; font-weight: 600;">${opts.accountType}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666;">Routing Number</td>
+          <td style="padding: 10px 0; font-weight: 600; font-family: monospace;">${opts.routingNumber}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666;">Account Number</td>
+          <td style="padding: 10px 0; font-weight: 600; font-family: monospace;">${opts.accountNumber}</td>
+        </tr>
+        <tr style="border-bottom: 1px solid #e5e5e5;">
+          <td style="padding: 10px 0; color: #666;">Deposit Due</td>
+          <td style="padding: 10px 0; font-weight: 600;">$${opts.depositAmount.toLocaleString()}</td>
+        </tr>
+        <tr>
+          <td style="padding: 10px 0; color: #666;">Total Contract Value</td>
+          <td style="padding: 10px 0; font-weight: 600;">$${opts.totalCost.toLocaleString()}</td>
+        </tr>
+      </table>
+      <div style="margin-top: 24px;">
+        <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Contract in Dashboard</a>
+      </div>
+    `),
+  });
+}
+
 // ── INTERNAL: Onboarding Form Submitted ───────────────────────────────────────
 
 export async function sendOnboardingSubmittedEmail(opts: {

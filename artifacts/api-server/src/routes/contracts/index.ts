@@ -2,7 +2,7 @@ import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, contractsTable, onboardingClientsTable, onboardingTasksTable, proposalsTable } from "@workspace/db";
-import { sendContractSignedEmail, sendContractSignedClientEmail } from "../../lib/email";
+import { sendContractSignedEmail, sendContractSignedClientEmail, sendAchPaymentEmail } from "../../lib/email";
 import {
   CreateContractBody,
   UpdateContractBody,
@@ -313,6 +313,62 @@ router.post("/contracts/:id/sign", async (req, res) => {
   }).catch(() => {});
 
   res.json(formatContract(updated));
+});
+
+router.post("/contracts/:id/ach", async (req, res) => {
+  const { id } = req.params;
+
+  const { accountHolderName, bankName, routingNumber, accountNumber, accountType } = req.body as {
+    accountHolderName?: string;
+    bankName?: string;
+    routingNumber?: string;
+    accountNumber?: string;
+    accountType?: string;
+  };
+
+  if (!accountHolderName || !bankName || !routingNumber || !accountNumber || !accountType) {
+    res.status(400).json({ error: "All ACH fields are required" });
+    return;
+  }
+
+  if (!/^\d{9}$/.test(routingNumber)) {
+    res.status(400).json({ error: "Routing number must be 9 digits" });
+    return;
+  }
+
+  if (!/^\d{4,17}$/.test(accountNumber)) {
+    res.status(400).json({ error: "Account number must be 4–17 digits" });
+    return;
+  }
+
+  const contract = await db
+    .select()
+    .from(contractsTable)
+    .where(eq(contractsTable.uuid, id))
+    .limit(1);
+
+  if (!contract[0]) {
+    res.status(404).json({ error: "Contract not found" });
+    return;
+  }
+
+  const c = contract[0];
+
+  // Send ACH info to info@ — never stored in DB
+  sendAchPaymentEmail({
+    clientName: c.clientName,
+    businessName: c.businessName,
+    contractUuid: c.uuid ?? String(c.id),
+    totalCost: Number(c.totalCost),
+    depositAmount: Number(c.depositAmount),
+    accountHolderName,
+    bankName,
+    routingNumber,
+    accountNumber,
+    accountType,
+  }).catch(() => {});
+
+  res.json({ ok: true });
 });
 
 export default router;
