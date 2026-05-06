@@ -252,45 +252,78 @@ router.post("/gemini/review", async (req, res) => {
       selectedTier?: string; clientStrategist?: string;
     };
 
-    // Compute effective total: use override if set, otherwise sum pricingItems
-    let effectiveTotal = p.totalAmount ?? 0;
-    if (!effectiveTotal && p.pricingItems) {
-      try {
-        const items = JSON.parse(p.pricingItems) as { price: number }[];
-        effectiveTotal = items.reduce((s, r) => s + Number(r.price), 0);
-      } catch { /* keep 0 */ }
-    }
+    // Parse pricing items for math verification
+    type PricingItem = { label?: string; description?: string; price: number; qty?: number; unit?: string };
+    let parsedItems: PricingItem[] = [];
+    try {
+      if (p.pricingItems) parsedItems = JSON.parse(p.pricingItems) as PricingItem[];
+    } catch { /* keep empty */ }
 
-    prompt = `You are a senior strategist at McWilliams Media reviewing a client proposal before it's sent. Be specific, actionable, and concise. Use markdown with headers.
+    const itemsSum = parsedItems.reduce((s, r) => s + Number(r.price), 0);
+    const statedTotal = Number(p.totalAmount ?? 0);
+    const effectiveTotal = statedTotal || itemsSum;
 
-Review this proposal and provide:
+    const pricingBlock = parsedItems.length > 0
+      ? parsedItems.map(item => {
+          const qty = item.qty && item.qty !== 1 ? `${item.qty} × ` : "";
+          return `  - ${item.label ?? "Item"}${item.description ? ` (${item.description})` : ""}: ${qty}$${Number(item.price).toLocaleString()}`;
+        }).join("\n") +
+        `\n  ITEMS SUM: $${itemsSum.toLocaleString()}` +
+        `\n  STATED TOTAL: $${statedTotal.toLocaleString()}` +
+        (Math.abs(itemsSum - statedTotal) > 0.01 && statedTotal > 0
+          ? `\n  ⚠ MATH MISMATCH: items sum to $${itemsSum.toLocaleString()} but stated total is $${statedTotal.toLocaleString()}`
+          : statedTotal > 0 ? "\n  ✓ Math checks out" : "\n  ⚠ Total is $0 — not set")
+      : "  *(No pricing line items defined)*";
+
+    prompt = `You are a senior strategist and editor at McWilliams Media reviewing a client proposal before it is sent. You are thorough and exacting. Use markdown with headers.
+
+Review ALL of the following areas:
 
 ## Overall Impression
-Is this proposal strong? What's the first thing a client would feel reading it?
+Is this proposal ready to send? What would a client feel receiving it right now?
+
+## Spelling & Grammar
+Read every word of the proposal content and special context carefully. List every spelling mistake, typo, or grammatical error you find — quote the exact wrong text and provide the correction. If none, say "No issues found."
+
+## Pricing Math
+Verify the numbers:
+- Do the line items add up to the stated total?
+- Are any prices missing, $0, or suspiciously low?
+- Flag any math errors explicitly.
 
 ## Content Quality
-Evaluate the writing — is it compelling, professional, and persuasive? Quote specific weak phrases if any.
+Evaluate the writing — is it compelling, professional, and persuasive? Quote specific weak or vague phrases and suggest sharper alternatives.
 
 ## Completeness
-Any missing sections, empty fields, or important gaps?
+Check for: missing content, empty fields, $0 pricing, no strategist assigned, no page descriptions, missing special context, or any other gaps that would make this look unprofessional.
 
 ## Value Proposition
-Does it clearly communicate why McWilliams Media is the right choice for this specific client?
+Does the proposal clearly communicate why McWilliams Media is the right partner for this specific client and their goals?
 
 ## Action Items
-List 2–4 specific improvements to make before sending.
+List the 3–5 most important fixes needed before this proposal should be sent, in priority order.
 
 ---
-**Proposal Data:**
-- Client: ${p.clientName ?? "Unknown"} at ${p.businessName ?? "Unknown"}
-- Project Type: ${p.projectType ?? "Unknown"}
-- Total Amount: $${effectiveTotal.toLocaleString()}
+**PROPOSAL DATA:**
+- Client: ${p.clientName ?? "⚠ MISSING"} at ${p.businessName ?? "⚠ MISSING"}
+- Project Type: ${p.projectType ?? "⚠ MISSING"}
+- Strategist: ${p.clientStrategist ?? "⚠ UNASSIGNED"}
 - Status: ${p.status ?? "draft"}
-- Strategist: ${p.clientStrategist ?? "Unassigned"}
 ${p.selectedTier ? `- Selected Tier: ${p.selectedTier}` : ""}
-${p.numberOfPages ? `- Pages: ${p.numberOfPages}${p.pageNames ? ` (${p.pageNames})` : ""}` : ""}
-${p.specialContext ? `\n**Special Context:**\n${p.specialContext}` : ""}
-${p.content ? `\n**Proposal Content:**\n${p.content}` : "\n*(No content written yet)*"}`;
+${p.numberOfPages ? `- Number of Pages: ${p.numberOfPages}` : "- Pages: ⚠ not set"}
+${p.pageNames ? `- Page Names/Details: ${p.pageNames}` : "- Page Descriptions: ⚠ none provided"}
+
+**PRICING BREAKDOWN:**
+${pricingBlock}
+Effective Total Shown to Client: $${effectiveTotal.toLocaleString()}
+
+${p.specialContext ? `**SPECIAL CONTEXT / INTERNAL NOTES:**\n${p.specialContext}` : "**SPECIAL CONTEXT:** ⚠ None provided"}
+
+**PROPOSAL BODY CONTENT:**
+${p.content ? p.content : "⚠ NO CONTENT WRITTEN YET — this proposal is blank"}
+
+---
+Important: Be specific about every issue. Quote exact text when flagging spelling or grammar errors. Do not generalize.`;
   } else if (type === "contract") {
     const c = data as {
       clientName?: string; businessName?: string; contractType?: string;
