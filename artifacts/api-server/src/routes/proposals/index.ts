@@ -153,8 +153,7 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "• Privacy Policy, Terms & Conditions, and Site Map pages",
       "",
       `Total Investment: ${formatted}`,
-      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
-    ].filter((l) => l !== undefined).join("\n").trimEnd();
+    ].join("\n").trimEnd();
   }
 
   if (p.projectType === "tiered") {
@@ -165,8 +164,7 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "Services include ongoing digital marketing strategy and execution as detailed in the accepted proposal.",
       "",
       `Total Investment: ${formatted}/month`,
-      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
-    ].filter((l) => l !== undefined).join("\n").trimEnd();
+    ].join("\n").trimEnd();
   }
 
   if (p.projectType === "ala-carte" || p.projectType === "marketing") {
@@ -176,8 +174,7 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "Services selected by client as outlined in the accepted proposal.",
       "",
       `Total Investment: ${formatted}/month`,
-      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
-    ].filter((l) => l !== undefined).join("\n").trimEnd();
+    ].join("\n").trimEnd();
   }
 
   if (p.projectType === "print") {
@@ -187,8 +184,7 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "Design deliverables as outlined in the accepted proposal.",
       "",
       `Total Investment: ${formatted}`,
-      p.specialContext ? `\nNotes: ${p.specialContext}` : "",
-    ].filter((l) => l !== undefined).join("\n").trimEnd();
+    ].join("\n").trimEnd();
   }
 
   return `Services as outlined in the accepted proposal.\n\nTotal Investment: ${formatted}`;
