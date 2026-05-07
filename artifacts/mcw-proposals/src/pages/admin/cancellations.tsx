@@ -144,19 +144,21 @@ export default function Cancellations() {
 
   const formUrl = getFormUrl();
 
-  const defaultEmailSubject = "We'd Love Your Feedback — McWilliams Media";
+  const defaultEmailSubject = "Action Required: Cancellation Acknowledgement — McWilliams Media";
   function buildDefaultBody(to: string) {
     const name = to.trim() || "[Client Name]";
     return `${name},
 
-We're sorry to hear you'd like to cancel your services with McWilliams Media. Before we process your request, we'd really appreciate a moment of your time to share your feedback — it helps us continue improving.
+We've received your request to cancel your services with McWilliams Media. To officially process your cancellation and ensure a smooth wrap-up, please complete our Cancellation Acknowledgement Form at the link below.
 
-Please complete our short cancellation form here:
+This form confirms your understanding of our cancellation notice period and billing schedule — it only takes a few minutes to complete.
+
+Complete your Cancellation Acknowledgement Form here:
 ${formUrl}
 
-It only takes a couple of minutes, and your honest input means a lot to us.
+Please note: Your cancellation will not be finalized until this form is submitted. If you have any questions about the billing terms or your final invoice, don't hesitate to reach out — we're happy to walk you through everything.
 
-If you'd like to talk through anything or reconsider, we're always happy to connect. Just reply to this email or give us a call.
+Thank you for your time with McWilliams Media. We wish you all the best.
 
 Warm regards,
 The McWilliams Media Team`;
