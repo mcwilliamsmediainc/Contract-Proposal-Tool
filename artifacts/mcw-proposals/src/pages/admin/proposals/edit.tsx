@@ -310,8 +310,9 @@ export default function EditProposal() {
     setSaving(true);
     try {
       const values = form.getValues();
-      // effectiveTotal is computed live from pricingItems/totalAmount override (see liveTotal)
-      const effectiveTotal = liveTotal ?? 0;
+      // For web/project proposals, use the live derived value (line items + override).
+      // For tiered/ala-carte, liveTotal is null — preserve whatever totalAmount is stored.
+      const effectiveTotal = liveTotal !== null ? liveTotal : (values.totalAmount ?? 0);
       const data = await updateProposal.mutateAsync({
         id,
         data: { ...values, totalAmount: effectiveTotal }
@@ -388,9 +389,10 @@ export default function EditProposal() {
 
   const watched = form.watch();
 
-  // Live proposal value — must be declared before any early returns to satisfy hook rules.
-  // Mirrors PricingSection defaults exactly (rate 350 for Web Pages) so the toolbar value
-  // matches what the client portal will display before custom pricingItems are saved.
+  // Live proposal value — declared before early returns to satisfy React hook ordering rules.
+  // Uses getDefaultPricingRows (rate 450 for Web Pages) — the same defaults shown in the
+  // Pricing panel editor — so the toolbar always reflects the admin's active pricing view.
+  // Returns null for tiered/ala-carte (no single dollar total applies).
   const liveTotal = useMemo(() => {
     if (watched.projectType === "tiered" || watched.projectType === "ala-carte") return null;
     const pages = watched.numberOfPages || 5;
