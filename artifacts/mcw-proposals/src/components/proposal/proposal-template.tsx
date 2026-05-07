@@ -779,7 +779,7 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
   return (
     <section id="section-pricing" className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Project Quote</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-2 text-center" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>Total Investment</h2>
         <div className="mt-8 rounded-xl border border-gray-200 overflow-hidden shadow-sm">
           <div className="bg-[#061e57] px-6 py-4 flex justify-between items-center">
             <p className="text-white font-bold text-lg">Website Design</p>

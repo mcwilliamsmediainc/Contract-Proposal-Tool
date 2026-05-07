@@ -914,26 +914,49 @@ export default function EditProposal() {
         </div>
       </SlidePanel>
 
-      <AiReviewDrawer
-        open={reviewOpen}
-        onClose={() => setReviewOpen(false)}
-        reviewType="proposal"
-        storageKey={`proposal:${id}`}
-        data={{
-          clientName: watched.clientName || proposal.clientName,
-          businessName: watched.businessName || proposal.businessName,
-          projectType: watched.projectType || proposal.projectType,
-          totalAmount: watched.totalAmount ?? proposal.totalAmount,
-          pricingItems: watched.pricingItems ?? proposal.pricingItems,
-          content: watched.content || proposal.content,
-          specialContext: watched.specialContext || proposal.specialContext,
-          numberOfPages: watched.numberOfPages || proposal.numberOfPages,
-          pageNames: watched.pageNames || proposal.pageNames,
-          status: proposal.status,
-          selectedTier: proposal.selectedTier,
-          clientStrategist: watched.clientStrategist || proposal.clientStrategist,
-        }}
-      />
+      {(() => {
+        // Compute effective pricing for AI review — fall back to default items when none saved
+        const reviewPages = watched.numberOfPages || proposal.numberOfPages || 5;
+        const defaultReviewItems: PricingLineItem[] = [
+          { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
+          { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
+          { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
+          { desc: `Web Pages (${reviewPages})`, rate: 450, qty: `${reviewPages} Pages`, price: 450 * reviewPages },
+          { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
+          { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
+        ];
+        const rawPricingItems = watched.pricingItems ?? proposal.pricingItems;
+        let effectiveItems: PricingLineItem[] = defaultReviewItems;
+        try {
+          const parsed = rawPricingItems ? JSON.parse(rawPricingItems) as PricingLineItem[] : null;
+          if (parsed && parsed.length > 0) effectiveItems = parsed;
+        } catch { /* keep defaults */ }
+        const itemsSum = effectiveItems.reduce((s, r) => s + Number(r.price), 0);
+        const statedTotal = watched.totalAmount ?? Number(proposal.totalAmount) ?? 0;
+        const effectiveTotal = statedTotal > 0 ? statedTotal : itemsSum;
+        return (
+          <AiReviewDrawer
+            open={reviewOpen}
+            onClose={() => setReviewOpen(false)}
+            reviewType="proposal"
+            storageKey={`proposal:${id}`}
+            data={{
+              clientName: watched.clientName || proposal.clientName,
+              businessName: watched.businessName || proposal.businessName,
+              projectType: watched.projectType || proposal.projectType,
+              totalAmount: effectiveTotal,
+              pricingItems: JSON.stringify(effectiveItems),
+              content: watched.content || proposal.content,
+              specialContext: watched.specialContext || proposal.specialContext,
+              numberOfPages: reviewPages,
+              pageNames: watched.pageNames || proposal.pageNames,
+              status: proposal.status,
+              selectedTier: proposal.selectedTier,
+              clientStrategist: watched.clientStrategist || proposal.clientStrategist,
+            }}
+          />
+        );
+      })()}
     </div>
   );
 }
