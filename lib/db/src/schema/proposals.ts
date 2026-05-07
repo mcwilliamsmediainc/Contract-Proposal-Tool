@@ -108,3 +108,24 @@ export const insertProposalSchema = createInsertSchema(proposalsTable).omit({
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposalsTable.$inferSelect;
 export type OnboardingTask = typeof onboardingTasksTable.$inferSelect;
+
+export const auditLeadsTable = pgTable("audit_leads", {
+  id: serial("id").primaryKey(),
+  uuid: text("uuid").notNull().unique(),
+  url: text("url").notNull(),
+  city: text("city").notNull(),
+  challenge: text("challenge"),
+  email: text("email"),
+  status: text("status").notNull().default("new"),
+  scores: text("scores"),
+  scanData: text("scan_data"),
+  businessType: text("business_type"),
+  budget: text("budget"),
+  goal: text("goal"),
+  proposalRequested: boolean("proposal_requested").notNull().default(false),
+  proposalRequestedAt: timestamp("proposal_requested_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type AuditLead = typeof auditLeadsTable.$inferSelect;

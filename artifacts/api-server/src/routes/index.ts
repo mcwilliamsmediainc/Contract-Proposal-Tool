@@ -7,6 +7,7 @@ import geminiRouter from "./gemini";
 import onboardingFormRouter from "./onboarding-form";
 import paymentUpdateRouter from "./payment-update";
 import cancellationsRouter from "./cancellations";
+import auditRouter from "./audit";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -28,6 +29,12 @@ function isPublicPath(path: string, method: string): boolean {
   if (path.startsWith("/payment-update")) return true;
   // Public client cancellation form submission
   if (path === "/cancellation-form" && method === "POST") return true;
+  // Public audit tool endpoints
+  if (path.startsWith("/audit/create")) return true;
+  if (path.startsWith("/audit/scan")) return true;
+  if (path.startsWith("/audit/capture")) return true;
+  if (path.startsWith("/audit/qualify")) return true;
+  if (path.startsWith("/audit/request-proposal")) return true;
   return false;
 }
 
@@ -46,5 +53,6 @@ router.use(geminiRouter);
 router.use(onboardingFormRouter);
 router.use(paymentUpdateRouter);
 router.use(cancellationsRouter);
+router.use(auditRouter);
 
 export default router;
