@@ -178,6 +178,18 @@ export const PublicProposalStatus = {
 } as const;
 
 /**
+ * Type of discount — percent (%) or fixed ($)
+ */
+export type PublicProposalDiscountType =
+  | (typeof PublicProposalDiscountType)[keyof typeof PublicProposalDiscountType]
+  | null;
+
+export const PublicProposalDiscountType = {
+  percent: "percent",
+  fixed: "fixed",
+} as const;
+
+/**
  * Public-facing proposal shape — excludes internal notes (safe for client portal)
  */
 export interface PublicProposal {
@@ -204,6 +216,12 @@ export interface PublicProposal {
   brandShootEnabled?: boolean;
   /** Custom body text for the Brand Shoot section; null uses the template default */
   brandShootText?: string | null;
+  /** Type of discount — percent (%) or fixed ($) */
+  discountType?: PublicProposalDiscountType;
+  /** Discount amount (percentage or dollar value depending on discountType) */
+  discountValue?: number | null;
+  /** Human-readable label shown on the proposal (e.g. "Networking Group Member — 10% off") */
+  discountLabel?: string | null;
   viewCount: number;
   lastViewedAt?: string | null;
   /** UUID of the linked contract, if one exists — used by client portal to navigate directly to signing */
@@ -240,6 +258,15 @@ export const CreateProposalBodyProjectType = {
   project: "project",
 } as const;
 
+export type CreateProposalBodyDiscountType =
+  | (typeof CreateProposalBodyDiscountType)[keyof typeof CreateProposalBodyDiscountType]
+  | null;
+
+export const CreateProposalBodyDiscountType = {
+  percent: "percent",
+  fixed: "fixed",
+} as const;
+
 export interface CreateProposalBody {
   clientName: string;
   businessName: string;
@@ -257,6 +284,9 @@ export interface CreateProposalBody {
   clientStrategist?: string | null;
   brandShootEnabled?: boolean;
   brandShootText?: string | null;
+  discountType?: CreateProposalBodyDiscountType;
+  discountValue?: number | null;
+  discountLabel?: string | null;
 }
 
 export type UpdateProposalBodyProjectType =
@@ -281,6 +311,15 @@ export const UpdateProposalBodyStatus = {
   archived: "archived",
 } as const;
 
+export type UpdateProposalBodyDiscountType =
+  | (typeof UpdateProposalBodyDiscountType)[keyof typeof UpdateProposalBodyDiscountType]
+  | null;
+
+export const UpdateProposalBodyDiscountType = {
+  percent: "percent",
+  fixed: "fixed",
+} as const;
+
 export interface UpdateProposalBody {
   clientName?: string;
   businessName?: string;
@@ -301,6 +340,9 @@ export interface UpdateProposalBody {
   notes?: string | null;
   brandShootEnabled?: boolean;
   brandShootText?: string | null;
+  discountType?: UpdateProposalBodyDiscountType;
+  discountValue?: number | null;
+  discountLabel?: string | null;
 }
 
 export interface AcceptProposalBody {

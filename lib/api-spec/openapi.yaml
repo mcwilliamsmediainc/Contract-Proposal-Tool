@@ -1042,6 +1042,19 @@ components:
           type: string
           nullable: true
           description: Custom body text for the Brand Shoot section; null uses the template default
+        discountType:
+          type: string
+          nullable: true
+          enum: [percent, fixed]
+          description: Type of discount — percent (%) or fixed ($)
+        discountValue:
+          type: number
+          nullable: true
+          description: Discount amount (percentage or dollar value depending on discountType)
+        discountLabel:
+          type: string
+          nullable: true
+          description: Human-readable label shown on the proposal (e.g. "Networking Group Member — 10% off")
         viewCount:
           type: integer
         lastViewedAt:
@@ -1138,6 +1151,16 @@ components:
         brandShootText:
           type: string
           nullable: true
+        discountType:
+          type: string
+          nullable: true
+          enum: [percent, fixed]
+        discountValue:
+          type: number
+          nullable: true
+        discountLabel:
+          type: string
+          nullable: true
       required:
         - clientName
         - businessName
@@ -1195,6 +1218,16 @@ components:
         brandShootEnabled:
           type: boolean
         brandShootText:
+          type: string
+          nullable: true
+        discountType:
+          type: string
+          nullable: true
+          enum: [percent, fixed]
+        discountValue:
+          type: number
+          nullable: true
+        discountLabel:
           type: string
           nullable: true
 

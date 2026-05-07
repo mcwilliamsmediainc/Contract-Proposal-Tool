@@ -42,6 +42,9 @@ const formSchema = z.object({
   notes: z.string().optional(),
   brandShootEnabled: z.boolean().optional(),
   brandShootText: z.string().optional(),
+  discountType: z.enum(["percent", "fixed"]).nullable().optional(),
+  discountValue: z.number().nullable().optional(),
+  discountLabel: z.string().optional(),
 });
 type FormValues = z.infer<typeof formSchema>;
 
@@ -267,6 +270,7 @@ export default function EditProposal() {
       pricingItems: undefined,
       specialContext: "", content: "", loomVideoUrl: "", calendlyUrl: "",
       brandShootEnabled: true, brandShootText: "",
+      discountType: null, discountValue: null, discountLabel: "",
     },
   });
 
@@ -291,6 +295,9 @@ export default function EditProposal() {
         notes: proposal.notes || "",
         brandShootEnabled: proposal.brandShootEnabled ?? true,
         brandShootText: proposal.brandShootText || "",
+        discountType: (proposal.discountType as "percent" | "fixed" | null) ?? null,
+        discountValue: proposal.discountValue ?? null,
+        discountLabel: proposal.discountLabel || "",
       });
     }
   }, [proposal, id, form]);
@@ -410,8 +417,15 @@ export default function EditProposal() {
       rows = defaultRows;
     }
     const lineTotal = rows.reduce((s, r) => s + Number(r.price), 0);
-    return (watched.totalAmount && watched.totalAmount > 0) ? watched.totalAmount : lineTotal;
-  }, [watched.pricingItems, watched.totalAmount, watched.numberOfPages, watched.projectType]);
+    const subtotal = (watched.totalAmount && watched.totalAmount > 0) ? watched.totalAmount : lineTotal;
+    if (watched.discountType && watched.discountValue && watched.discountValue > 0) {
+      const disc = watched.discountType === "percent"
+        ? Math.round(subtotal * (watched.discountValue / 100) * 100) / 100
+        : watched.discountValue;
+      return subtotal - disc;
+    }
+    return subtotal;
+  }, [watched.pricingItems, watched.totalAmount, watched.numberOfPages, watched.projectType, watched.discountType, watched.discountValue]);
 
   if (isLoading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -593,6 +607,9 @@ export default function EditProposal() {
             createdAt: proposal.createdAt,
             brandShootEnabled: watched.brandShootEnabled ?? true,
             brandShootText: watched.brandShootText || null,
+            discountType: watched.discountType ?? null,
+            discountValue: watched.discountValue ?? null,
+            discountLabel: watched.discountLabel || null,
           }}
         />
       ) : isAlaCarte ? (
@@ -622,6 +639,9 @@ export default function EditProposal() {
             createdAt: proposal.createdAt,
             brandShootEnabled: watched.brandShootEnabled ?? true,
             brandShootText: watched.brandShootText || null,
+            discountType: watched.discountType ?? null,
+            discountValue: watched.discountValue ?? null,
+            discountLabel: watched.discountLabel || null,
           }}
         />
       )}
@@ -858,6 +878,82 @@ export default function EditProposal() {
                             </FormControl>
                           </FormItem>
                         )} />
+                      </div>
+
+                      {/* ── Discounts ── */}
+                      <div className="pt-2 border-t border-gray-200">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">Discount</p>
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-2">
+                            <FormField control={form.control} name="discountType" render={({ field: f }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">Type</FormLabel>
+                                <Select
+                                  value={f.value ?? "none"}
+                                  onValueChange={v => f.onChange(v === "none" ? null : v as "percent" | "fixed")}
+                                >
+                                  <FormControl>
+                                    <SelectTrigger className="text-sm">
+                                      <SelectValue placeholder="No discount" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    <SelectItem value="none">No discount</SelectItem>
+                                    <SelectItem value="percent">Percent (%)</SelectItem>
+                                    <SelectItem value="fixed">Fixed ($)</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </FormItem>
+                            )} />
+                            <FormField control={form.control} name="discountValue" render={({ field: f }) => (
+                              <FormItem>
+                                <FormLabel className="text-xs">
+                                  {watched.discountType === "percent" ? "Amount (%)" : watched.discountType === "fixed" ? "Amount ($)" : "Amount"}
+                                </FormLabel>
+                                <FormControl>
+                                  <div className="relative">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">
+                                      {watched.discountType === "percent" ? "%" : watched.discountType === "fixed" ? "$" : "#"}
+                                    </span>
+                                    <Input
+                                      type="number" min={0} step={watched.discountType === "percent" ? 1 : 0.01}
+                                      placeholder="0"
+                                      className="pl-7 text-sm"
+                                      disabled={!watched.discountType}
+                                      value={f.value ?? ""}
+                                      onChange={e => f.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                                    />
+                                  </div>
+                                </FormControl>
+                              </FormItem>
+                            )} />
+                          </div>
+                          <FormField control={form.control} name="discountLabel" render={({ field: f }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs">Label <span className="text-gray-400 font-normal">(shown on proposal)</span></FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder="e.g. Networking Group Member — 10% off"
+                                  className="text-sm"
+                                  disabled={!watched.discountType}
+                                  {...f}
+                                />
+                              </FormControl>
+                            </FormItem>
+                          )} />
+                          {watched.discountType && watched.discountValue && watched.discountValue > 0 && (() => {
+                            const sub = (watched.totalAmount && watched.totalAmount > 0) ? watched.totalAmount : lineTotal;
+                            const disc = watched.discountType === "percent"
+                              ? Math.round(sub * (watched.discountValue / 100) * 100) / 100
+                              : watched.discountValue;
+                            return (
+                              <div className="rounded-lg bg-green-50 border border-green-200 px-4 py-2.5 flex justify-between items-center text-sm">
+                                <span className="text-green-800 font-medium">Discount applied</span>
+                                <span className="font-bold text-green-700">−${disc.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              </div>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                   );

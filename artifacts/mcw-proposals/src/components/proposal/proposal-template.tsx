@@ -37,6 +37,9 @@ export interface ProposalData {
   createdAt?: string | Date;
   brandShootEnabled?: boolean | null;
   brandShootText?: string | null;
+  discountType?: string | null;
+  discountValue?: number | null;
+  discountLabel?: string | null;
 }
 
 function CheckItem({ children }: { children: React.ReactNode }) {
@@ -758,10 +761,13 @@ export function EssentialsSection({ selectedHosting, onSelectHosting }: {
   );
 }
 
-export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
+export function PricingSection({ numberOfPages, totalAmount, pricingItems, discountType, discountValue, discountLabel }: {
   numberOfPages?: number | null;
   totalAmount?: number | null;
   pricingItems?: string | null;
+  discountType?: string | null;
+  discountValue?: number | null;
+  discountLabel?: string | null;
 }) {
   const pages = numberOfPages || 5;
   const defaultItems: PricingLineItem[] = [
@@ -779,7 +785,15 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
   }
   const items = customItems && customItems.length > 0 ? customItems : defaultItems;
   const calcTotal = items.reduce((s, i) => s + i.price, 0);
-  const displayTotal = (totalAmount && totalAmount > 0) ? totalAmount : calcTotal;
+  const subtotal = (totalAmount && totalAmount > 0) ? totalAmount : calcTotal;
+
+  const hasDiscount = discountType && discountValue && discountValue > 0;
+  const discountAmount = hasDiscount
+    ? discountType === "percent"
+      ? Math.round(subtotal * (discountValue! / 100) * 100) / 100
+      : discountValue!
+    : 0;
+  const displayTotal = subtotal - discountAmount;
 
   return (
     <section id="section-pricing" className="bg-white py-20 px-6 border-t border-gray-100">
@@ -808,8 +822,28 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
                   <td className="px-6 py-3 text-right font-semibold text-gray-900">${item.price.toLocaleString()}.00</td>
                 </tr>
               ))}
+              {hasDiscount && (
+                <tr className="bg-green-50 hover:bg-green-100">
+                  <td className="px-6 py-3 text-green-800 font-medium italic">
+                    {discountLabel || (discountType === "percent" ? `${discountValue}% Discount` : "Discount")}
+                  </td>
+                  <td className="px-4 py-3 text-right text-green-700">
+                    {discountType === "percent" ? `${discountValue}%` : "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right text-green-700">1</td>
+                  <td className="px-6 py-3 text-right font-semibold text-green-700">
+                    −${discountAmount.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </td>
+                </tr>
+              )}
             </tbody>
             <tfoot>
+              {hasDiscount && (
+                <tr className="border-t border-gray-200 bg-gray-50">
+                  <td colSpan={3} className="px-6 py-2 text-right text-sm text-gray-500">Subtotal</td>
+                  <td className="px-6 py-2 text-right text-sm text-gray-500">${subtotal.toLocaleString()}.00</td>
+                </tr>
+              )}
               <tr className="border-t-2 border-gray-300 bg-gray-50">
                 <td colSpan={3} className="px-6 py-4 text-right font-bold text-gray-900">Total</td>
                 <td className="px-6 py-4 text-right font-bold text-[#061e57] text-lg">${displayTotal.toLocaleString()}.00</td>
@@ -1017,7 +1051,14 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
         </>
       )}
       {/* 8. Investment — pricing after value is established */}
-      <PricingSection numberOfPages={data.numberOfPages} totalAmount={data.totalAmount} pricingItems={data.pricingItems} />
+      <PricingSection
+        numberOfPages={data.numberOfPages}
+        totalAmount={data.totalAmount}
+        pricingItems={data.pricingItems}
+        discountType={data.discountType}
+        discountValue={data.discountValue}
+        discountLabel={data.discountLabel}
+      />
       {/* 9. Team */}
       <TeamSection />
       {/* 10. What's Next */}

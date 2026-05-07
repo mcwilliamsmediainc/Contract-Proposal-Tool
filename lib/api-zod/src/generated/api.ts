@@ -66,6 +66,22 @@ export const ListProposalsResponseItem = zod
       .describe(
         "Custom body text for the Brand Shoot section; null uses the template default",
       ),
+    discountType: zod
+      .enum(["percent", "fixed"])
+      .nullish()
+      .describe("Type of discount — percent (%) or fixed ($)"),
+    discountValue: zod
+      .number()
+      .nullish()
+      .describe(
+        "Discount amount (percentage or dollar value depending on discountType)",
+      ),
+    discountLabel: zod
+      .string()
+      .nullish()
+      .describe(
+        'Human-readable label shown on the proposal (e.g. \"Networking Group Member — 10% off\")',
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -125,6 +141,9 @@ export const CreateProposalBody = zod.object({
   clientStrategist: zod.string().nullish(),
   brandShootEnabled: zod.boolean().optional(),
   brandShootText: zod.string().nullish(),
+  discountType: zod.enum(["percent", "fixed"]).nullish(),
+  discountValue: zod.number().nullish(),
+  discountLabel: zod.string().nullish(),
 });
 
 /**
@@ -178,6 +197,22 @@ export const GetProposalResponse = zod
       .describe(
         "Custom body text for the Brand Shoot section; null uses the template default",
       ),
+    discountType: zod
+      .enum(["percent", "fixed"])
+      .nullish()
+      .describe("Type of discount — percent (%) or fixed ($)"),
+    discountValue: zod
+      .number()
+      .nullish()
+      .describe(
+        "Discount amount (percentage or dollar value depending on discountType)",
+      ),
+    discountLabel: zod
+      .string()
+      .nullish()
+      .describe(
+        'Human-readable label shown on the proposal (e.g. \"Networking Group Member — 10% off\")',
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -226,6 +261,9 @@ export const UpdateProposalBody = zod.object({
   notes: zod.string().nullish(),
   brandShootEnabled: zod.boolean().optional(),
   brandShootText: zod.string().nullish(),
+  discountType: zod.enum(["percent", "fixed"]).nullish(),
+  discountValue: zod.number().nullish(),
+  discountLabel: zod.string().nullish(),
 });
 
 export const UpdateProposalResponse = zod
@@ -271,6 +309,22 @@ export const UpdateProposalResponse = zod
       .nullish()
       .describe(
         "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
+    discountType: zod
+      .enum(["percent", "fixed"])
+      .nullish()
+      .describe("Type of discount — percent (%) or fixed ($)"),
+    discountValue: zod
+      .number()
+      .nullish()
+      .describe(
+        "Discount amount (percentage or dollar value depending on discountType)",
+      ),
+    discountLabel: zod
+      .string()
+      .nullish()
+      .describe(
+        'Human-readable label shown on the proposal (e.g. \"Networking Group Member — 10% off\")',
       ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -361,6 +415,22 @@ export const AcceptProposalResponse = zod
       .nullish()
       .describe(
         "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
+    discountType: zod
+      .enum(["percent", "fixed"])
+      .nullish()
+      .describe("Type of discount — percent (%) or fixed ($)"),
+    discountValue: zod
+      .number()
+      .nullish()
+      .describe(
+        "Discount amount (percentage or dollar value depending on discountType)",
+      ),
+    discountLabel: zod
+      .string()
+      .nullish()
+      .describe(
+        'Human-readable label shown on the proposal (e.g. \"Networking Group Member — 10% off\")',
       ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -497,6 +567,22 @@ export const RecordProposalViewResponse = zod
       .nullish()
       .describe(
         "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
+    discountType: zod
+      .enum(["percent", "fixed"])
+      .nullish()
+      .describe("Type of discount — percent (%) or fixed ($)"),
+    discountValue: zod
+      .number()
+      .nullish()
+      .describe(
+        "Discount amount (percentage or dollar value depending on discountType)",
+      ),
+    discountLabel: zod
+      .string()
+      .nullish()
+      .describe(
+        'Human-readable label shown on the proposal (e.g. \"Networking Group Member — 10% off\")',
       ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
@@ -861,6 +947,22 @@ export const GetAdminProposalResponse = zod
       .nullish()
       .describe(
         "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
+    discountType: zod
+      .enum(["percent", "fixed"])
+      .nullish()
+      .describe("Type of discount — percent (%) or fixed ($)"),
+    discountValue: zod
+      .number()
+      .nullish()
+      .describe(
+        "Discount amount (percentage or dollar value depending on discountType)",
+      ),
+    discountLabel: zod
+      .string()
+      .nullish()
+      .describe(
+        'Human-readable label shown on the proposal (e.g. \"Networking Group Member — 10% off\")',
       ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
