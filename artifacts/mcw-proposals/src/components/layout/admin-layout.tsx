@@ -1,12 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, FilePlus2, Users, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard, LogOut, FileText } from "lucide-react";
+import { LayoutDashboard, Users, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard, LogOut, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useUser, useClerk } from "@clerk/react";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/proposals/new", label: "New Proposal", icon: FilePlus2 },
+  { href: "/admin/proposals", label: "Proposals", icon: FileText },
   { href: "/admin/contracts", label: "Proposals & Contracts", icon: FileText },
   { href: "/admin/onboarding", label: "Onboarding", icon: Users },
   { href: "/admin/clients", label: "Clients", icon: BookUser },

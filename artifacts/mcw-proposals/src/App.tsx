@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 
 import Home from "@/pages/home";
 import AdminDashboard from "@/pages/admin/dashboard";
+import ProposalsList from "@/pages/admin/proposals/list";
 import NewProposal from "@/pages/admin/proposals/new";
 import EditProposal from "@/pages/admin/proposals/edit";
 import Onboarding from "@/pages/admin/onboarding";
@@ -225,6 +226,9 @@ function ClerkProviderWithRoutes() {
             {/* Protected admin routes */}
             <Route path="/admin">
               {() => <RequireSignIn><AdminDashboard /></RequireSignIn>}
+            </Route>
+            <Route path="/admin/proposals">
+              {() => <RequireSignIn><ProposalsList /></RequireSignIn>}
             </Route>
             <Route path="/admin/proposals/new">
               {() => <RequireSignIn><NewProposal /></RequireSignIn>}
