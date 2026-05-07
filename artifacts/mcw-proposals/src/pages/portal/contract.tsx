@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams } from "wouter";
 import { useGetContract, useSignContract, getGetContractQueryKey } from "@workspace/api-client-react";
 import { Button } from "@/components/ui/button";
@@ -18,9 +18,15 @@ function hostingLabel(opt: string) {
 
 function contractTypeLabel(type: string) {
   if (type === "website") return "Website Development";
-  if (type === "marketing") return "Marketing Services";
+  if (type === "marketing" || type === "tiered") return "Marketing Services";
   if (type === "print") return "Print & Brand";
   return type;
+}
+
+function ordinalSuffix(n: number): string {
+  const s = ["th", "st", "nd", "rd"];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] ?? s[v] ?? s[0]);
 }
 
 type View = "agreement" | "ach" | "done" | "other-arrangements";
@@ -72,21 +78,14 @@ export default function ContractPortal() {
     );
   }
 
-  if (contract.status === "signed" && view === "agreement") {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md px-6">
-          <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Agreement Signed</h1>
-          <p className="text-gray-500 mb-1">This contract has already been signed.</p>
-          <p className="text-sm text-gray-400">Thank you, {contract.clientName}. We'll be in touch soon.</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (contract.status === "signed" && view === "agreement") {
+      setView("ach");
+    }
+  }, [contract.status, view]);
 
   const today = new Date();
-  const dateStr = `${today.getDate()}th day of ${today.toLocaleString("default", { month: "long" })}, ${today.getFullYear()}`;
+  const dateStr = `${ordinalSuffix(today.getDate())} day of ${today.toLocaleString("default", { month: "long" })}, ${today.getFullYear()}`;
 
   const isMarketing = contract.contractType === "marketing";
 
@@ -499,7 +498,7 @@ export default function ContractPortal() {
                 <CreditCard className="w-5 h-5" />
                 ACH Payment Authorization
               </h2>
-              <p className="text-blue-200 text-sm mt-1">Your contract is signed — authorize your deposit to get started</p>
+              <p className="text-blue-200 text-sm mt-1">Your contract is signed — {isMarketing ? "authorize your setup fee to get started" : "authorize your deposit to get started"}</p>
             </div>
 
             <div className="px-8 py-6 space-y-6">
@@ -509,7 +508,7 @@ export default function ContractPortal() {
                 <CheckCircle2 className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
                 <div>
                   <p className="font-semibold text-green-900 text-sm">Agreement signed successfully!</p>
-                  <p className="text-green-700 text-sm mt-0.5">Please provide your ACH bank details below to authorize your deposit of <strong>${Number(contract.depositAmount).toLocaleString()}</strong> and get your project underway.</p>
+                  <p className="text-green-700 text-sm mt-0.5">Please provide your ACH bank details below to authorize your {isMarketing ? "setup fee" : "deposit"} of <strong>${Number(contract.depositAmount).toLocaleString()}</strong> and get your project underway.</p>
                 </div>
               </div>
 
@@ -631,7 +630,7 @@ export default function ContractPortal() {
                   <div>
                     <p className="text-sm font-semibold text-gray-800 mb-1">ACH Debit Authorization</p>
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      By checking this box, I, <strong>{contract.clientName}</strong>, authorize <strong>McWilliams Media Inc.</strong> to initiate an ACH debit of the initial deposit amount as specified in the signed Development Agreement from the bank account provided above. I understand this deposit is non-refundable per the signed Development Agreement. I may revoke this authorization at any time by contacting{" "}
+                      By checking this box, I, <strong>{contract.clientName}</strong>, authorize <strong>McWilliams Media Inc.</strong> to initiate an ACH debit of the initial {isMarketing ? "setup fee" : "deposit"} amount as specified in the signed {isMarketing ? "Development and Marketing Agreement" : "Development Agreement"} from the bank account provided above. I understand this {isMarketing ? "setup fee" : "deposit"} is non-refundable per the signed {isMarketing ? "Development and Marketing Agreement" : "Development Agreement"}. I may revoke this authorization at any time by contacting{" "}
                       <a href="mailto:billing@mcwilliamsmedia.com" className="text-[#061e57] underline">billing@mcwilliamsmedia.com</a>{" "}
                       before the transaction is processed.
                     </p>
@@ -672,11 +671,11 @@ export default function ContractPortal() {
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">You're all set!</h2>
               <p className="text-gray-500 max-w-sm mx-auto mb-6">
-                Your contract is signed and your payment information has been securely received. We'll process your deposit and reach out to schedule your kickoff call shortly.
+                Your contract is signed and your payment information has been securely received. We'll process your {isMarketing ? "setup fee" : "deposit"} and reach out to schedule your kickoff call shortly.
               </p>
               <div className="bg-[#eef4f9] border border-[#b3cee1] rounded-lg p-5 max-w-sm mx-auto text-left">
                 <p className="text-sm text-[#3a4856] leading-relaxed">
-                  <strong>What's next:</strong> Your strategist will confirm your deposit has been collected and schedule your project kickoff within 1–2 business days.
+                  <strong>What's next:</strong> Your strategist will confirm your {isMarketing ? "setup fee" : "deposit"} has been collected and schedule your project kickoff within 1–2 business days.
                 </p>
               </div>
             </div>
@@ -690,7 +689,7 @@ export default function ContractPortal() {
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Contract signed!</h2>
               <p className="text-gray-500 max-w-sm mx-auto mb-6">
-                No problem — your contract is on file. Someone from our team will be in touch to coordinate your deposit payment.
+                No problem — your contract is on file. Someone from our team will be in touch to coordinate your {isMarketing ? "setup fee" : "deposit"} payment.
               </p>
               <div className="bg-[#eef4f9] border border-[#b3cee1] rounded-lg p-5 max-w-sm mx-auto text-left">
                 <p className="text-sm text-[#3a4856] leading-relaxed">

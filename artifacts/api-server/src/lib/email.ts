@@ -361,7 +361,7 @@ export async function sendContractSignedEmail(opts: {
   clientStrategist?: string | null;
 }) {
   const to = recipientsFor(opts.clientStrategist);
-  const adminUrl = `${baseUrl()}/admin/contracts`;
+  const adminUrl = `${baseUrl()}/admin/contracts/${opts.contractUuid}/edit`;
 
   await send({
     from: FROM_INTERNAL,
@@ -399,11 +399,6 @@ export async function sendContractSignedClientEmail(opts: {
       <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
         Your signed contract with McWilliams Media for <strong>${opts.businessName}</strong> has been received. A copy is on file and your project is officially underway.
       </p>
-      <div style="background: #f5f5f5; border-radius: 8px; padding: 20px 24px; margin: 0 0 24px;">
-        <p style="margin: 0 0 8px; font-size: 14px; color: #444;"><strong>Contract Type:</strong> ${opts.contractType}</p>
-        <p style="margin: 0 0 8px; font-size: 14px; color: #444;"><strong>Total Investment:</strong> $${opts.totalCost.toLocaleString()}</p>
-        <p style="margin: 0; font-size: 14px; color: #444;"><strong>Deposit Due:</strong> $${opts.depositAmount.toLocaleString()}</p>
-      </div>
       <div style="background: #eef4f9; border-left: 4px solid #b3cee1; padding: 16px 20px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
         <p style="margin: 0; color: #3a4856; font-size: 14px; line-height: 1.6;">
           <strong>Next steps:</strong><br>

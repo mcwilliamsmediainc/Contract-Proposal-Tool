@@ -137,15 +137,12 @@ function mapContractType(projectType: string): "website" | "marketing" | "print"
 }
 
 function mapHostingOption(selectedTier: string | null | undefined): "none" | "basic" | "platinum" {
-  if (selectedTier === "gold") return "basic";
+  if (selectedTier === "pro") return "basic";
   if (selectedTier === "platinum") return "platinum";
   return "none";
 }
 
-function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
-  const total = Number(p.totalAmount ?? 0);
-  const formatted = total.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 0 });
-
+function buildScheduleA(p: typeof proposalsTable.$inferSelect): string | null {
   if (p.projectType === "web") {
     const pages = p.numberOfPages ?? 5;
     const pageList = p.pageNames
@@ -167,20 +164,11 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
   }
 
   if (p.projectType === "tiered") {
-    const tier = p.selectedTier ?? "selected";
-    return [
-      `Monthly Marketing Retainer — ${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
-      "",
-      "Services include ongoing digital marketing strategy and execution as detailed in the accepted proposal.",
-    ].join("\n").trimEnd();
+    return null;
   }
 
   if (p.projectType === "ala-carte" || p.projectType === "marketing") {
-    return [
-      "Monthly Marketing Services — Ala Carte Package",
-      "",
-      "Services selected by client as outlined in the accepted proposal.",
-    ].join("\n").trimEnd();
+    return null;
   }
 
   if (p.projectType === "print") {
@@ -830,7 +818,7 @@ router.post("/proposals/:id/send-email", async (req, res) => {
     clientEmail: proposal.clientEmail,
     proposalUuid: id,
     clientStrategist: proposal.clientStrategist,
-    emailSubject: emailSubject?.trim() || `Your ${proposal.projectType === "web" ? "Website" : "Marketing"} Proposal — McWilliams Media`,
+    emailSubject: emailSubject?.trim() || `Your ${proposal.projectType === "web" ? "Website" : proposal.projectType === "print" ? "Print & Brand" : "Marketing"} Proposal — McWilliams Media`,
     emailBody: emailBody.trim(),
   });
 
@@ -838,7 +826,7 @@ router.post("/proposals/:id/send-email", async (req, res) => {
   if (proposal.status === "draft") {
     await db
       .update(proposalsTable)
-      .set({ status: "sent", sentAt: new Date(), updatedAt: new Date() })
+      .set({ status: "sent", updatedAt: new Date() })
       .where(eq(proposalsTable.uuid, id));
   }
 

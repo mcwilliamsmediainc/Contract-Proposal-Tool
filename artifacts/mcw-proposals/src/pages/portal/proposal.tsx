@@ -86,7 +86,7 @@ export default function ClientPortal() {
           }}
           selectedTier={selectedTier}
           onSelectTier={setSelectedTier}
-          onAccept={(tier) => goToContract(tier)}
+          onAccept={() => goToContract(selectedTier ?? undefined)}
           isPending={acceptProposal.isPending}
         />
       </>

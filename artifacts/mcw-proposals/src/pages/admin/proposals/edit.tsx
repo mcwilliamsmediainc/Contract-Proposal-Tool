@@ -336,7 +336,7 @@ export default function EditProposal() {
   const handleOpenEmail = () => {
     const values = form.getValues();
     const link = clientUrl(`/proposal/${id}`);
-    const script = buildEmailScript(values.projectType || proposal.projectType, values.clientName || proposal.clientName, link);
+    const script = buildEmailScript(values.projectType || proposal?.projectType || "web", values.clientName || proposal?.clientName || "", link);
     setEmailSubject(script.subject);
     setEmailBody(script.body);
     setActivePanel("email");
@@ -352,7 +352,7 @@ export default function EditProposal() {
         body: JSON.stringify({ emailSubject, emailBody }),
       });
       if (!res.ok) throw new Error("Failed");
-      toast({ title: "Email sent!", description: `Proposal link sent to ${proposal.clientEmail}.` });
+      toast({ title: "Email sent!", description: `Proposal link sent to ${proposal?.clientEmail}.` });
       setActivePanel(null);
       // Refresh proposal so status badge updates
       queryClient.invalidateQueries({ queryKey: getGetAdminProposalQueryKey(id) });

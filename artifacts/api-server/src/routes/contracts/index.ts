@@ -2,7 +2,7 @@ import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, contractsTable, onboardingClientsTable, onboardingTasksTable, proposalsTable } from "@workspace/db";
-import { sendContractSignedEmail, sendContractSignedClientEmail, sendAchPaymentEmail, sendContractReadyClientEmail, sendOnboardingKickoffEmail } from "../../lib/email";
+import { sendContractSignedEmail, sendContractSignedClientEmail, sendAchPaymentEmail, sendContractReadyClientEmail, sendContractReadyInternalEmail, sendOnboardingKickoffEmail } from "../../lib/email";
 import {
   CreateContractBody,
   UpdateContractBody,
@@ -217,6 +217,16 @@ router.post("/contracts/:id/send", async (req, res) => {
     clientStrategist: sendStrategist,
   }).catch(() => {});
 
+  // Notify internal team that contract was sent
+  sendContractReadyInternalEmail({
+    clientName: updated.clientName,
+    businessName: updated.businessName,
+    contractUuid: updated.uuid ?? String(updated.id),
+    contractType: updated.contractType,
+    totalCost: Number(updated.totalCost),
+    clientStrategist: sendStrategist,
+  }).catch(() => {});
+
   res.json(formatContract(updated));
 });
 
@@ -311,7 +321,7 @@ router.post("/contracts/:id/sign", async (req, res) => {
 
   // For contracts with no ala-carte proposal, fall back to broad type-based services
   if (onboardingServices.length === 0) {
-    if (updated.contractType === "marketing" || updated.contractType === "tiered") {
+    if (updated.contractType === "marketing") {
       onboardingServices = ["marketing.google_ads", "marketing.social_media_ads", "marketing.social_media_posting", "marketing.newsletter"];
     } else if (updated.contractType === "website") {
       onboardingServices = ["website"];
