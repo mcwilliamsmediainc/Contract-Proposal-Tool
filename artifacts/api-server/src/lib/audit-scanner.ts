@@ -86,26 +86,51 @@ async function validateUrl(raw: string): Promise<URL> {
   return parsed;
 }
 
-async function fetchPageHtml(url: string): Promise<string> {
-  const validated = await validateUrl(url);
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 10000);
-  try {
-    const res = await fetch(validated.toString(), {
-      signal: controller.signal,
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; McWilliamsMediaAudit/1.0; +https://mcwilliamsmedia.com)",
-      },
-      redirect: "follow",
-    });
+async function fetchWithSafeRedirects(initialUrl: string, maxHops = 5): Promise<string> {
+  let currentUrl = initialUrl;
+
+  for (let hop = 0; hop < maxHops; hop++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
+    let res: Response;
+    try {
+      res = await fetch(currentUrl, {
+        signal: controller.signal,
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (compatible; McWilliamsMediaAudit/1.0; +https://mcwilliamsmedia.com)",
+        },
+        redirect: "manual",
+      });
+    } catch {
+      return "";
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    if (res.status >= 300 && res.status < 400) {
+      const location = res.headers.get("location");
+      if (!location) return "";
+      // Resolve relative redirect URLs against the current URL
+      const nextUrl = new URL(location, currentUrl).toString();
+      // Validate the redirect target before following
+      await validateUrl(nextUrl);
+      currentUrl = nextUrl;
+      continue;
+    }
+
+    if (!res.ok) return "";
     const text = await res.text();
     return text.slice(0, 15000);
-  } catch {
-    return "";
-  } finally {
-    clearTimeout(timeout);
   }
+
+  return "";
+}
+
+async function fetchPageHtml(url: string): Promise<string> {
+  await validateUrl(url);
+  return fetchWithSafeRedirects(url);
 }
 
 export async function scanWebsite(url: string, city: string): Promise<ScanResult> {

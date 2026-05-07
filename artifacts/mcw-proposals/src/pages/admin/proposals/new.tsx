@@ -33,17 +33,28 @@ export default function NewProposal() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
+  // Pre-fill from audit lead (passed as URL query params from /admin/lead-capture)
+  const params = new URLSearchParams(window.location.search);
+  const prefillEmail = params.get("clientEmail") ?? "";
+  const prefillName = params.get("clientName") ?? "";
+  const prefillCity = params.get("city") ?? "";
+  const prefillUrl = params.get("url") ?? "";
+  const prefillContext = [
+    prefillUrl && `Website: ${prefillUrl}`,
+    prefillCity && `City: ${prefillCity}`,
+  ].filter(Boolean).join("\n") || "";
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      clientName: "",
-      businessName: "",
-      clientEmail: "",
+      clientName: prefillName,
+      businessName: prefillName,
+      clientEmail: prefillEmail,
       projectType: "web",
       clientStrategist: "",
       numberOfPages: undefined,
       pageNames: "",
-      specialContext: "",
+      specialContext: prefillContext,
       content: "",
     },
   });
