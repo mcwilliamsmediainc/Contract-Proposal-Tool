@@ -869,8 +869,8 @@ export function WhatsNextSection() {
     },
     {
       number: "02",
-      title: "A contract is emailed to you",
-      desc: "We'll send your contract right away. Review and sign it digitally — no printing required.",
+      title: "Complete your contract online",
+      desc: "You'll be taken directly to your contract to review and sign digitally — no printing, no waiting.",
     },
     {
       number: "03",
