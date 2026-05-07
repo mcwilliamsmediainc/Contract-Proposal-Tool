@@ -45,6 +45,19 @@ type FormValues = z.infer<typeof formSchema>;
 
 type Panel = "client" | "pricing" | "settings" | "email" | null;
 
+/** Single source of truth for default pricing line items — used by both the
+ *  Pricing panel editor and the live-total computation so they never diverge. */
+function getDefaultPricingRows(pages: number): PricingLineItem[] {
+  return [
+    { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
+    { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
+    { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
+    { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
+    { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
+    { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
+  ];
+}
+
 function SlidePanel({ open, onClose, title, children, onSave, saving, saveLabel }: {
   open: boolean; onClose: () => void; title: string;
   children: React.ReactNode; onSave: () => void; saving?: boolean; saveLabel?: string;
@@ -381,14 +394,7 @@ export default function EditProposal() {
   const liveTotal = useMemo(() => {
     if (watched.projectType === "tiered" || watched.projectType === "ala-carte") return null;
     const pages = watched.numberOfPages || 5;
-    const defaultRows: PricingLineItem[] = [
-      { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
-      { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
-      { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
-      { desc: `Web Pages (${pages})`, rate: 350, qty: `${pages} Pages`, price: 350 * pages },
-      { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
-      { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
-    ];
+    const defaultRows = getDefaultPricingRows(pages);
     let rows: PricingLineItem[];
     try {
       const parsed = watched.pricingItems ? JSON.parse(watched.pricingItems) as PricingLineItem[] : null;
@@ -708,14 +714,7 @@ export default function EditProposal() {
                 name="pricingItems"
                 render={({ field }) => {
                   const pages = watched.numberOfPages || 5;
-                  const defaultRows: PricingLineItem[] = [
-                    { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
-                    { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
-                    { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
-                    { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
-                    { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
-                    { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
-                  ];
+                  const defaultRows = getDefaultPricingRows(pages);
 
                   let rows: PricingLineItem[];
                   try {
