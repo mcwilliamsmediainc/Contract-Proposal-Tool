@@ -138,11 +138,16 @@ export default function AdminDashboard() {
 
   const computedStats = useMemo(() => {
     const total    = filteredProposals.length;
-    const pipeline = filteredProposals.reduce((s, p) => s + Number(p.totalAmount ?? 0), 0);
+    const pipeline = filteredProposals
+      .filter(p => p.status !== "accepted")
+      .reduce((s, p) => s + Number(p.totalAmount ?? 0), 0);
+    const won      = filteredProposals
+      .filter(p => p.status === "accepted")
+      .reduce((s, p) => s + Number(p.totalAmount ?? 0), 0);
     const accepted = filteredProposals.filter(p => p.status === "accepted").length;
     const rate     = total > 0 ? (accepted / total) * 100 : 0;
     const views    = filteredProposals.reduce((s, p) => s + (p.viewCount ?? 0), 0);
-    return { total, pipeline, rate, views };
+    return { total, pipeline, won, rate, views };
   }, [filteredProposals]);
 
   const isFiltered = activeStage !== "all" || effectiveStrategist !== "all" || filterStatus !== "all" || myItemsOnly || !!search;
@@ -271,6 +276,9 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">{formatCurrency(computedStats.pipeline)}</div>
+              {computedStats.won > 0 && (
+                <p className="text-xs text-muted-foreground mt-1">{formatCurrency(computedStats.won)} won</p>
+              )}
             </CardContent>
           </Card>
           <Card className="bg-card/50 backdrop-blur border-border/50">

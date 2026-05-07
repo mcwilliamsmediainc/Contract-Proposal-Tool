@@ -112,7 +112,9 @@ router.get("/admin/stats", async (req, res) => {
   const draftCount = proposals.filter((p) => p.status === "draft").length;
   const sentCount = proposals.filter((p) => p.status === "sent").length;
   const acceptedCount = proposals.filter((p) => p.status === "accepted").length;
-  const activePipeline = sentCount + draftCount;
+  const activePipeline = proposals
+    .filter((p) => p.status === "draft" || p.status === "sent")
+    .reduce((s, p) => s + Number(p.totalAmount ?? 0), 0);
   const totalEngagement = proposals.reduce((sum, p) => sum + (p.viewCount ?? 0), 0);
   const conversionRate =
     totalProposals > 0 ? (acceptedCount / totalProposals) * 100 : 0;

@@ -20,6 +20,7 @@ const formSchema = z.object({
   businessName: z.string().min(2, "Business name is required"),
   clientEmail: z.string().email("Invalid email address"),
   projectType: z.enum(["web", "tiered", "ala-carte", "project"]),
+  totalAmount: z.coerce.number().min(0).optional(),
   clientStrategist: z.string().optional(),
   numberOfPages: z.coerce.number().int().min(1).optional(),
   pageNames: z.string().optional(),
@@ -40,6 +41,7 @@ export default function NewProposal() {
       businessName: "",
       clientEmail: "",
       projectType: "web",
+      totalAmount: undefined,
       clientStrategist: "",
       numberOfPages: undefined,
       pageNames: "",
@@ -78,6 +80,7 @@ export default function NewProposal() {
       const proposal = await createProposal.mutateAsync({
         data: {
           ...values,
+          totalAmount: values.totalAmount ?? 0,
           clientStrategist: values.clientStrategist || null,
           numberOfPages: values.numberOfPages ?? null,
           pageNames: values.pageNames || null,
@@ -165,6 +168,27 @@ export default function NewProposal() {
                           <SelectItem value="ala-carte">A La Carte Marketing</SelectItem>
                         </SelectContent>
                       </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="totalAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Proposal Value ($)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={0}
+                          step={100}
+                          placeholder="e.g. 5000"
+                          value={field.value ?? ""}
+                          onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
