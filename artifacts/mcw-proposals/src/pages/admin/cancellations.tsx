@@ -21,6 +21,7 @@ import {
   CheckCircle2,
   ChevronDown,
   ChevronUp,
+  X,
 } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow, format } from "date-fns";
@@ -30,6 +31,51 @@ import { useQueryClient } from "@tanstack/react-query";
 function getFormUrl() {
   const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
   return `${window.location.origin}${base}/offboarding`;
+}
+
+const STRATEGIST_EMAILS: Record<string, string> = {
+  "Matt McWilliams": "matt@mcwilliamsmedia.com",
+  "Tiffany King": "tiffany@mcwilliamsmedia.com",
+  "Elise Johnson": "elise@mcwilliamsmedia.com",
+  "Rachelle Hoover": "rachelle@mcwilliamsmedia.com",
+  "Ashlea Mortenson": "ashlea@mcwilliamsmedia.com",
+};
+
+function SlidePanel({ open, onClose, title, children, onSave, saving, saveLabel }: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  onSave: () => void;
+  saving?: boolean;
+  saveLabel?: string;
+}) {
+  return (
+    <>
+      {open && <div className="fixed inset-0 bg-black/30 z-40 transition-opacity" onClick={onClose} />}
+      <div className={cn(
+        "fixed right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl z-50 flex flex-col transition-transform duration-300 ease-out",
+        open ? "translate-x-0" : "translate-x-full"
+      )}>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
+          <h2 className="font-bold text-gray-900 text-lg">{title}</h2>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-gray-200 text-gray-500 transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        <div className="flex-1 overflow-auto p-6 space-y-5">
+          {children}
+        </div>
+        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3 flex-shrink-0">
+          <Button onClick={onSave} disabled={saving} className="flex-1 bg-[#0a1f5c] hover:bg-[#0d3494]">
+            {saving && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
+            {saveLabel ?? "Save Changes"}
+          </Button>
+          <Button variant="outline" onClick={onClose}>Cancel</Button>
+        </div>
+      </div>
+    </>
+  );
 }
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
@@ -90,13 +136,18 @@ export default function Cancellations() {
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copiedLink, setCopiedLink] = useState(false);
-  const [copiedEmail, setCopiedEmail] = useState(false);
-  const [showEmailTemplate, setShowEmailTemplate] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [emailTo, setEmailTo] = useState("");
+  const [emailStrategist, setEmailStrategist] = useState("");
+  const [emailSubjectState, setEmailSubjectState] = useState("");
+  const [emailBodyState, setEmailBodyState] = useState("");
 
   const formUrl = getFormUrl();
 
-  const emailSubject = "We'd Love Your Feedback — McWilliams Media";
-  const emailBody = `Hi [Client Name],
+  const defaultEmailSubject = "We'd Love Your Feedback — McWilliams Media";
+  function buildDefaultBody(to: string) {
+    const name = to.trim() || "[Client Name]";
+    return `${name},
 
 We're sorry to hear you'd like to cancel your services with McWilliams Media. Before we process your request, we'd really appreciate a moment of your time to share your feedback — it helps us continue improving.
 
@@ -109,6 +160,7 @@ If you'd like to talk through anything or reconsider, we're always happy to conn
 
 Warm regards,
 The McWilliams Media Team`;
+  }
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(formUrl).then(() => {
@@ -118,19 +170,19 @@ The McWilliams Media Team`;
     });
   };
 
-  const handleCopyEmail = () => {
-    const full = `Subject: ${emailSubject}\n\n${emailBody}`;
-    navigator.clipboard.writeText(full).then(() => {
-      setCopiedEmail(true);
-      toast({ title: "Email copied!", description: "Paste it directly into your email client." });
-      setTimeout(() => setCopiedEmail(false), 2500);
-    });
+  const handleOpenEmail = () => {
+    setEmailTo("");
+    setEmailStrategist("");
+    setEmailSubjectState(defaultEmailSubject);
+    setEmailBodyState(buildDefaultBody(""));
+    setEmailOpen(true);
   };
 
-  const handleCompose = () => {
-    const subject = encodeURIComponent(emailSubject);
-    const body = encodeURIComponent(emailBody);
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
+  const handleSendEmail = () => {
+    const subject = encodeURIComponent(emailSubjectState);
+    const body = encodeURIComponent(emailBodyState);
+    window.open(`mailto:${emailTo}?subject=${subject}&body=${body}`, "_blank");
+    setEmailOpen(false);
   };
 
   const handleSubmit = async () => {
@@ -221,14 +273,14 @@ The McWilliams Media Team`;
             </div>
 
             {/* Action buttons */}
-            <div className="flex flex-wrap gap-2 mb-4">
+            <div className="flex flex-wrap gap-2">
               <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-1.5">
                 {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
                 {copiedLink ? "Copied!" : "Copy Link"}
               </Button>
-              <Button variant="outline" size="sm" onClick={handleCompose} className="gap-1.5">
+              <Button size="sm" onClick={handleOpenEmail} className="gap-1.5 bg-blue-600 hover:bg-blue-700 text-white">
                 <Mail className="w-3.5 h-3.5" />
-                Compose Email
+                Email Client
               </Button>
               <a href={formUrl} target="_blank" rel="noreferrer">
                 <Button variant="outline" size="sm" className="gap-1.5">
@@ -236,35 +288,7 @@ The McWilliams Media Team`;
                   Open Form
                 </Button>
               </a>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowEmailTemplate((v) => !v)}
-                className="gap-1.5 text-muted-foreground"
-              >
-                {showEmailTemplate ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                {showEmailTemplate ? "Hide Template" : "View Email Template"}
-              </Button>
             </div>
-
-            {/* Expandable email template */}
-            {showEmailTemplate && (
-              <div className="rounded-xl border border-border bg-muted/30 overflow-hidden">
-                <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/40">
-                  <div>
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subject: </span>
-                    <span className="text-xs text-foreground">{emailSubject}</span>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={handleCopyEmail} className="gap-1.5 h-7 text-xs">
-                    {copiedEmail ? <CheckCircle2 className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
-                    {copiedEmail ? "Copied!" : "Copy All"}
-                  </Button>
-                </div>
-                <pre className="px-4 py-3 text-sm text-foreground leading-relaxed whitespace-pre-wrap font-sans">
-                  {emailBody}
-                </pre>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -490,6 +514,70 @@ The McWilliams Media Team`;
           </table>
         </div>
       )}
+      {/* ── EMAIL CLIENT PANEL ── */}
+      <SlidePanel
+        open={emailOpen}
+        onClose={() => setEmailOpen(false)}
+        title="Email Client"
+        onSave={handleSendEmail}
+        saveLabel="Send Email"
+      >
+        <div className="space-y-5">
+          {/* From */}
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">From</p>
+            <Select
+              value={emailStrategist || "default"}
+              onValueChange={(v) => setEmailStrategist(v === "default" ? "" : v)}
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="default">McWilliams Media &lt;info@mcwilliamsmedia.com&gt;</SelectItem>
+                {Object.entries(STRATEGIST_EMAILS).map(([name, email]) => (
+                  <SelectItem key={name} value={name}>{name} &lt;{email}&gt;</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-400 mt-1">Select the sender — this pre-fills the From field in your email client.</p>
+          </div>
+
+          {/* To */}
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">To</p>
+            <Input
+              value={emailTo}
+              onChange={(e) => setEmailTo(e.target.value)}
+              placeholder="client@example.com"
+              type="email"
+              className="text-sm"
+            />
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Subject</label>
+            <Input
+              value={emailSubjectState}
+              onChange={(e) => setEmailSubjectState(e.target.value)}
+              className="text-sm"
+            />
+          </div>
+
+          {/* Body */}
+          <div>
+            <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Message</label>
+            <Textarea
+              value={emailBodyState}
+              onChange={(e) => setEmailBodyState(e.target.value)}
+              className="min-h-[300px] resize-y text-sm leading-relaxed font-mono"
+              placeholder="Compose your message..."
+            />
+            <p className="text-xs text-gray-400 mt-1.5">The offboarding form link is already included. Edit freely before sending.</p>
+          </div>
+        </div>
+      </SlidePanel>
     </AdminLayout>
   );
 }
