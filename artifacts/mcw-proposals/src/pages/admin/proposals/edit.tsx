@@ -375,27 +375,17 @@ export default function EditProposal() {
 
   const watched = form.watch();
 
-  if (isLoading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-    </div>
-  );
-  if (!proposal) return <div className="p-8">Proposal not found.</div>;
-
-  const isSent = proposal.status === "sent" || proposal.status === "accepted";
-  const isTiered = watched.projectType === "tiered";
-  const isAlaCarte = watched.projectType === "ala-carte";
-  const isProject = watched.projectType === "project";
-
-  // Live proposal value — mirrors PricingSection logic so toolbar always shows what will be saved
+  // Live proposal value — must be declared before any early returns to satisfy hook rules.
+  // Mirrors PricingSection defaults exactly (rate 350 for Web Pages) so the toolbar value
+  // matches what the client portal will display before custom pricingItems are saved.
   const liveTotal = useMemo(() => {
-    if (isTiered || isAlaCarte) return null;
+    if (watched.projectType === "tiered" || watched.projectType === "ala-carte") return null;
     const pages = watched.numberOfPages || 5;
     const defaultRows: PricingLineItem[] = [
       { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
       { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
       { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
-      { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
+      { desc: `Web Pages (${pages})`, rate: 350, qty: `${pages} Pages`, price: 350 * pages },
       { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
       { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
     ];
@@ -408,7 +398,19 @@ export default function EditProposal() {
     }
     const lineTotal = rows.reduce((s, r) => s + Number(r.price), 0);
     return (watched.totalAmount && watched.totalAmount > 0) ? watched.totalAmount : lineTotal;
-  }, [watched.pricingItems, watched.totalAmount, watched.numberOfPages, isTiered, isAlaCarte]);
+  }, [watched.pricingItems, watched.totalAmount, watched.numberOfPages, watched.projectType]);
+
+  if (isLoading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+    </div>
+  );
+  if (!proposal) return <div className="p-8">Proposal not found.</div>;
+
+  const isSent = proposal.status === "sent" || proposal.status === "accepted";
+  const isTiered = watched.projectType === "tiered";
+  const isAlaCarte = watched.projectType === "ala-carte";
+  const isProject = watched.projectType === "project";
 
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
