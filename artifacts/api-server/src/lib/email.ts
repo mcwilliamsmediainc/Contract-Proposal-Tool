@@ -308,11 +308,6 @@ export async function sendContractReadyClientEmail(opts: {
       <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
         Thank you for accepting your proposal. We've prepared your <strong>${typeLabel} Services Agreement</strong> for <strong>${opts.businessName}</strong>. Please review and sign it at your earliest convenience to lock in your project start date.
       </p>
-      <div style="background: #f9f9fb; border: 1px solid #dde6f0; border-radius: 8px; padding: 20px 24px; margin: 0 0 28px;">
-        <p style="margin: 0 0 6px; font-size: 14px; color: #444;"><strong>Contract Type:</strong> ${typeLabel} Services Agreement</p>
-        <p style="margin: 0 0 6px; font-size: 14px; color: #444;"><strong>Total Investment:</strong> $${opts.totalCost.toLocaleString()}</p>
-        <p style="margin: 0; font-size: 14px; color: #444;"><strong>Deposit Due at Signing:</strong> $${opts.depositAmount.toLocaleString()}</p>
-      </div>
       <div style="text-align: center; margin: 0 0 28px;">
         <a href="${signingUrl}" style="background: #061e57; color: #ffffff; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; letter-spacing: 0.3px;">Review &amp; Sign Contract →</a>
       </div>
