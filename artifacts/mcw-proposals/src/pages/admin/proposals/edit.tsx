@@ -471,7 +471,8 @@ export default function EditProposal() {
                 className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-900/20 text-amber-950 border border-amber-900/30 hover:bg-amber-900/30 transition-all"
               >
                 <DollarSign className="w-3 h-3" />
-                {liveTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+                <span className="font-normal opacity-70">Proposal Value:</span>
+                ${liveTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </button>
             ) : (isTiered || isAlaCarte) ? (
               <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-900/10 text-amber-900/60">
