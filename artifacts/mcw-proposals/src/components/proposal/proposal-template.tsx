@@ -431,7 +431,7 @@ export function TimelineSection() {
           </div>
 
           {/* Step 1 — Kick-off */}
-          <div className="mcw-step" style={{ animationDelay: ".06s" }}>
+          <div className="mcw-step" style={{ animationDelay: ".05s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot">
                 <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
@@ -446,14 +446,14 @@ export function TimelineSection() {
               <div className="mcw-connector"/>
             </div>
             <div className="mcw-step-body">
-              <p className="mcw-step-label">Project kick-off meeting</p>
-              <p className="mcw-step-desc">We sit down together to align on your goals, audience, timeline, and what success looks like for your new site.</p>
+              <p className="mcw-step-label">Kick-off meeting</p>
+              <p className="mcw-step-desc">We align on your goals, audience, and timeline — then we get to work.</p>
               <span className="mcw-step-tag mcw-tag-note">You are here</span>
             </div>
           </div>
 
           {/* Step 2 — Wireframe */}
-          <div className="mcw-step" style={{ animationDelay: ".14s" }}>
+          <div className="mcw-step" style={{ animationDelay: ".13s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot">
                 <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
@@ -464,38 +464,21 @@ export function TimelineSection() {
                   <line x1="14" y1="18" x2="14" y2="22.5" stroke="#061e57" strokeWidth="1.3"/>
                 </svg>
               </div>
-              <div className="mcw-connector"/>
+              <div className="mcw-connector-dashed"/>
             </div>
             <div className="mcw-step-body">
               <p className="mcw-step-label">Wireframe</p>
-              <p className="mcw-step-desc">We create a blueprint of your site — page layouts, navigation, and content structure — before any design begins.</p>
+              <p className="mcw-step-desc">A blueprint of every page — layouts, navigation, and structure — sent to you for review before design begins.</p>
               <span className="mcw-step-tag mcw-tag-days">Goal: 12 business days</span>
             </div>
           </div>
 
-          {/* Step 3 — Wireframe sent */}
-          <div className="mcw-step" style={{ animationDelay: ".22s" }}>
-            <div className="mcw-step-spine">
-              <div className="mcw-step-dot">
-                <svg className="mcw-plane-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
-                  <polygon points="3,14 25,7 20,14 25,21" stroke="#061e57" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
-                  <line x1="20" y1="14" x2="13" y2="18" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <div className="mcw-connector-dashed"/>
-            </div>
-            <div className="mcw-step-body">
-              <p className="mcw-step-label">Wireframe sent to you</p>
-              <p className="mcw-step-desc">You receive the wireframe to review at your own pace before we move forward.</p>
-            </div>
-          </div>
-
           {/* Wireframe review loop */}
-          <div className="mcw-loop-wrap" style={{ animationDelay: ".28s" }}>
+          <div className="mcw-loop-wrap" style={{ animationDelay: ".20s" }}>
             <div className="mcw-loop-box">
               <div className="mcw-loop-header">
-                <span className="mcw-loop-header-text">Wireframe review &amp; revision cycle</span>
-                <span className="mcw-loop-repeat">Repeats as needed</span>
+                <span className="mcw-loop-header-text">Review &amp; revise</span>
+                <span className="mcw-loop-repeat">Repeats until approved</span>
               </div>
               <div className="mcw-loop-row">
                 <div className="mcw-loop-icon-wrap">
@@ -509,8 +492,8 @@ export function TimelineSection() {
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p className="mcw-loop-row-title">You review &amp; send feedback</p>
-                  <p className="mcw-loop-row-desc">Share notes via MarkUp or written email — no calls required</p>
+                  <p className="mcw-loop-row-title">You send feedback</p>
+                  <p className="mcw-loop-row-desc">Via MarkUp or written email</p>
                 </div>
                 <span className="mcw-loop-days client">5 bus. days</span>
               </div>
@@ -529,16 +512,15 @@ export function TimelineSection() {
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p className="mcw-loop-row-title">We make your revisions</p>
-                  <p className="mcw-loop-row-desc">MCW Media applies your changes and resends for another look</p>
+                  <p className="mcw-loop-row-title">We revise &amp; resend</p>
                 </div>
                 <span className="mcw-loop-days mcw">3 bus. days</span>
               </div>
             </div>
           </div>
 
-          {/* Step 4 — Approve wireframe */}
-          <div className="mcw-step" style={{ animationDelay: ".34s" }}>
+          {/* Step 3 — Approve wireframe */}
+          <div className="mcw-step" style={{ animationDelay: ".27s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot filled">
                 <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
@@ -550,7 +532,7 @@ export function TimelineSection() {
             </div>
             <div className="mcw-step-body">
               <p className="mcw-step-label">You approve the wireframe</p>
-              <p className="mcw-step-desc">Once you're happy with the structure, we lock it in and move into the full build.</p>
+              <p className="mcw-step-desc">Structure locked in — we move to the full build.</p>
             </div>
           </div>
 
@@ -565,8 +547,8 @@ export function TimelineSection() {
             Phase 2 — Build
           </div>
 
-          {/* Step 5 — Buildout */}
-          <div className="mcw-step" style={{ animationDelay: ".42s" }}>
+          {/* Step 4 — Buildout */}
+          <div className="mcw-step" style={{ animationDelay: ".34s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot">
                 <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
@@ -581,37 +563,20 @@ export function TimelineSection() {
                   <line x1="14" y1="19" x2="14" y2="22" stroke="#061e57" strokeWidth="1.3"/>
                 </svg>
               </div>
-              <div className="mcw-connector"/>
+              <div className="mcw-connector-dashed"/>
             </div>
             <div className="mcw-step-body">
               <p className="mcw-step-label">Website buildout</p>
-              <p className="mcw-step-desc">We design and build every page of your site based on the approved wireframe — colors, fonts, images, and content all come together here.</p>
+              <p className="mcw-step-desc">Every page designed and built — colors, fonts, images, content. Up to 2 full drafts sent to you for review.</p>
               <span className="mcw-step-tag mcw-tag-days">Goal: 12 business days</span>
             </div>
           </div>
 
-          {/* Step 6 — Drafts sent */}
-          <div className="mcw-step" style={{ animationDelay: ".50s" }}>
-            <div className="mcw-step-spine">
-              <div className="mcw-step-dot">
-                <svg className="mcw-plane-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
-                  <polygon points="3,14 25,7 20,14 25,21" stroke="#061e57" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
-                  <line x1="20" y1="14" x2="13" y2="18" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <div className="mcw-connector-dashed"/>
-            </div>
-            <div className="mcw-step-body">
-              <p className="mcw-step-label">Drafts sent to you</p>
-              <p className="mcw-step-desc">You'll receive up to two full drafts of the site to review before launch.</p>
-            </div>
-          </div>
-
           {/* Build review loop */}
-          <div className="mcw-loop-wrap" style={{ animationDelay: ".56s" }}>
+          <div className="mcw-loop-wrap" style={{ animationDelay: ".41s" }}>
             <div className="mcw-loop-box">
               <div className="mcw-loop-header">
-                <span className="mcw-loop-header-text">Draft review &amp; revision cycle</span>
+                <span className="mcw-loop-header-text">Review &amp; revise</span>
                 <span className="mcw-loop-repeat">Up to 2 rounds</span>
               </div>
               <div className="mcw-loop-row">
@@ -626,8 +591,8 @@ export function TimelineSection() {
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p className="mcw-loop-row-title">You review &amp; send feedback</p>
-                  <p className="mcw-loop-row-desc">Share notes via MarkUp or written email — no calls required</p>
+                  <p className="mcw-loop-row-title">You send feedback</p>
+                  <p className="mcw-loop-row-desc">Via MarkUp or written email</p>
                 </div>
                 <span className="mcw-loop-days client">5 bus. days</span>
               </div>
@@ -646,8 +611,7 @@ export function TimelineSection() {
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
-                  <p className="mcw-loop-row-title">We make your revisions</p>
-                  <p className="mcw-loop-row-desc">MCW Media applies your changes and resends a fresh draft</p>
+                  <p className="mcw-loop-row-title">We revise &amp; resend</p>
                 </div>
                 <span className="mcw-loop-days mcw">3 bus. days</span>
               </div>
@@ -663,8 +627,8 @@ export function TimelineSection() {
             Phase 3 — Launch
           </div>
 
-          {/* Step 7 — Approve final */}
-          <div className="mcw-step" style={{ animationDelay: ".64s" }}>
+          {/* Step 5 — Approve & sign off */}
+          <div className="mcw-step" style={{ animationDelay: ".48s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot filled">
                 <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
@@ -675,13 +639,13 @@ export function TimelineSection() {
               <div className="mcw-connector"/>
             </div>
             <div className="mcw-step-body">
-              <p className="mcw-step-label">You approve the final site</p>
-              <p className="mcw-step-desc">You give the official go-ahead. Nothing goes live without your sign-off.</p>
+              <p className="mcw-step-label">You approve &amp; sign off</p>
+              <p className="mcw-step-desc">Nothing goes live without your go-ahead.</p>
             </div>
           </div>
 
-          {/* Step 8 — Go live */}
-          <div className="mcw-step" style={{ animationDelay: ".72s" }}>
+          {/* Step 6 — Site goes live */}
+          <div className="mcw-step" style={{ animationDelay: ".55s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot brown">
                 <svg className="mcw-rocket-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
@@ -694,15 +658,15 @@ export function TimelineSection() {
               </div>
             </div>
             <div className="mcw-step-body">
-              <p className="mcw-step-label">Website goes live</p>
-              <p className="mcw-step-desc">We publish your site and hand over everything you need — logins, documentation, and next steps.</p>
+              <p className="mcw-step-label">Site goes live</p>
+              <p className="mcw-step-desc">We publish and hand over logins, docs, and next steps.</p>
             </div>
           </div>
 
           {/* Timeline note */}
           <div className="mcw-timeline-note">
-            <p className="mcw-timeline-note-title">A note on timelines</p>
-            <p className="mcw-timeline-note-body">The faster we receive your feedback within each review window, the faster your project moves. All revision requests must be submitted via <strong>MarkUp</strong> or <strong>written email</strong> so nothing gets lost.</p>
+            <p className="mcw-timeline-note-title">Timelines move with your feedback</p>
+            <p className="mcw-timeline-note-body">The faster you submit notes within each review window, the sooner we launch. All feedback via <strong>MarkUp</strong> or <strong>written email</strong>.</p>
           </div>
 
         </div>
