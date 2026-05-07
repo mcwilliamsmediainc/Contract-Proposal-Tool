@@ -7,7 +7,7 @@ import { useUser, useClerk } from "@clerk/react";
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/proposals", label: "Proposals", icon: FileText },
-  { href: "/admin/contracts", label: "Proposals & Contracts", icon: FileText },
+  { href: "/admin/contracts", label: "Contracts", icon: FileText },
   { href: "/admin/onboarding", label: "Onboarding", icon: Users },
   { href: "/admin/clients", label: "Clients", icon: BookUser },
   { href: "/admin/payment-link", label: "Update Payment Info", icon: CreditCard },
