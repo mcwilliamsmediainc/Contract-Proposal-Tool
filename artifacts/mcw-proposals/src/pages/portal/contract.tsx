@@ -379,7 +379,7 @@ export default function ContractPortal() {
                     <Trash2 className="w-4 h-4 text-[#3a4856] mt-0.5 shrink-0" />
                     <div>
                       <p className="text-sm font-semibold text-gray-800">Never Stored — Deleted After Processing</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Your banking details are <strong>not saved</strong> to our database. They are securely transmitted to our accounting team for a one-time ACH entry and then permanently deleted per our data retention policy.</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Your banking details are <strong>not saved</strong> to our database. They are securely transmitted to our accounting team for ACH processing and then permanently deleted per our data retention policy.</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
@@ -479,8 +479,8 @@ export default function ContractPortal() {
                   <div>
                     <p className="text-sm font-semibold text-gray-800 mb-1">ACH Debit Authorization</p>
                     <p className="text-xs text-gray-600 leading-relaxed">
-                      By checking this box, I, <strong>{contract.clientName}</strong>, authorize <strong>McWilliams Media Inc.</strong> to initiate a one-time ACH debit of <strong>${Number(contract.depositAmount).toLocaleString()}</strong> from the bank account provided above. I understand this deposit is non-refundable per the signed Development Agreement. I may revoke this authorization at any time by contacting{" "}
-                      <a href="mailto:info@mcwilliamsmedia.com" className="text-[#061e57] underline">info@mcwilliamsmedia.com</a>{" "}
+                      By checking this box, I, <strong>{contract.clientName}</strong>, authorize <strong>McWilliams Media Inc.</strong> to initiate an ACH debit of the initial deposit amount as specified in the signed Development Agreement from the bank account provided above. I understand this deposit is non-refundable per the signed Development Agreement. I may revoke this authorization at any time by contacting{" "}
+                      <a href="mailto:billing@mcwilliamsmedia.com" className="text-[#061e57] underline">billing@mcwilliamsmedia.com</a>{" "}
                       before the transaction is processed.
                     </p>
                   </div>
@@ -543,8 +543,8 @@ export default function ContractPortal() {
               <div className="bg-[#eef4f9] border border-[#b3cee1] rounded-lg p-5 max-w-sm mx-auto text-left">
                 <p className="text-sm text-[#3a4856] leading-relaxed">
                   Questions in the meantime? Reach us at{" "}
-                  <a href="mailto:info@mcwilliamsmedia.com" className="text-[#061e57] font-semibold hover:underline">
-                    info@mcwilliamsmedia.com
+                  <a href="mailto:billing@mcwilliamsmedia.com" className="text-[#061e57] font-semibold hover:underline">
+                    billing@mcwilliamsmedia.com
                   </a>
                 </p>
               </div>

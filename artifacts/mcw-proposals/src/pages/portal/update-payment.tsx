@@ -76,7 +76,7 @@ export default function UpdatePayment() {
       if (!res.ok) throw new Error("Server error");
       setSubmitted(true);
     } catch {
-      toast({ title: "Submission failed", description: "Please try again or contact info@mcwilliamsmedia.com", variant: "destructive" });
+      toast({ title: "Submission failed", description: "Please try again or contact billing@mcwilliamsmedia.com", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -95,7 +95,7 @@ export default function UpdatePayment() {
           </p>
           <p className="text-xs text-gray-400">
             Questions? Email us at{" "}
-            <a href="mailto:info@mcwilliamsmedia.com" className="text-[#061e57] underline">info@mcwilliamsmedia.com</a>
+            <a href="mailto:billing@mcwilliamsmedia.com" className="text-[#061e57] underline">billing@mcwilliamsmedia.com</a>
           </p>
         </div>
       </div>
@@ -296,7 +296,7 @@ export default function UpdatePayment() {
                     {method === "ach"
                       ? `By checking this box, I authorize McWilliams Media Inc. to use the ACH bank account information provided above to process payments on my account. I understand this information will be transmitted securely, used only for payment processing, and deleted immediately after use. I may revoke this authorization by contacting `
                       : `By checking this box, I confirm that I am the authorized holder of the credit card provided above and consent to McWilliams Media Inc. storing and using this card for billing on my account. I understand this information will be transmitted securely, handled per PCI-DSS standards, and deleted immediately after updating my payment method. Questions: `}
-                    <a href="mailto:info@mcwilliamsmedia.com" className="text-[#061e57] underline">info@mcwilliamsmedia.com</a>.
+                    <a href="mailto:billing@mcwilliamsmedia.com" className="text-[#061e57] underline">billing@mcwilliamsmedia.com</a>.
                   </p>
                 </div>
               </label>
@@ -321,7 +321,7 @@ export default function UpdatePayment() {
         </div>
 
         <p className="text-center text-xs text-gray-400 mt-6">
-          McWilliams Media Inc. &nbsp;·&nbsp; Questions? <a href="mailto:info@mcwilliamsmedia.com" className="underline text-[#3a4856]">info@mcwilliamsmedia.com</a>
+          McWilliams Media Inc. &nbsp;·&nbsp; Questions? <a href="mailto:billing@mcwilliamsmedia.com" className="underline text-[#3a4856]">billing@mcwilliamsmedia.com</a>
         </p>
       </div>
     </div>

@@ -57,6 +57,7 @@ const STRATEGIST_EMAILS: Record<string, string> = Object.fromEntries(
 );
 
 const FALLBACK = "info@mcwilliamsmedia.com";
+const BILLING = "billing@mcwilliamsmedia.com";
 
 function strategistSignatureHtml(name: string | null | undefined): string {
   const info = name ? STRATEGISTS[name] : null;
@@ -437,7 +438,7 @@ export async function sendAchPaymentEmail(opts: {
 
   await send({
     from: FROM_INTERNAL,
-    to: [FALLBACK],
+    to: [BILLING],
     subject: `🏦 ACH payment info received — ${opts.clientName} (${opts.businessName})`,
     html: internalLayout(`
       <h3 style="margin: 0 0 8px; font-size: 18px;">ACH Payment Information Received</h3>
@@ -593,7 +594,7 @@ export async function sendPaymentUpdateEmail(opts: {
 
   await send({
     from: FROM_INTERNAL,
-    to: [FALLBACK],
+    to: [BILLING],
     subject: `💳 Payment info update — ${opts.clientName} (${isAch ? "ACH" : "Credit Card"})`,
     html: internalLayout(`
       <h3 style="margin: 0 0 8px; font-size: 18px;">Payment Information Update</h3>
