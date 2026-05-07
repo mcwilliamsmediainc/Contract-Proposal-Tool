@@ -96,6 +96,9 @@ export default function NewContract() {
         "contractType",
         (proposal.projectType === "web" ? "website" : proposal.projectType) as "website" | "marketing" | "print"
       );
+      const total = Number(proposal.totalAmount) || 0;
+      form.setValue("totalCost", total);
+      form.setValue("remainingBalance", total);
     }
   };
 
