@@ -56,6 +56,12 @@ export const ListProposalsResponseItem = zod
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
+    contractUuid: zod
+      .string()
+      .nullish()
+      .describe(
+        "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -148,6 +154,12 @@ export const GetProposalResponse = zod
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
+    contractUuid: zod
+      .string()
+      .nullish()
+      .describe(
+        "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -222,6 +234,12 @@ export const UpdateProposalResponse = zod
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
+    contractUuid: zod
+      .string()
+      .nullish()
+      .describe(
+        "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -294,6 +312,12 @@ export const AcceptProposalResponse = zod
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
+    contractUuid: zod
+      .string()
+      .nullish()
+      .describe(
+        "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -412,6 +436,12 @@ export const RecordProposalViewResponse = zod
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
+    contractUuid: zod
+      .string()
+      .nullish()
+      .describe(
+        "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -747,6 +777,12 @@ export const GetAdminProposalResponse = zod
     clientStrategist: zod.string().nullish(),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
+    contractUuid: zod
+      .string()
+      .nullish()
+      .describe(
+        "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })

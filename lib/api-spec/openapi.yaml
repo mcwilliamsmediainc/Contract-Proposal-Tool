@@ -1041,6 +1041,10 @@ components:
           type: string
           format: date-time
           nullable: true
+        contractUuid:
+          type: string
+          nullable: true
+          description: UUID of the linked contract, if one exists — used by client portal to navigate directly to signing
         createdAt:
           type: string
           format: date-time

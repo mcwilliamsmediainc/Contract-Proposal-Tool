@@ -1,45 +1,46 @@
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useGetProposal, useRecordProposalView, useAcceptProposal, getGetProposalQueryKey } from "@workspace/api-client-react";
 import { useEffect, useRef, useState } from "react";
-import { Loader2, CheckCircle, Download } from "lucide-react";
+import { Loader2, ExternalLink } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { FullProposalTemplate } from "@/components/proposal/proposal-template";
 import { TieredMarketingTemplate } from "@/components/proposal/tiered-marketing-template";
 import { AlaCarteMarketingTemplate } from "@/components/proposal/ala-carte-marketing-template";
 import type { Tier } from "@/components/proposal/tiered-marketing-template";
+import { Download } from "lucide-react";
 
 export default function ClientPortal() {
   const params = useParams<{ id: string }>();
   const id = params?.id || "";
+  const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { data: proposal, isLoading } = useGetProposal(id, { query: { enabled: !!id, queryKey: getGetProposalQueryKey(id) } });
   const recordView = useRecordProposalView();
   const acceptProposal = useAcceptProposal();
   const viewedRef = useRef(false);
-  const [accepted, setAccepted] = useState(false);
   const [selectedTier, setSelectedTier] = useState<Tier | null>(null);
-  const [acceptedHosting, setAcceptedHosting] = useState<string | null>(null);
 
   useEffect(() => {
     if (id && !viewedRef.current) { viewedRef.current = true; recordView.mutate({ id }); }
   }, [id, recordView]);
 
+  // If proposal is already accepted and has a linked contract, offer the contract link
   useEffect(() => {
-    if (proposal?.status === "accepted") setAccepted(true);
-  }, [proposal?.status]);
+    if (proposal?.status === "accepted" && proposal.contractUuid) {
+      setLocation(`/contract/${proposal.contractUuid}`);
+    }
+  }, [proposal?.status, proposal?.contractUuid, setLocation]);
 
-  const handleAccept = async (selectedHosting?: string) => {
+  const goToContract = async (selectedTierValue?: string) => {
     try {
       const data = await acceptProposal.mutateAsync({
         id,
-        data: {
-          signatureData: "",
-          ...(selectedTier ? { selectedTier } : selectedHosting ? { selectedTier: selectedHosting } : {}),
-        } as { signatureData: string },
+        data: { signatureData: "", ...(selectedTierValue ? { selectedTier: selectedTierValue } : {}) } as { signatureData: string },
       });
       queryClient.setQueryData(getGetProposalQueryKey(id), data);
-      if (selectedHosting) setAcceptedHosting(selectedHosting);
-      setAccepted(true);
+      if (proposal?.contractUuid) {
+        setLocation(`/contract/${proposal.contractUuid}`);
+      }
     } catch {}
   };
 
@@ -55,29 +56,6 @@ export default function ClientPortal() {
   if (!proposal) return (
     <div className="min-h-screen flex justify-center items-center" style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #1a5bb8 100%)" }}>
       <p className="text-white text-xl">Proposal not found or expired.</p>
-    </div>
-  );
-
-  if (accepted) return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-6" style={{ background: "linear-gradient(160deg, #0a1f5c 0%, #1a5bb8 100%)" }}>
-      <div className="bg-white rounded-2xl p-10 max-w-md text-center shadow-2xl">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-          <CheckCircle className="w-8 h-8 text-green-600" />
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900 mb-3">Proposal Accepted!</h1>
-        <p className="text-gray-600 mb-1">Welcome, {proposal.clientName}. The McWilliams Media team has been notified and will be in touch shortly.</p>
-        {selectedTier && (
-          <p className="text-sm text-blue-600 font-semibold mt-3">
-            Selected: {selectedTier.charAt(0).toUpperCase() + selectedTier.slice(1)} Plan
-          </p>
-        )}
-        {acceptedHosting && (
-          <p className="text-sm text-blue-600 font-semibold mt-2">
-            Hosting: {acceptedHosting === "gold" ? "Gold ($60/mo)" : "Platinum ($100/mo)"}
-          </p>
-        )}
-        <p className="text-xs text-gray-400 mt-6">Transaction: {proposal.id}</p>
-      </div>
     </div>
   );
 
@@ -107,7 +85,7 @@ export default function ClientPortal() {
           }}
           selectedTier={selectedTier}
           onSelectTier={setSelectedTier}
-          onAccept={handleAccept}
+          onAccept={(tier) => goToContract(tier)}
           isPending={acceptProposal.isPending}
         />
       </>
@@ -128,17 +106,7 @@ export default function ClientPortal() {
             createdAt: proposal.createdAt,
           }}
           onAccept={async (selectedServiceIds) => {
-            try {
-              const data = await acceptProposal.mutateAsync({
-                id,
-                data: {
-                  signatureData: "",
-                  selectedTier: JSON.stringify(selectedServiceIds),
-                } as { signatureData: string },
-              });
-              queryClient.setQueryData(getGetProposalQueryKey(id), data);
-              setAccepted(true);
-            } catch {}
+            await goToContract(JSON.stringify(selectedServiceIds));
           }}
           isPending={acceptProposal.isPending}
         />
@@ -162,7 +130,7 @@ export default function ClientPortal() {
           loomVideoUrl: proposal.loomVideoUrl,
           createdAt: proposal.createdAt,
         }}
-        onAccept={handleAccept}
+        onAccept={() => goToContract()}
         isPending={acceptProposal.isPending}
       />
     </>

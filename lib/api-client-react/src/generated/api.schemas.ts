@@ -202,6 +202,8 @@ export interface PublicProposal {
   clientStrategist?: string | null;
   viewCount: number;
   lastViewedAt?: string | null;
+  /** UUID of the linked contract, if one exists — used by client portal to navigate directly to signing */
+  contractUuid?: string | null;
   createdAt: string;
   updatedAt: string;
 }

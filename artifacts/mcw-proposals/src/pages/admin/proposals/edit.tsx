@@ -510,35 +510,24 @@ export default function EditProposal() {
         </div>
       </div>
 
-      {/* Accepted proposal — contract nudge or existing contract warning */}
-      {proposal.status === "accepted" && (
-        proposal.contractId ? (
-          <div className="flex items-center justify-between px-6 py-3 bg-amber-50 border-b border-amber-200">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-amber-500" />
-              <span className="text-sm font-semibold text-amber-800">A contract already exists for this client.</span>
-            </div>
-            <Link
-              href={`/admin/contracts/${proposal.contractId}`}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
-            >
-              View Contract →
-            </Link>
+      {/* Contract banner — always show if linked contract exists */}
+      {proposal.contractUuid && (
+        <div className="flex items-center justify-between px-6 py-3 bg-[#061e57]/5 border-b border-[#061e57]/15">
+          <div className="flex items-center gap-3">
+            <div className={`w-2 h-2 rounded-full ${proposal.status === "accepted" ? "bg-green-500" : "bg-[#b3cee1]"}`} />
+            <span className="text-sm font-semibold text-[#061e57]">
+              {proposal.status === "accepted"
+                ? "Proposal accepted — contract is ready for client signing."
+                : "A contract is linked to this proposal and will be sent with it."}
+            </span>
           </div>
-        ) : (
-          <div className="flex items-center justify-between px-6 py-3 bg-green-50 border-b border-green-200">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-green-500" />
-              <span className="text-sm font-semibold text-green-800">This proposal was accepted — ready to create a contract?</span>
-            </div>
-            <Link
-              href={`/admin/contracts/new?proposalId=${id}&clientName=${encodeURIComponent(proposal.clientName)}&businessName=${encodeURIComponent(proposal.businessName)}&clientEmail=${encodeURIComponent(proposal.clientEmail)}&totalCost=${encodeURIComponent(Number(proposal.totalAmount))}`}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
-            >
-              Create Contract →
-            </Link>
-          </div>
-        )
+          <Link
+            href={`/admin/contracts/${proposal.contractUuid}/edit`}
+            className="flex items-center gap-1.5 px-4 py-1.5 bg-[#061e57] hover:bg-[#0d2a6b] text-white text-xs font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap"
+          >
+            Edit Contract Details →
+          </Link>
+        </div>
       )}
 
       {/* Full proposal preview */}

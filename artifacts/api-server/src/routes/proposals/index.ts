@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { eq, desc, asc } from "drizzle-orm";
+import { eq, desc, asc, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable, contractsTable } from "@workspace/db";
 import {
@@ -43,7 +43,7 @@ const DEFAULT_ONBOARDING_TASKS = [
 
 // Public formatter — safe for client portal routes; never includes internal notes.
 // Matches the PublicProposal schema in openapi.yaml.
-function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
+function formatProposalPublic(p: typeof proposalsTable.$inferSelect, contractUuid?: string | null) {
   return {
     id: String(p.uuid ?? p.id),
     clientName: p.clientName,
@@ -65,6 +65,7 @@ function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
     clientStrategist: p.clientStrategist ?? null,
     viewCount: p.viewCount,
     lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
+    contractUuid: contractUuid ?? null,
     createdAt: p.createdAt.toISOString(),
     updatedAt: p.updatedAt.toISOString(),
   };
@@ -72,9 +73,9 @@ function formatProposalPublic(p: typeof proposalsTable.$inferSelect) {
 
 // Admin formatter — adds internal notes on top of the public shape.
 // Matches the Proposal schema (extends PublicProposal) in openapi.yaml.
-function formatProposal(p: typeof proposalsTable.$inferSelect) {
+function formatProposal(p: typeof proposalsTable.$inferSelect, contractUuid?: string | null) {
   return {
-    ...formatProposalPublic(p),
+    ...formatProposalPublic(p, contractUuid),
     notes: p.notes ?? null,
   };
 }
@@ -246,7 +247,19 @@ router.get("/proposals", async (req, res) => {
     .where(status ? eq(proposalsTable.status, status) : undefined)
     .orderBy(desc(proposalsTable.createdAt));
 
-  res.json(proposals.map(formatProposal));
+  // Batch look up linked contract UUIDs
+  const proposalUuids = proposals.map((p) => p.uuid).filter(Boolean) as string[];
+  const contractRows = proposalUuids.length > 0
+    ? await db
+        .select({ proposalId: contractsTable.proposalId, uuid: contractsTable.uuid })
+        .from(contractsTable)
+        .where(inArray(contractsTable.proposalId, proposalUuids))
+    : [];
+  const contractByProposalId: Record<string, string> = Object.fromEntries(
+    contractRows.map((c) => [c.proposalId, c.uuid])
+  );
+
+  res.json(proposals.map((p) => formatProposal(p, p.uuid ? contractByProposalId[p.uuid] : undefined)));
 });
 
 router.post("/proposals", async (req, res) => {
@@ -277,7 +290,26 @@ router.post("/proposals", async (req, res) => {
     })
     .returning();
 
-  res.status(201).json(formatProposal(proposal));
+  // Auto-create a linked draft contract for this proposal
+  const totalAmt = Number(data.totalAmount ?? 0);
+  const deposit = Math.round(totalAmt * 0.5);
+  const contractUuid = randomUUID();
+  await db.insert(contractsTable).values({
+    uuid: contractUuid,
+    proposalId: proposal.uuid,
+    clientName: data.clientName,
+    businessName: data.businessName,
+    clientEmail: data.clientEmail ?? null,
+    contractType: mapContractType(data.projectType ?? "web"),
+    totalCost: String(totalAmt),
+    depositAmount: String(deposit),
+    remainingBalance: String(totalAmt - deposit),
+    hostingOption: "none",
+    scheduleA: buildScheduleA(proposal),
+    status: "draft",
+  });
+
+  res.status(201).json(formatProposal(proposal, contractUuid));
 });
 
 router.get("/proposals/:id/onboarding-tasks", async (req, res) => {
@@ -365,8 +397,15 @@ router.get("/proposals/:id", async (req, res) => {
     return;
   }
 
+  // Look up the linked contract UUID so the client portal can navigate directly to signing
+  const linkedContract = await db
+    .select({ uuid: contractsTable.uuid })
+    .from(contractsTable)
+    .where(eq(contractsTable.proposalId, id))
+    .limit(1);
+
   // Public route — portal consumes this, never include notes
-  res.json(formatProposalPublic(proposal[0]));
+  res.json(formatProposalPublic(proposal[0], linkedContract[0]?.uuid ?? null));
 });
 
 // Admin-only endpoint — returns internal notes; not included in the public portal response.
@@ -435,6 +474,46 @@ router.patch("/proposals/:id", async (req, res) => {
     return;
   }
 
+  // Sync the linked draft contract whenever client info or total changes
+  if (
+    data.clientName !== undefined ||
+    data.businessName !== undefined ||
+    data.clientEmail !== undefined ||
+    data.totalAmount !== undefined
+  ) {
+    const linkedContracts = await db
+      .select()
+      .from(contractsTable)
+      .where(eq(contractsTable.proposalId, id))
+      .limit(1);
+    if (linkedContracts[0] && linkedContracts[0].status === "draft") {
+      const contractUpdate: Partial<typeof contractsTable.$inferInsert> = { updatedAt: new Date() };
+      if (data.clientName !== undefined) contractUpdate.clientName = updated.clientName;
+      if (data.businessName !== undefined) contractUpdate.businessName = updated.businessName;
+      if (data.clientEmail !== undefined) contractUpdate.clientEmail = updated.clientEmail;
+      if (data.totalAmount !== undefined) {
+        const newTotal = Number(updated.totalAmount);
+        const newDeposit = Math.round(newTotal * 0.5);
+        contractUpdate.totalCost = String(newTotal);
+        contractUpdate.depositAmount = String(newDeposit);
+        contractUpdate.remainingBalance = String(newTotal - newDeposit);
+        contractUpdate.scheduleA = buildScheduleA(updated);
+      }
+      await db
+        .update(contractsTable)
+        .set(contractUpdate)
+        .where(eq(contractsTable.uuid, linkedContracts[0].uuid));
+    }
+  }
+
+  // Look up contract UUID for response
+  const linkedContractRow = await db
+    .select({ uuid: contractsTable.uuid })
+    .from(contractsTable)
+    .where(eq(contractsTable.proposalId, id))
+    .limit(1);
+  const contractUuid = linkedContractRow[0]?.uuid ?? null;
+
   // When transitioning to accepted via PATCH, ensure onboarding_client exists
   if (data.status === "accepted") {
     const services = updated.projectType === "web"
@@ -466,7 +545,7 @@ router.patch("/proposals/:id", async (req, res) => {
     }
   }
 
-  res.json(formatProposal(updated));
+  res.json(formatProposal(updated, contractUuid));
 });
 
 router.delete("/proposals/:id", async (req, res) => {

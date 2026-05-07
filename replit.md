@@ -36,16 +36,16 @@ lib/
 3. **Proposal Builder** (`/admin/proposals/new`) — AI-assisted content generation via Gemini
 4. **Proposal Editor** (`/admin/proposals/:id/edit`) — Edit existing proposals
 5. **Client Portal** (`/proposal/:uuid`) — Immersive, unauthenticated cinematic experience
-   - Digital signature pad (signature_pad library)
    - Markdown content rendering (react-markdown + remark-gfm)
    - Loom/YouTube and Calendly embed support
-   - **Tiered Marketing Proposal** (`projectType: "tiered"`): interactive 3-tier plan selection (Pro $1,500/mo · Plus $2,500/mo · Platinum $4,000/mo + $500 setup); accept button gated on tier selection; selected tier saved to `proposals.selected_tier`
-   - **Ala Carte Marketing Proposal** (`projectType: "ala-carte"`): interactive service picker across 6 categories (SEO, Google Ads, Social Media Ads, Social Media Posting, Email Marketing, Brand Shoot); floating total bar; selected service IDs stored as JSON in `proposals.selected_tier` on accept
+   - **Tiered Marketing Proposal** (`projectType: "tiered"`): interactive 3-tier plan selection; accept navigates directly to contract signing
+   - **Ala Carte Marketing Proposal** (`projectType: "ala-carte"`): service picker; accept saves service IDs + navigates to contract signing
+   - **One-step flow**: accepting any proposal immediately redirects to `/contract/:contractUuid` — proposal + contract = one seamless client journey
 6. **Onboarding Pipeline** (`/admin/onboarding`) — Post-signature onboarding steps
-7. **Contract Management** (`/admin/contracts`) — Full contract lifecycle system
-   - Contracts list with stats (total, awaiting, signed)
-   - New contract form with optional proposal linking
-   - Edit contract with "Send to Client" action
+7. **Proposals & Contracts** (`/admin/contracts`) — Combined proposal+contract management
+   - Every new proposal auto-creates a linked draft contract (50% deposit default)
+   - Contract stays in sync with proposal (client info, totals) while in draft status
+   - Admin edits contract details via "Edit Contract Details →" on proposal edit page
    - Public 3-step signing flow (`/contract/:uuid`):
      - Step 1: Full Development Agreement text with fee breakdown + signature pad
      - Step 2: Referral details (how they met, who they worked with)

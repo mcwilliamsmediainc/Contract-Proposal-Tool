@@ -101,7 +101,8 @@ router.get("/admin/proposals/:id", async (req, res) => {
     return;
   }
   const contractId = contractRows[0]?.uuid ?? null;
-  res.json({ ...formatProposalAdmin(proposal[0]), contractId });
+  // contractUuid is the same value — used by edit.tsx (aligns with PublicProposal.contractUuid)
+  res.json({ ...formatProposalAdmin(proposal[0]), contractId, contractUuid: contractId });
 });
 
 router.get("/admin/stats", async (req, res) => {
