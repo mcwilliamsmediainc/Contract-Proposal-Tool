@@ -409,6 +409,11 @@ export interface AddOnboardingTaskBody {
   label: string;
 }
 
+/**
+ * Parsed JSON form responses from the intake questionnaire
+ */
+export type OnboardingClientFormResponses = { [key: string]: unknown } | null;
+
 export interface OnboardingClient {
   id: string;
   clientName: string;
@@ -419,6 +424,11 @@ export interface OnboardingClient {
   proposalId?: string | null;
   contractId?: string | null;
   status: string;
+  /** Status of the onboarding intake form (pending/submitted or null if not started) */
+  formStatus?: string | null;
+  formSubmittedAt?: string | null;
+  /** Parsed JSON form responses from the intake questionnaire */
+  formResponses?: OnboardingClientFormResponses;
   createdAt: string;
   updatedAt: string;
 }

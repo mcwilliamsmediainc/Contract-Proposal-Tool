@@ -41,6 +41,7 @@ import {
   ClipboardCheck,
   GripVertical,
   Sparkles,
+  FileText,
 } from "lucide-react";
 import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { format } from "date-fns";
@@ -447,22 +448,149 @@ function ShareFormButton({ clientId }: { clientId: string }) {
   };
 
   return (
-    <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40">
-      <button
-        onClick={handleCopy}
-        className={cn(
-          "flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-all",
-          copied
-            ? "border-green-500/40 bg-green-50 text-green-700"
-            : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5"
-        )}
-      >
-        {copied ? (
-          <><ClipboardCheck className="w-3 h-3" /> Copied!</>
-        ) : (
-          <><Link2 className="w-3 h-3" /> Share Intake Form</>
-        )}
-      </button>
+    <button
+      onClick={handleCopy}
+      className={cn(
+        "flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-all",
+        copied
+          ? "border-green-500/40 bg-green-50 text-green-700"
+          : "border-border text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5"
+      )}
+    >
+      {copied ? (
+        <><ClipboardCheck className="w-3 h-3" /> Copied!</>
+      ) : (
+        <><Link2 className="w-3 h-3" /> Share Intake Form</>
+      )}
+    </button>
+  );
+}
+
+// ── Form Responses Panel ──────────────────────────────────────────────────────
+
+type FormResponses = {
+  general?: Record<string, unknown>;
+  googleAds?: Record<string, unknown>;
+  socialMedia?: Record<string, unknown>;
+  metaAds?: Record<string, unknown>;
+  email?: Record<string, unknown>;
+};
+
+const FORM_SECTIONS: { key: keyof FormResponses; title: string; fields: { label: string; key: string; type?: string }[] }[] = [
+  {
+    key: "general",
+    title: "General Info",
+    fields: [
+      { label: "Website", key: "websiteUrl" },
+      { label: "Contact Email", key: "pocEmail" },
+      { label: "Standard Discounts", key: "standardDiscounts" },
+      { label: "Seasonal Discounts", key: "seasonalDiscounts" },
+      { label: "Lead Magnets", key: "leadMagnets" },
+      { label: "Logo Files", key: "logoFilesUrl" },
+      { label: "Brand Images", key: "brandImagesUrl" },
+      { label: "Facebook", key: "facebookUrl" },
+      { label: "Instagram", key: "instagramUrl" },
+      { label: "LinkedIn", key: "linkedinUrl" },
+      { label: "Other Social", key: "otherSocialUrl" },
+    ],
+  },
+  {
+    key: "googleAds",
+    title: "Google Ads",
+    fields: [
+      { label: "Articles of Corp", key: "articlesOfCorpUrl" },
+      { label: "Driver's License", key: "driversLicenseUrl" },
+      { label: "Has Google LSA?", key: "hasGoogleLsa", type: "bool" },
+      { label: "LSA Articles of Corp", key: "lsaArticlesOfCorpUrl" },
+      { label: "LSA Driver's License", key: "lsaDriversLicenseUrl" },
+      { label: "LSA Business Insurance", key: "lsaBusinessInsuranceUrl" },
+      { label: "LSA License Number", key: "lsaLicenseNumber" },
+      { label: "LSA Leadsy Link", key: "lsaLeadsyLink" },
+      { label: "LSA Setup", key: "lsaSetupOption" },
+    ],
+  },
+  {
+    key: "socialMedia",
+    title: "Social Media",
+    fields: [
+      { label: "Graphic Styles", key: "graphicStyles", type: "array" },
+      { label: "Post Types", key: "postTypes", type: "array" },
+      { label: "Inspo Account 1", key: "inspirationalAccount1" },
+      { label: "Inspo Account 2", key: "inspirationalAccount2" },
+    ],
+  },
+  {
+    key: "metaAds",
+    title: "Meta Ads",
+    fields: [
+      { label: "Ran Meta Ads Before?", key: "hasRunMetaAds", type: "bool" },
+      { label: "Business Manager", key: "metaBusinessManagerName" },
+      { label: "Ad Account Name", key: "facebookAdAccountName" },
+      { label: "Has Landing Page?", key: "hasLandingPage", type: "bool" },
+      { label: "Instagram Connected", key: "instagramConnected", type: "bool" },
+      { label: "Identity Confirmed", key: "identityConfirmed", type: "bool" },
+      { label: "Payment Added", key: "paymentAdded", type: "bool" },
+      { label: "Phone Verified", key: "phoneVerified", type: "bool" },
+    ],
+  },
+  {
+    key: "email",
+    title: "Email Marketing",
+    fields: [
+      { label: "Contact List URL", key: "emailContactListUrl" },
+      { label: "Done Email Marketing?", key: "hasDoneEmailMarketing", type: "bool" },
+      { label: "Platform", key: "emailPlatform" },
+      { label: "Mailchimp Access", key: "mailchimpAccessGranted", type: "bool" },
+      { label: "List Size", key: "emailListSize" },
+    ],
+  },
+];
+
+function formatFieldValue(v: unknown, type?: string): string | null {
+  if (v === null || v === undefined || v === "") return null;
+  if (type === "bool") return v === true ? "Yes" : v === false ? "No" : null;
+  if (type === "array") return Array.isArray(v) && v.length > 0 ? (v as string[]).join(", ") : null;
+  return String(v);
+}
+
+function FormResponsesPanel({ responses }: { responses: FormResponses }) {
+  const sections = FORM_SECTIONS.map((section) => {
+    const data = responses[section.key];
+    if (!data) return null;
+    const rows = section.fields
+      .map((f) => {
+        const val = formatFieldValue(data[f.key], f.type);
+        if (!val) return null;
+        return { label: f.label, value: val };
+      })
+      .filter((r): r is { label: string; value: string } => r !== null);
+    if (rows.length === 0) return null;
+    return { title: section.title, rows };
+  }).filter((s): s is { title: string; rows: { label: string; value: string }[] } => s !== null);
+
+  if (sections.length === 0) {
+    return <p className="text-xs text-muted-foreground/60 py-2 text-center italic">No responses recorded.</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {sections.map((section) => (
+        <div key={section.title}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary/70 mb-1">{section.title}</p>
+          <div className="space-y-0.5">
+            {section.rows.map((row) => (
+              <div key={row.label} className="flex gap-2 text-xs">
+                <span className="text-muted-foreground shrink-0 min-w-[110px]">{row.label}:</span>
+                <span className="text-foreground break-all">
+                  {row.value.startsWith("http") ? (
+                    <a href={row.value} target="_blank" rel="noreferrer" className="text-primary underline hover:opacity-80 truncate block max-w-[160px]">{row.value.replace(/^https?:\/\//, "")}</a>
+                  ) : row.value}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -474,6 +602,7 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
   const [adding, setAdding] = useState(false);
   const [localOrder, setLocalOrder] = useState<number[] | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   const { data: tasks, isLoading: loadingTasks } = useListOnboardingTasks(client.id, {
     query: { queryKey: getListOnboardingTasksQueryKey(client.id) },
@@ -656,9 +785,33 @@ function OnboardingCard({ client }: { client: OnboardingClient }) {
           )}
         </div>
 
-        {/* Intake form link */}
-        <ShareFormButton clientId={client.id} />
+        {/* Intake form link + form status */}
+        <div className="flex items-center gap-2 mt-2.5 pt-2.5 border-t border-border/40">
+          <ShareFormButton clientId={client.id} />
+          {client.formStatus === "submitted" && (
+            <button
+              onClick={() => setFormOpen((o) => !o)}
+              className={cn(
+                "flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border transition-all ml-auto",
+                formOpen
+                  ? "border-green-500/50 bg-green-50 text-green-700"
+                  : "border-green-500/30 bg-green-50/60 text-green-700 hover:border-green-500/60"
+              )}
+            >
+              <FileText className="w-3 h-3" />
+              Form Submitted
+              {formOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Form Responses Drawer */}
+      {client.formStatus === "submitted" && client.formResponses && formOpen && (
+        <div className="px-5 py-4 border-b border-border/50 bg-muted/20">
+          <FormResponsesPanel responses={client.formResponses as FormResponses} />
+        </div>
+      )}
 
       {/* Checklist */}
       <div className="px-5 py-3 min-h-[120px]">

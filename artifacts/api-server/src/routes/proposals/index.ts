@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { eq, desc, asc, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable, contractsTable } from "@workspace/db";
+import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable, onboardingFormResponsesTable, contractsTable } from "@workspace/db";
 import {
   CreateProposalBody,
   UpdateProposalBody,
@@ -80,9 +80,16 @@ function formatProposal(p: typeof proposalsTable.$inferSelect, contractUuid?: st
   };
 }
 
-function formatOnboardingClient(c: typeof onboardingClientsTable.$inferSelect) {
+function formatOnboardingClient(
+  c: typeof onboardingClientsTable.$inferSelect,
+  form?: typeof onboardingFormResponsesTable.$inferSelect | null
+) {
   let services: string[] = [];
   try { services = JSON.parse(c.services) as string[]; } catch { services = []; }
+  let formResponses: Record<string, unknown> | null = null;
+  if (form?.responses) {
+    try { formResponses = JSON.parse(form.responses) as Record<string, unknown>; } catch { formResponses = null; }
+  }
   return {
     id: c.uuid,
     clientName: c.clientName,
@@ -93,6 +100,9 @@ function formatOnboardingClient(c: typeof onboardingClientsTable.$inferSelect) {
     proposalId: c.proposalId ?? null,
     contractId: c.contractId ?? null,
     status: c.status,
+    formStatus: form?.status ?? null,
+    formSubmittedAt: form?.submittedAt?.toISOString() ?? null,
+    formResponses,
     createdAt: c.createdAt.toISOString(),
     updatedAt: c.updatedAt.toISOString(),
   };
@@ -906,7 +916,18 @@ router.get("/onboarding-clients", async (_req, res) => {
     .select()
     .from(onboardingClientsTable)
     .orderBy(desc(onboardingClientsTable.createdAt));
-  res.json(clients.map(formatOnboardingClient));
+
+  const forms = await db
+    .select()
+    .from(onboardingFormResponsesTable)
+    .where(
+      clients.length > 0
+        ? inArray(onboardingFormResponsesTable.onboardingClientId, clients.map((c) => c.uuid))
+        : undefined
+    );
+
+  const formByClientId = new Map(forms.map((f) => [f.onboardingClientId, f]));
+  res.json(clients.map((c) => formatOnboardingClient(c, formByClientId.get(c.uuid) ?? null)));
 });
 
 router.post("/onboarding-clients", async (req, res) => {

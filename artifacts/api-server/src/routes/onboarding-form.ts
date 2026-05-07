@@ -104,6 +104,7 @@ router.post("/onboarding-form/:id", async (req, res) => {
       businessName: client.businessName,
       onboardingId: id,
       clientStrategist: client.clientStrategist,
+      responses: responses as Record<string, unknown>,
     }).catch(() => {});
 
     if (client.clientEmail) {

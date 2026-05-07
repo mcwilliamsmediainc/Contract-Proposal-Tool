@@ -1386,6 +1386,19 @@ components:
           nullable: true
         status:
           type: string
+        formStatus:
+          type: string
+          nullable: true
+          description: Status of the onboarding intake form (pending/submitted or null if not started)
+        formSubmittedAt:
+          type: string
+          format: date-time
+          nullable: true
+        formResponses:
+          type: object
+          nullable: true
+          additionalProperties: {}
+          description: Parsed JSON form responses from the intake questionnaire
         createdAt:
           type: string
           format: date-time

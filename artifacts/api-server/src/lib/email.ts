@@ -622,24 +622,139 @@ export async function sendPaymentUpdateEmail(opts: {
 
 // ── INTERNAL: Onboarding Form Submitted ───────────────────────────────────────
 
+function renderFormResponses(responses: Record<string, unknown>): string {
+  const sections: { title: string; key: string; fields: { label: string; key: string; type?: string }[] }[] = [
+    {
+      title: "General Info",
+      key: "general",
+      fields: [
+        { label: "Website URL", key: "websiteUrl" },
+        { label: "Point of Contact Email", key: "pocEmail" },
+        { label: "Standard Discounts", key: "standardDiscounts" },
+        { label: "Seasonal Discounts", key: "seasonalDiscounts" },
+        { label: "Lead Magnets", key: "leadMagnets" },
+        { label: "Logo Files URL", key: "logoFilesUrl" },
+        { label: "Brand Images URL", key: "brandImagesUrl" },
+        { label: "Facebook", key: "facebookUrl" },
+        { label: "Instagram", key: "instagramUrl" },
+        { label: "LinkedIn", key: "linkedinUrl" },
+        { label: "Other Social", key: "otherSocialUrl" },
+      ],
+    },
+    {
+      title: "Google Ads",
+      key: "googleAds",
+      fields: [
+        { label: "Articles of Incorporation", key: "articlesOfCorpUrl" },
+        { label: "Driver's License", key: "driversLicenseUrl" },
+        { label: "Has Google LSA?", key: "hasGoogleLsa", type: "bool" },
+        { label: "LSA Articles of Corp", key: "lsaArticlesOfCorpUrl" },
+        { label: "LSA Driver's License", key: "lsaDriversLicenseUrl" },
+        { label: "LSA Business Insurance", key: "lsaBusinessInsuranceUrl" },
+        { label: "LSA License Number", key: "lsaLicenseNumber" },
+        { label: "LSA Leadsy Link", key: "lsaLeadsyLink" },
+        { label: "LSA Setup Option", key: "lsaSetupOption" },
+      ],
+    },
+    {
+      title: "Social Media",
+      key: "socialMedia",
+      fields: [
+        { label: "Graphic Styles", key: "graphicStyles", type: "array" },
+        { label: "Post Types", key: "postTypes", type: "array" },
+        { label: "Inspirational Account 1", key: "inspirationalAccount1" },
+        { label: "Inspirational Account 2", key: "inspirationalAccount2" },
+      ],
+    },
+    {
+      title: "Meta Ads",
+      key: "metaAds",
+      fields: [
+        { label: "Has Run Meta Ads?", key: "hasRunMetaAds", type: "bool" },
+        { label: "Meta Business Manager Name", key: "metaBusinessManagerName" },
+        { label: "Facebook Ad Account Name", key: "facebookAdAccountName" },
+        { label: "Has Landing Page?", key: "hasLandingPage", type: "bool" },
+        { label: "Instagram Connected", key: "instagramConnected", type: "bool" },
+        { label: "Identity Confirmed", key: "identityConfirmed", type: "bool" },
+        { label: "Payment Added", key: "paymentAdded", type: "bool" },
+        { label: "Phone Verified", key: "phoneVerified", type: "bool" },
+      ],
+    },
+    {
+      title: "Email Marketing",
+      key: "email",
+      fields: [
+        { label: "Email Contact List URL", key: "emailContactListUrl" },
+        { label: "Has Done Email Marketing?", key: "hasDoneEmailMarketing", type: "bool" },
+        { label: "Email Platform", key: "emailPlatform" },
+        { label: "Mailchimp Access Granted", key: "mailchimpAccessGranted", type: "bool" },
+        { label: "Email List Size", key: "emailListSize" },
+      ],
+    },
+  ];
+
+  const formatValue = (v: unknown, type?: string): string => {
+    if (v === null || v === undefined || v === "") return '<span style="color:#aaa;">—</span>';
+    if (type === "bool") return v ? "✅ Yes" : "❌ No";
+    if (type === "array") return Array.isArray(v) && v.length > 0 ? (v as string[]).join(", ") : '<span style="color:#aaa;">—</span>';
+    return String(v);
+  };
+
+  let html = "";
+
+  for (const section of sections) {
+    const sectionData = responses[section.key] as Record<string, unknown> | undefined;
+    if (!sectionData) continue;
+
+    const rows = section.fields
+      .map((f) => {
+        const val = sectionData[f.key];
+        const formatted = formatValue(val, f.type);
+        if (formatted === '<span style="color:#aaa;">—</span>') return null;
+        return `<tr>
+          <td style="padding: 7px 12px; font-size: 13px; color: #555; white-space: nowrap; vertical-align: top;">${f.label}</td>
+          <td style="padding: 7px 12px; font-size: 13px; color: #1a1a1a; word-break: break-word;">${formatted}</td>
+        </tr>`;
+      })
+      .filter(Boolean);
+
+    if (rows.length === 0) continue;
+
+    html += `
+      <div style="margin-bottom: 20px;">
+        <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #061e57;">${section.title}</p>
+        <table style="width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden;">
+          ${rows.join("\n")}
+        </table>
+      </div>`;
+  }
+
+  return html || '<p style="color:#888;">No responses recorded.</p>';
+}
+
 export async function sendOnboardingSubmittedEmail(opts: {
   clientName: string;
   businessName: string;
   onboardingId: string;
   clientStrategist?: string | null;
+  responses?: Record<string, unknown>;
 }) {
   const to = recipientsFor(opts.clientStrategist);
   const adminUrl = `${baseUrl()}/admin/onboarding`;
+  const responsesHtml = opts.responses ? renderFormResponses(opts.responses) : "";
 
   await send({
     from: FROM_INTERNAL,
     to,
     subject: `✅ ${opts.clientName} completed their onboarding form`,
     html: internalLayout(`
-      <h3 style="margin: 0 0 16px; font-size: 18px;">Onboarding Form Submitted</h3>
-      <p style="margin: 0 0 8px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has completed and submitted their onboarding questionnaire.</p>
-      <p style="margin: 0 0 24px; color: #666; font-size: 14px;">Review their responses and begin onboarding.</p>
-      <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Onboarding Pipeline</a>
+      <h3 style="margin: 0 0 8px; font-size: 18px;">Onboarding Form Submitted</h3>
+      <p style="margin: 0 0 6px;"><strong>${opts.clientName}</strong> at <strong>${opts.businessName}</strong> has completed and submitted their onboarding questionnaire.</p>
+      <p style="margin: 0 0 20px; color: #666; font-size: 14px;">Their full responses are below.</p>
+      ${responsesHtml}
+      <div style="margin-top: 24px;">
+        <a href="${adminUrl}" style="background: #061e57; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">View Onboarding Pipeline</a>
+      </div>
     `),
   });
 }

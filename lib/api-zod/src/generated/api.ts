@@ -711,6 +711,17 @@ export const ListOnboardingClientsResponseItem = zod.object({
   proposalId: zod.string().nullish(),
   contractId: zod.string().nullish(),
   status: zod.string(),
+  formStatus: zod
+    .string()
+    .nullish()
+    .describe(
+      "Status of the onboarding intake form (pending\/submitted or null if not started)",
+    ),
+  formSubmittedAt: zod.coerce.date().nullish(),
+  formResponses: zod
+    .record(zod.string(), zod.unknown())
+    .nullish()
+    .describe("Parsed JSON form responses from the intake questionnaire"),
   createdAt: zod.coerce.date(),
   updatedAt: zod.coerce.date(),
 });
