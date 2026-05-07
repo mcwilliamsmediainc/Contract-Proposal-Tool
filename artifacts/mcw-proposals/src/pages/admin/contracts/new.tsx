@@ -320,7 +320,7 @@ export default function NewContract() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No Hosting</SelectItem>
-                          <SelectItem value="basic">Basic — $50/mo</SelectItem>
+                          <SelectItem value="basic">Gold — $60/mo</SelectItem>
                           <SelectItem value="platinum">Platinum — $100/mo</SelectItem>
                         </SelectContent>
                       </Select>

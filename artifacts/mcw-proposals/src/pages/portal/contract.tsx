@@ -11,7 +11,7 @@ import SignatureCanvas from "react-signature-canvas";
 import { PublicHeader } from "@/components/layout/public-header";
 
 function hostingLabel(opt: string) {
-  if (opt === "basic") return "Basic Hosting — $50/month";
+  if (opt === "basic") return "Gold Hosting — $60/month";
   if (opt === "platinum") return "Platinum Hosting — $100/month";
   return "No Hosting";
 }
@@ -222,7 +222,7 @@ export default function ContractPortal() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {([
                     { value: "none",     label: "No Hosting",    price: "",           desc: "I'll manage hosting myself" },
-                    { value: "basic",    label: "Basic",         price: "$50/month",   desc: "Managed hosting & support" },
+                    { value: "basic",    label: "Gold",          price: "$60/month",   desc: "Managed hosting & support" },
                     { value: "platinum", label: "Platinum",      price: "$100/month",  desc: "Priority hosting & updates" },
                   ] as const).map(({ value, label, price, desc }) => (
                     <button

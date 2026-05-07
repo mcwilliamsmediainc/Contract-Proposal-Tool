@@ -31,9 +31,10 @@ import {
 } from "@/components/ui/select";
 import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles } from "lucide-react";
+import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles, FileText } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { useWatch, type UseFormReturn } from "react-hook-form";
 import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
@@ -56,6 +57,116 @@ function statusBadge(status: string) {
   if (status === "signed") return <Badge className="bg-green-100 text-green-800 border-green-200 font-mono uppercase text-[10px] tracking-wider">Signed</Badge>;
   if (status === "sent") return <Badge variant="secondary" className="font-mono uppercase text-[10px] tracking-wider">Sent</Badge>;
   return <Badge variant="outline" className="font-mono uppercase text-[10px] tracking-wider">Draft</Badge>;
+}
+
+function contractTypeLabel(type: string) {
+  if (type === "website") return "Website Development";
+  if (type === "marketing") return "Marketing Services";
+  if (type === "print") return "Print & Brand";
+  return type;
+}
+
+function ContractDraftPreview({
+  form,
+  contract,
+}: {
+  form: UseFormReturn<FormValues>;
+  contract: { clientName: string; id: string; status: string; scheduleA?: string | null };
+}) {
+  const values = useWatch({ control: form.control });
+  const today = new Date();
+  const dateStr = `${today.getDate()}th day of ${today.toLocaleString("default", { month: "long" })}, ${today.getFullYear()}`;
+
+  const totalCost = Number(values.totalCost ?? 0);
+  const deposit = Number(values.depositAmount ?? 0);
+  const remaining = Number(values.remainingBalance ?? 0);
+  const contractType = values.contractType ?? "website";
+  const scheduleA = values.scheduleA;
+  const clientName = values.clientName || contract.clientName || "Client";
+
+  return (
+    <div className="mt-10">
+      <div className="flex items-center gap-2 mb-4">
+        <FileText className="w-4 h-4 text-muted-foreground" />
+        <h2 className="font-mono text-sm uppercase tracking-wider text-muted-foreground font-semibold">Contract Draft Preview</h2>
+        <span className="text-[10px] text-muted-foreground/60 font-mono ml-1">(live — updates as you edit above)</span>
+      </div>
+
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-[#061e57] px-8 py-5 text-white">
+          <h2 className="text-lg font-bold uppercase tracking-wide">Development Agreement</h2>
+          <p className="text-blue-200 text-sm mt-1">Draft — {contract.id.slice(0, 8)}…</p>
+        </div>
+
+        <div className="px-8 py-6 prose prose-sm max-w-none text-gray-700 leading-relaxed">
+          <p className="text-sm text-gray-500 mb-4 font-medium">
+            THIS DEVELOPMENT AGREEMENT, ("Agreement") dated this {dateStr} is entered into between{" "}
+            <strong>MCWILLIAMS MEDIA INC.</strong>, an Oklahoma Corporation, ("Developer") and{" "}
+            <strong>{clientName}</strong> ("Client").
+          </p>
+
+          <p className="mb-4">
+            WHEREAS Developer is in the business of custom professional {contractTypeLabel(contractType).toLowerCase()} services. WHEREAS Client desires to retain Developer to create and provide services per the Deliverables detailed herein. NOW THEREFORE, in consideration of the mutual promises, conditions, covenants and warranties contained herein and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the parties hereto agree as follows:
+          </p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">1.0. Developer Services</h3>
+          <p className="mb-3">Developer will perform the Services described herein for Client. Before delivering work to Client, Developer will test its components to ensure everything works correctly.</p>
+          <p className="mb-3"><strong>1.2. Buildout.</strong> Developer shall complete the requirements and host/deliver it in a manner that Client can view and approve. Edits will be done in accordance with the specific outlined in the proposal.</p>
+          <p className="mb-3"><strong>1.3. Major Revisions.</strong> If Client desires to implement major revisions, Client shall submit all edit requests through our 3rd party tool. Developer shall provide a revised cost and time frame, and upon approval, shall proceed to implement changes within the new schedule.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">Fees and Schedule</h3>
+          <div className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
+            <div className="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Total Fee</div>
+                <div className="text-lg font-bold text-gray-900">${totalCost.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Deposit</div>
+                <div className="text-lg font-bold text-[#061e57]">${deposit.toLocaleString()}</div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Remaining</div>
+                <div className="text-lg font-bold text-gray-900">${remaining.toLocaleString()}</div>
+              </div>
+            </div>
+          </div>
+
+          <p className="mb-3"><strong>2.1. Deposit.</strong> Client shall pay a non-refundable Deposit prior to the commencement of any work by Developer.</p>
+          <p className="mb-3"><strong>2.2. Expenses.</strong> Client shall reimburse Developer for any and all out of pocket expenses incurred by Developer pursuant to this Agreement.</p>
+          <p className="mb-3"><strong>2.3. Payments.</strong> Client agrees that all payments shall be made via ACH transfer, which is the preferred method of payment for all services. Alternative payment methods, including check or credit card, may be accepted at Developer's discretion.</p>
+          <p className="mb-3"><strong>2.4. Late Fees.</strong> Late Payments shall be subject to a late fee of $75.00 per month. If Client's account becomes ninety (90) days past due, Developer shall have the right to suspend all Services, including hosting.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">3.0. Schedules</h3>
+          <p className="mb-3">Developer shall use all reasonable efforts to meet the delivery schedules set herein. Any delay or non-performance caused by conditions beyond the reasonable control of Developer shall not constitute a breach of this Agreement.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">4.0. Copyright</h3>
+          <p className="mb-3">Client owns copyright to the content of the work. Client gives us permission to record any video meetings for design purposes.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">9.0. Termination</h3>
+          <p className="mb-3">Each Party may terminate this Agreement by written notice for material breach, provided such breach remains uncured within thirty (30) days. If Client cancels for any reason, Developer shall retain the non-refundable Deposit and all payments made to date.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">11.0. Applicable Law</h3>
+          <p className="mb-3">This Agreement shall be governed by the laws of the State of Oklahoma with jurisdiction and venue in Tulsa County, Oklahoma.</p>
+
+          {scheduleA && (
+            <div className="mt-4">
+              <h3 className="font-bold text-gray-900 mb-2">Schedule A — Scope of Work</h3>
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 whitespace-pre-wrap text-sm">{scheduleA}</div>
+            </div>
+          )}
+
+          <div className="border-t border-gray-200 mt-6 pt-6">
+            <p className="font-semibold text-gray-900 mb-1">IN WITNESS WHEREOF, the Parties hereto have executed this Agreement:</p>
+            <p className="text-sm text-gray-500 mb-4">By signing below, <strong>{clientName}</strong> agrees to all terms of this Development Agreement.</p>
+            <div className="h-24 bg-gray-50 rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
+              <span className="text-xs text-gray-400 font-mono">[ Client signature pad appears here ]</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function EditContract() {
@@ -252,7 +363,7 @@ export default function EditContract() {
                       <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
                         <SelectItem value="none">No Hosting</SelectItem>
-                        <SelectItem value="basic">Basic — $50/mo</SelectItem>
+                        <SelectItem value="basic">Gold — $60/mo</SelectItem>
                         <SelectItem value="platinum">Platinum — $100/mo</SelectItem>
                       </SelectContent>
                     </Select>
@@ -285,6 +396,9 @@ export default function EditContract() {
             </Button>
           </form>
         </Form>
+
+        {/* ── Live Contract Draft Preview ── */}
+        <ContractDraftPreview form={form} contract={contract} />
       </div>
       <AiReviewDrawer
         open={reviewOpen}
