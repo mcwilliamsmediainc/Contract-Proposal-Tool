@@ -684,6 +684,7 @@ router.post("/proposals/:id/accept", async (req, res) => {
         contractType,
         totalCost: total,
         depositAmount: deposit,
+        clientStrategist: updated.clientStrategist,
       }).catch(() => {});
     }
 
@@ -734,6 +735,7 @@ router.post("/proposals/:id/accept", async (req, res) => {
       businessName: updated.businessName ?? updated.clientName,
       clientEmail: updated.clientEmail,
       selectedTier: updated.selectedTier,
+      clientStrategist: updated.clientStrategist,
     }).catch(() => {});
   }
 

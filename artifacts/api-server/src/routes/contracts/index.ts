@@ -194,6 +194,17 @@ router.post("/contracts/:id/send", async (req, res) => {
     return;
   }
 
+  // Look up strategist from linked proposal if available
+  let sendStrategist: string | null = null;
+  if (updated.proposalId) {
+    const [linkedProposal] = await db
+      .select({ clientStrategist: proposalsTable.clientStrategist })
+      .from(proposalsTable)
+      .where(eq(proposalsTable.uuid, updated.proposalId))
+      .limit(1);
+    sendStrategist = linkedProposal?.clientStrategist ?? null;
+  }
+
   // Fire client email with contract details
   sendContractReadyClientEmail({
     clientName: updated.clientName,
@@ -203,6 +214,7 @@ router.post("/contracts/:id/send", async (req, res) => {
     contractType: updated.contractType,
     totalCost: Number(updated.totalCost),
     depositAmount: Number(updated.depositAmount),
+    clientStrategist: sendStrategist,
   }).catch(() => {});
 
   res.json(formatContract(updated));
@@ -377,6 +389,7 @@ router.post("/contracts/:id/sign", async (req, res) => {
     contractType: updated.contractType,
     totalCost: Number(updated.totalCost),
     depositAmount: Number(updated.depositAmount),
+    clientStrategist,
   }).catch(() => {});
 
   res.json(formatContract(updated));

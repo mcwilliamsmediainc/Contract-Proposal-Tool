@@ -5,14 +5,109 @@ import { logger } from "./logger";
 const FROM_INTERNAL = "McWilliams Media <notifications@mcwilliamsmedia.com>";
 const FROM_CLIENT = "McWilliams Media <noreply@mcwclients.com>";
 
-const STRATEGIST_EMAILS: Record<string, string> = {
-  "Matt McWilliams": "matt@mcwilliamsmedia.com",
-  "Tiffany King": "tiffany@mcwilliamsmedia.com",
-  "Elise Johnson": "elise@mcwilliamsmedia.com",
-  "Rachelle Hoover": "rachelle@mcwilliamsmedia.com",
+const MCW_PHONE = "(918) 286-4995";
+const MCW_ADDRESS = "2430 W. New Orleans St., Broken Arrow, OK 74011";
+const MCW_WEBSITE = "mcwilliamsmedia.com";
+const MCW_LOGO_URL = "https://mcwilliamsmedia.com/mcwilliams-logo.png";
+
+interface StrategistInfo {
+  email: string;
+  title: string;
+  phone: string;
+  headshot: string | null;
+}
+
+const STRATEGISTS: Record<string, StrategistInfo> = {
+  "Matt McWilliams": {
+    email: "matt@mcwilliamsmedia.com",
+    title: "Owner & Creative Director",
+    phone: MCW_PHONE,
+    headshot: null,
+  },
+  "Tiffany King": {
+    email: "tiffany@mcwilliamsmedia.com",
+    title: "Digital Marketing Strategist",
+    phone: MCW_PHONE,
+    headshot: null,
+  },
+  "Elise Johnson": {
+    email: "elise@mcwilliamsmedia.com",
+    title: "Digital Marketing Strategist",
+    phone: MCW_PHONE,
+    headshot: null,
+  },
+  "Rachelle Hoover": {
+    email: "rachelle@mcwilliamsmedia.com",
+    title: "Digital Marketing Strategist",
+    phone: MCW_PHONE,
+    headshot: null,
+  },
 };
 
+const STRATEGIST_EMAILS: Record<string, string> = Object.fromEntries(
+  Object.entries(STRATEGISTS).map(([name, info]) => [name, info.email])
+);
+
 const FALLBACK = "info@mcwilliamsmedia.com";
+
+function strategistSignatureHtml(name: string | null | undefined): string {
+  const info = name ? STRATEGISTS[name] : null;
+  const displayName = name || "McWilliams Media";
+  const email = info?.email ?? FALLBACK;
+  const title = info?.title ?? "Digital Marketing Agency";
+  const phone = MCW_PHONE;
+  const headshot = info?.headshot;
+
+  const headshotCol = headshot
+    ? `<td style="padding:0 16px 0 0;vertical-align:top;width:72px;">
+        <img src="${headshot}" alt="${displayName}" width="64" height="64"
+          style="border-radius:50%;width:64px;height:64px;object-fit:cover;display:block;border:2px solid #dde6f0;" />
+      </td>`
+    : "";
+
+  return `
+    <table style="border-collapse:collapse;border-top:2px solid #061e57;padding-top:18px;margin-top:24px;width:100%;max-width:520px;">
+      <tr><td colspan="2" style="height:18px;"></td></tr>
+      <tr>
+        ${headshotCol}
+        <td style="vertical-align:top;padding:0;">
+          <table style="border-collapse:collapse;">
+            <tr>
+              <td>
+                <p style="margin:0 0 1px;font-size:15px;font-weight:700;color:#061e57;font-family:'Inter',Arial,sans-serif;">${displayName}</p>
+                <p style="margin:0 0 8px;font-size:12px;color:#6b7280;font-family:'Inter',Arial,sans-serif;text-transform:uppercase;letter-spacing:0.5px;">${title}</p>
+                <table style="border-collapse:collapse;">
+                  <tr>
+                    <td style="padding:1px 8px 1px 0;font-size:13px;color:#374151;font-family:'Inter',Arial,sans-serif;">
+                      📞 <a href="tel:+1${phone.replace(/\D/g,"")}" style="color:#374151;text-decoration:none;">${phone}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:1px 8px 1px 0;font-size:13px;color:#374151;font-family:'Inter',Arial,sans-serif;">
+                      ✉️ <a href="mailto:${email}" style="color:#061e57;text-decoration:none;">${email}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:1px 8px 1px 0;font-size:13px;color:#374151;font-family:'Inter',Arial,sans-serif;">
+                      🌐 <a href="https://${MCW_WEBSITE}" style="color:#061e57;text-decoration:none;">${MCW_WEBSITE}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:1px 0 8px 0;font-size:12px;color:#9ca3af;font-family:'Inter',Arial,sans-serif;">
+                      📍 ${MCW_ADDRESS}
+                    </td>
+                  </tr>
+                </table>
+                <img src="${MCW_LOGO_URL}" alt="McWilliams Media" height="28"
+                  style="display:block;height:28px;max-width:160px;object-fit:contain;margin-top:4px;" />
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
+}
 
 function getMailgunClient() {
   const apiKey = process.env["MAILGUN_API_KEY"];
@@ -149,6 +244,7 @@ export async function sendProposalAcceptedClientEmail(opts: {
   businessName: string;
   clientEmail: string;
   selectedTier?: string | null;
+  clientStrategist?: string | null;
 }) {
   if (!opts.clientEmail) return;
 
@@ -172,7 +268,7 @@ export async function sendProposalAcceptedClientEmail(opts: {
           Your dedicated strategist will reach out within 1–2 business days to schedule your kickoff call and walk you through the onboarding process.
         </p>
       </div>
-      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reply to your strategist directly or reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
+      ${strategistSignatureHtml(opts.clientStrategist)}
     `),
   });
 }
@@ -187,6 +283,7 @@ export async function sendContractReadyClientEmail(opts: {
   contractType: string;
   totalCost: number;
   depositAmount: number;
+  clientStrategist?: string | null;
 }) {
   if (!opts.clientEmail) return;
 
@@ -216,7 +313,7 @@ export async function sendContractReadyClientEmail(opts: {
           Once your contract is signed, your strategist will reach out to confirm your deposit and schedule your project kickoff call.
         </p>
       </div>
-      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reply to your strategist directly or reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
+      ${strategistSignatureHtml(opts.clientStrategist)}
     `),
   });
 }
@@ -285,6 +382,7 @@ export async function sendContractSignedClientEmail(opts: {
   contractType: string;
   totalCost: number;
   depositAmount: number;
+  clientStrategist?: string | null;
 }) {
   if (!opts.clientEmail) return;
 
@@ -308,7 +406,7 @@ export async function sendContractSignedClientEmail(opts: {
           Your strategist will be in touch to confirm your deposit and schedule your project kickoff. Keep an eye on your inbox!
         </p>
       </div>
-      <p style="margin: 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
+      ${strategistSignatureHtml(opts.clientStrategist)}
     `),
   });
 }
@@ -414,11 +512,7 @@ export async function sendProposalOutreachEmail(opts: {
     html: `
       <div style="font-family:'Inter',Arial,sans-serif;max-width:580px;margin:0 auto;padding:32px 0;">
         ${htmlBody}
-        <div style="height:32px"></div>
-        <p style="margin:0;font-size:13px;color:#999;border-top:1px solid #eee;padding-top:20px;">
-          ${strategistName} &nbsp;·&nbsp; McWilliams Media<br>
-          <a href="mailto:${strategistEmail}" style="color:#061e57;">${strategistEmail}</a>
-        </p>
+        ${strategistSignatureHtml(opts.clientStrategist)}
       </div>
     `,
   });
