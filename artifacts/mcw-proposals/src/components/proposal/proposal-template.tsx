@@ -107,22 +107,6 @@ export function SectionIntro({ clientName, businessName }: { clientName?: string
   );
 }
 
-export function SituationSection({ content }: { content?: string | null }) {
-  if (!content) return null;
-  return (
-    <section id="section-situation" className="bg-[#f8f9fc] py-20 px-6 border-t border-gray-100">
-      <div className="max-w-3xl mx-auto">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#3a4856] mb-4 pl-3 border-l-2 border-[#b3cee1]">Where You Are Right Now</p>
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-8 leading-tight" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-          The Problem / Your Situation
-        </h2>
-        <p className="text-xl leading-relaxed text-gray-700 whitespace-pre-wrap" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-          {content}
-        </p>
-      </div>
-    </section>
-  );
-}
 
 function StarRating() {
   return (
@@ -1064,9 +1048,7 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
       />
       {/* 2. Personal intro letter — signed by Matt */}
       <SectionIntro clientName={data.clientName} businessName={data.businessName} />
-      {/* 3. The Problem / Their Situation */}
-      <SituationSection content={data.content} />
-      {/* 4. Social proof — all testimonials in one section, before pricing */}
+      {/* 3. Social proof — all testimonials in one section, before pricing */}
       <SocialProofSection />
       {/* 5. Your solution */}
       <StrategySection />

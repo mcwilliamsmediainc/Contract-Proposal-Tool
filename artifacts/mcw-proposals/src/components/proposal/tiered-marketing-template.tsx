@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import {
   ProposalCover,
   SectionIntro,
-  SituationSection,
   TeamSection,
   TestimonialSection,
 } from "./proposal-template";
@@ -532,7 +531,6 @@ export function TieredMarketingTemplate({
         date={dateStr}
       />
       <SectionIntro clientName={data.clientName} businessName={data.businessName} />
-      <SituationSection content={data.content} />
       <TestimonialSection
         quote="The results are apparent: In under a year, my business has more than tripled! This was by far the best advertising money I have spent... Everything else was a waste comparatively."
         author="Chance Johnson"

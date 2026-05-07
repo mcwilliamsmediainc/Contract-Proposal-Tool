@@ -257,62 +257,6 @@ export default function NewProposal() {
               </CardContent>
             </Card>
 
-            {/* AI Custom Intro */}
-            <Card className="bg-card/50 backdrop-blur border-border/50">
-              <CardHeader className="pb-3">
-                <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">The Problem / Their Situation</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-xs text-muted-foreground">The highest-converting section most agencies skip. Describe what the client told you about their situation — the AI will mirror it back in 2–3 sentences that make them feel truly heard.</p>
-                <FormField
-                  control={form.control}
-                  name="specialContext"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Client's Situation / Notes</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="e.g. They've been struggling with low website traffic. Their current site is outdated and doesn't reflect the quality of their work. They've tried running Google Ads before but didn't see results..."
-                          className="min-h-[100px] resize-y text-sm"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={handleGenerate}
-                  disabled={generateContent.isPending}
-                  className="w-full"
-                >
-                  {generateContent.isPending
-                    ? <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    : <Sparkles className="w-4 h-4 mr-2" />}
-                  AI Generate Custom Intro
-                </Button>
-                <FormField
-                  control={form.control}
-                  name="content"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Generated Intro</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="AI-generated intro will appear here. You can also write or edit it manually."
-                          className="min-h-[120px] resize-y text-sm leading-relaxed"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-            </Card>
 
             <div className="pb-8">
               <Button

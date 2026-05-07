@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
-  Loader2, Sparkles, ArrowLeft, X, Users, FileText,
+  Loader2, Sparkles, ArrowLeft, X, Users,
   DollarSign, Layout, ExternalLink, Plus, Trash2, Link2, ClipboardCheck, GripVertical, Download, Mail
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -43,7 +43,7 @@ const formSchema = z.object({
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Panel = "client" | "content" | "pricing" | "settings" | "email" | null;
+type Panel = "client" | "pricing" | "settings" | "email" | null;
 
 function SlidePanel({ open, onClose, title, children, onSave, saving, saveLabel }: {
   open: boolean; onClose: () => void; title: string;
@@ -394,7 +394,6 @@ export default function EditProposal() {
   const isProject = watched.projectType === "project";
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
-    { panel: "content", label: "Intro Text", icon: FileText },
     { panel: "pricing", label: "Pricing", icon: DollarSign },
     { panel: "settings", label: "Settings", icon: ExternalLink },
   ];
@@ -643,27 +642,6 @@ export default function EditProposal() {
       </SlidePanel>
 
 
-      {/* ── INTRO CONTENT PANEL ── */}
-      <SlidePanel open={activePanel === "content"} onClose={() => setActivePanel(null)} title="Intro / Thank You Text" onSave={savePanel} saving={saving}>
-        <Form {...form}>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">This text appears on page 2 of the proposal, after the cover. Leave blank to use the default McWilliams Media introduction.</p>
-            <Controller control={form.control} name="content" render={({ field }) => (
-              <Textarea
-                className="min-h-[280px] resize-y text-sm leading-relaxed"
-                placeholder="Write a personalized introduction for this client..."
-                {...field}
-              />
-            )} />
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-gray-500 uppercase tracking-wider">Internal Notes (not shown to client)</label>
-              <Controller control={form.control} name="specialContext" render={({ field }) => (
-                <Textarea className="min-h-[80px] text-sm" placeholder="Notes for the team..." {...field} />
-              )} />
-            </div>
-          </div>
-        </Form>
-      </SlidePanel>
 
       {/* ── PRICING PANEL ── */}
       <SlidePanel open={activePanel === "pricing"} onClose={() => setActivePanel(null)} title="Pricing" onSave={savePanel} saving={saving}>
