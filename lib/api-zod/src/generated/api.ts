@@ -8,6 +8,150 @@
 import * as zod from "zod";
 
 /**
+ * @summary Create an audit lead and start the scan session
+ */
+export const CreateAuditLeadBody = zod.object({
+  url: zod.string(),
+  city: zod.string(),
+  challenge: zod.string().optional(),
+});
+
+export const CreateAuditLeadResponse = zod.object({
+  leadId: zod.string().uuid(),
+});
+
+/**
+ * @summary Run Gemini AI scan on the lead's website (rate-limited 5/hr/IP)
+ */
+export const ScanAuditLeadBody = zod.object({
+  leadId: zod.string().uuid(),
+});
+
+export const ScanAuditLeadResponse = zod.object({
+  leadId: zod.string().optional(),
+  scores: zod.object({}).passthrough().optional(),
+  observations: zod.object({}).passthrough().optional(),
+  businessType: zod.string().optional(),
+});
+
+/**
+ * @summary Capture email and return full scores; triggers PDF email delivery
+ */
+export const CaptureAuditEmailBody = zod.object({
+  leadId: zod.string().uuid(),
+  email: zod.string().email(),
+});
+
+export const CaptureAuditEmailResponse = zod.object({
+  success: zod.boolean().optional(),
+  scores: zod
+    .object({
+      ux: zod.number(),
+      seo: zod.number(),
+      social: zod.number(),
+      aiVisibility: zod.number(),
+    })
+    .optional(),
+  observations: zod.object({}).passthrough().optional(),
+  businessType: zod.string().optional(),
+});
+
+/**
+ * @summary Save budget and goal qualification answers
+ */
+export const QualifyAuditLeadBody = zod.object({
+  leadId: zod.string().uuid(),
+  budget: zod.string().optional(),
+  goal: zod.string().optional(),
+});
+
+export const QualifyAuditLeadResponse = zod.object({
+  success: zod.boolean().optional(),
+});
+
+/**
+ * @summary Mark lead as proposal-requested and notify the team
+ */
+export const RequestAuditProposalBody = zod.object({
+  leadId: zod.string().uuid(),
+});
+
+export const RequestAuditProposalResponse = zod.object({
+  success: zod.boolean().optional(),
+});
+
+/**
+ * @summary List all audit leads (admin)
+ */
+export const ListAuditLeadsResponseItem = zod.object({
+  id: zod.string().uuid(),
+  url: zod.string(),
+  city: zod.string(),
+  challenge: zod.string().nullish(),
+  email: zod.string().nullish(),
+  status: zod.enum([
+    "new",
+    "scanned",
+    "email_captured",
+    "qualified",
+    "proposal_requested",
+  ]),
+  scores: zod
+    .object({
+      ux: zod.number(),
+      seo: zod.number(),
+      social: zod.number(),
+      aiVisibility: zod.number(),
+    })
+    .nullish(),
+  businessType: zod.string().nullish(),
+  budget: zod.string().nullish(),
+  goal: zod.string().nullish(),
+  proposalRequested: zod.boolean(),
+  proposalRequestedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+export const ListAuditLeadsResponse = zod.array(ListAuditLeadsResponseItem);
+
+/**
+ * @summary Get single audit lead by UUID (admin)
+ */
+export const GetAuditLeadParams = zod.object({
+  uuid: zod.coerce.string().uuid(),
+});
+
+export const GetAuditLeadResponse = zod.object({
+  id: zod.string().uuid(),
+  url: zod.string(),
+  city: zod.string(),
+  challenge: zod.string().nullish(),
+  email: zod.string().nullish(),
+  status: zod.enum([
+    "new",
+    "scanned",
+    "email_captured",
+    "qualified",
+    "proposal_requested",
+  ]),
+  scores: zod
+    .object({
+      ux: zod.number(),
+      seo: zod.number(),
+      social: zod.number(),
+      aiVisibility: zod.number(),
+    })
+    .nullish(),
+  businessType: zod.string().nullish(),
+  budget: zod.string().nullish(),
+  goal: zod.string().nullish(),
+  proposalRequested: zod.boolean(),
+  proposalRequestedAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+  updatedAt: zod.coerce.date(),
+});
+
+/**
  * Returns server health status
  * @summary Health check
  */

@@ -71,11 +71,13 @@ export function generateAuditPDF(lead: AuditLead): Promise<Buffer> {
     const MARGIN = 48;
     const CONTENT_W = PW - MARGIN * 2;
 
-    const scores: Record<string, number> = lead.scores ? JSON.parse(lead.scores) : {};
-    const scanData: { observations?: Record<string, Record<string, string>> } = lead.scanData
-      ? JSON.parse(lead.scanData)
+    const scores: Record<string, number> = lead.scores
+      ? (typeof lead.scores === "object" ? (lead.scores as Record<string, number>) : JSON.parse(lead.scores as string))
       : {};
-    const obs = scanData.observations ?? {};
+    const scanDataRaw = lead.scanData
+      ? (typeof lead.scanData === "object" ? (lead.scanData as { observations?: Record<string, Record<string, string>> }) : JSON.parse(lead.scanData as string) as { observations?: Record<string, Record<string, string>> })
+      : {};
+    const obs = scanDataRaw.observations ?? {};
     const date = new Date().toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",

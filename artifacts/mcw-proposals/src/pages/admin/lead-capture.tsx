@@ -14,6 +14,7 @@ import {
   AlertCircle,
   Clock,
   TrendingUp,
+  FilePlus,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -171,6 +172,13 @@ function LeadRow({ lead }: { lead: AuditLeadRecord }) {
           <Clock className="w-3 h-3" />
           {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
         </div>
+        <a
+          href={`/admin/proposals/new?clientEmail=${encodeURIComponent(lead.email ?? "")}&clientName=${encodeURIComponent(lead.businessType ?? "")}&city=${encodeURIComponent(lead.city)}&url=${encodeURIComponent(lead.url)}`}
+          className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+        >
+          <FilePlus className="w-3 h-3" />
+          Create Proposal →
+        </a>
       </td>
     </tr>
   );
@@ -192,7 +200,7 @@ export default function LeadCapture() {
   const { data: leads, isLoading } = useQuery<AuditLeadRecord[]>({
     queryKey: ["audit-leads"],
     queryFn: async () => {
-      const r = await fetch(`${BASE}/api/audit/leads`, {
+      const r = await fetch(`${BASE}/api/admin/audit-leads`, {
         headers: { "Content-Type": "application/json" },
       });
       if (!r.ok) throw new Error("Failed to load audit leads");

@@ -21,9 +21,17 @@ import type {
   AddOnboardingTaskBody,
   AdminStats,
   ApiError,
+  AuditCaptureBody,
+  AuditCreateBody,
+  AuditLead,
+  AuditQualifyBody,
+  AuditRequestProposalBody,
+  AuditScanBody,
   Cancellation,
+  CaptureAuditEmail200,
   ClientRecord,
   Contract,
+  CreateAuditLead200,
   CreateCancellationBody,
   CreateContractBody,
   CreateGeminiConversationBody,
@@ -47,7 +55,10 @@ import type {
   Proposal,
   ProposalNotes,
   PublicProposal,
+  QualifyAuditLead200,
+  RequestAuditProposal200,
   SaveOnboardingFormBody,
+  ScanAuditLead200,
   SendGeminiMessageBody,
   SignContractBody,
   ToggleOnboardingTaskBody,
@@ -63,6 +74,599 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
+
+/**
+ * @summary Create an audit lead and start the scan session
+ */
+export const getCreateAuditLeadUrl = () => {
+  return `/api/audit/create`;
+};
+
+export const createAuditLead = async (
+  auditCreateBody: AuditCreateBody,
+  options?: RequestInit,
+): Promise<CreateAuditLead200> => {
+  return customFetch<CreateAuditLead200>(getCreateAuditLeadUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(auditCreateBody),
+  });
+};
+
+export const getCreateAuditLeadMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createAuditLead>>,
+    TError,
+    { data: BodyType<AuditCreateBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createAuditLead>>,
+  TError,
+  { data: BodyType<AuditCreateBody> },
+  TContext
+> => {
+  const mutationKey = ["createAuditLead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createAuditLead>>,
+    { data: BodyType<AuditCreateBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createAuditLead(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateAuditLeadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createAuditLead>>
+>;
+export type CreateAuditLeadMutationBody = BodyType<AuditCreateBody>;
+export type CreateAuditLeadMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Create an audit lead and start the scan session
+ */
+export const useCreateAuditLead = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createAuditLead>>,
+    TError,
+    { data: BodyType<AuditCreateBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createAuditLead>>,
+  TError,
+  { data: BodyType<AuditCreateBody> },
+  TContext
+> => {
+  return useMutation(getCreateAuditLeadMutationOptions(options));
+};
+
+/**
+ * @summary Run Gemini AI scan on the lead's website (rate-limited 5/hr/IP)
+ */
+export const getScanAuditLeadUrl = () => {
+  return `/api/audit/scan`;
+};
+
+export const scanAuditLead = async (
+  auditScanBody: AuditScanBody,
+  options?: RequestInit,
+): Promise<ScanAuditLead200> => {
+  return customFetch<ScanAuditLead200>(getScanAuditLeadUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(auditScanBody),
+  });
+};
+
+export const getScanAuditLeadMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof scanAuditLead>>,
+    TError,
+    { data: BodyType<AuditScanBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof scanAuditLead>>,
+  TError,
+  { data: BodyType<AuditScanBody> },
+  TContext
+> => {
+  const mutationKey = ["scanAuditLead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof scanAuditLead>>,
+    { data: BodyType<AuditScanBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return scanAuditLead(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type ScanAuditLeadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof scanAuditLead>>
+>;
+export type ScanAuditLeadMutationBody = BodyType<AuditScanBody>;
+export type ScanAuditLeadMutationError = ErrorType<void>;
+
+/**
+ * @summary Run Gemini AI scan on the lead's website (rate-limited 5/hr/IP)
+ */
+export const useScanAuditLead = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof scanAuditLead>>,
+    TError,
+    { data: BodyType<AuditScanBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof scanAuditLead>>,
+  TError,
+  { data: BodyType<AuditScanBody> },
+  TContext
+> => {
+  return useMutation(getScanAuditLeadMutationOptions(options));
+};
+
+/**
+ * @summary Capture email and return full scores; triggers PDF email delivery
+ */
+export const getCaptureAuditEmailUrl = () => {
+  return `/api/audit/capture`;
+};
+
+export const captureAuditEmail = async (
+  auditCaptureBody: AuditCaptureBody,
+  options?: RequestInit,
+): Promise<CaptureAuditEmail200> => {
+  return customFetch<CaptureAuditEmail200>(getCaptureAuditEmailUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(auditCaptureBody),
+  });
+};
+
+export const getCaptureAuditEmailMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof captureAuditEmail>>,
+    TError,
+    { data: BodyType<AuditCaptureBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof captureAuditEmail>>,
+  TError,
+  { data: BodyType<AuditCaptureBody> },
+  TContext
+> => {
+  const mutationKey = ["captureAuditEmail"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof captureAuditEmail>>,
+    { data: BodyType<AuditCaptureBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return captureAuditEmail(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CaptureAuditEmailMutationResult = NonNullable<
+  Awaited<ReturnType<typeof captureAuditEmail>>
+>;
+export type CaptureAuditEmailMutationBody = BodyType<AuditCaptureBody>;
+export type CaptureAuditEmailMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Capture email and return full scores; triggers PDF email delivery
+ */
+export const useCaptureAuditEmail = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof captureAuditEmail>>,
+    TError,
+    { data: BodyType<AuditCaptureBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof captureAuditEmail>>,
+  TError,
+  { data: BodyType<AuditCaptureBody> },
+  TContext
+> => {
+  return useMutation(getCaptureAuditEmailMutationOptions(options));
+};
+
+/**
+ * @summary Save budget and goal qualification answers
+ */
+export const getQualifyAuditLeadUrl = () => {
+  return `/api/audit/qualify`;
+};
+
+export const qualifyAuditLead = async (
+  auditQualifyBody: AuditQualifyBody,
+  options?: RequestInit,
+): Promise<QualifyAuditLead200> => {
+  return customFetch<QualifyAuditLead200>(getQualifyAuditLeadUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(auditQualifyBody),
+  });
+};
+
+export const getQualifyAuditLeadMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qualifyAuditLead>>,
+    TError,
+    { data: BodyType<AuditQualifyBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof qualifyAuditLead>>,
+  TError,
+  { data: BodyType<AuditQualifyBody> },
+  TContext
+> => {
+  const mutationKey = ["qualifyAuditLead"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof qualifyAuditLead>>,
+    { data: BodyType<AuditQualifyBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return qualifyAuditLead(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type QualifyAuditLeadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof qualifyAuditLead>>
+>;
+export type QualifyAuditLeadMutationBody = BodyType<AuditQualifyBody>;
+export type QualifyAuditLeadMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Save budget and goal qualification answers
+ */
+export const useQualifyAuditLead = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof qualifyAuditLead>>,
+    TError,
+    { data: BodyType<AuditQualifyBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof qualifyAuditLead>>,
+  TError,
+  { data: BodyType<AuditQualifyBody> },
+  TContext
+> => {
+  return useMutation(getQualifyAuditLeadMutationOptions(options));
+};
+
+/**
+ * @summary Mark lead as proposal-requested and notify the team
+ */
+export const getRequestAuditProposalUrl = () => {
+  return `/api/audit/request-proposal`;
+};
+
+export const requestAuditProposal = async (
+  auditRequestProposalBody: AuditRequestProposalBody,
+  options?: RequestInit,
+): Promise<RequestAuditProposal200> => {
+  return customFetch<RequestAuditProposal200>(getRequestAuditProposalUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(auditRequestProposalBody),
+  });
+};
+
+export const getRequestAuditProposalMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestAuditProposal>>,
+    TError,
+    { data: BodyType<AuditRequestProposalBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof requestAuditProposal>>,
+  TError,
+  { data: BodyType<AuditRequestProposalBody> },
+  TContext
+> => {
+  const mutationKey = ["requestAuditProposal"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof requestAuditProposal>>,
+    { data: BodyType<AuditRequestProposalBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return requestAuditProposal(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type RequestAuditProposalMutationResult = NonNullable<
+  Awaited<ReturnType<typeof requestAuditProposal>>
+>;
+export type RequestAuditProposalMutationBody =
+  BodyType<AuditRequestProposalBody>;
+export type RequestAuditProposalMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Mark lead as proposal-requested and notify the team
+ */
+export const useRequestAuditProposal = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof requestAuditProposal>>,
+    TError,
+    { data: BodyType<AuditRequestProposalBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof requestAuditProposal>>,
+  TError,
+  { data: BodyType<AuditRequestProposalBody> },
+  TContext
+> => {
+  return useMutation(getRequestAuditProposalMutationOptions(options));
+};
+
+/**
+ * @summary List all audit leads (admin)
+ */
+export const getListAuditLeadsUrl = () => {
+  return `/api/admin/audit-leads`;
+};
+
+export const listAuditLeads = async (
+  options?: RequestInit,
+): Promise<AuditLead[]> => {
+  return customFetch<AuditLead[]>(getListAuditLeadsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListAuditLeadsQueryKey = () => {
+  return [`/api/admin/audit-leads`] as const;
+};
+
+export const getListAuditLeadsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listAuditLeads>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listAuditLeads>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListAuditLeadsQueryKey();
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof listAuditLeads>>> = ({
+    signal,
+  }) => listAuditLeads({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listAuditLeads>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListAuditLeadsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listAuditLeads>>
+>;
+export type ListAuditLeadsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all audit leads (admin)
+ */
+
+export function useListAuditLeads<
+  TData = Awaited<ReturnType<typeof listAuditLeads>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listAuditLeads>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListAuditLeadsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Get single audit lead by UUID (admin)
+ */
+export const getGetAuditLeadUrl = (uuid: string) => {
+  return `/api/admin/audit-leads/${uuid}`;
+};
+
+export const getAuditLead = async (
+  uuid: string,
+  options?: RequestInit,
+): Promise<AuditLead> => {
+  return customFetch<AuditLead>(getGetAuditLeadUrl(uuid), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getGetAuditLeadQueryKey = (uuid: string) => {
+  return [`/api/admin/audit-leads/${uuid}`] as const;
+};
+
+export const getGetAuditLeadQueryOptions = <
+  TData = Awaited<ReturnType<typeof getAuditLead>>,
+  TError = ErrorType<void>,
+>(
+  uuid: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAuditLead>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetAuditLeadQueryKey(uuid);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getAuditLead>>> = ({
+    signal,
+  }) => getAuditLead(uuid, { signal, ...requestOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!uuid,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getAuditLead>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type GetAuditLeadQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getAuditLead>>
+>;
+export type GetAuditLeadQueryError = ErrorType<void>;
+
+/**
+ * @summary Get single audit lead by UUID (admin)
+ */
+
+export function useGetAuditLead<
+  TData = Awaited<ReturnType<typeof getAuditLead>>,
+  TError = ErrorType<void>,
+>(
+  uuid: string,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof getAuditLead>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getGetAuditLeadQueryOptions(uuid, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * Returns server health status

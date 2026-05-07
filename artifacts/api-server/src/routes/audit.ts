@@ -32,7 +32,22 @@ function rateLimit(req: Request, res: Response, next: () => void): void {
   next();
 }
 
-function formatLead(l: typeof auditLeadsTable.$inferSelect) {
+type DbLead = typeof auditLeadsTable.$inferSelect;
+type ScoresObj = Record<string, number> | null;
+
+function getScores(lead: DbLead): ScoresObj {
+  if (!lead.scores) return null;
+  if (typeof lead.scores === "object") return lead.scores as ScoresObj;
+  try { return JSON.parse(lead.scores as string) as ScoresObj; } catch { return null; }
+}
+
+function getScanData(lead: DbLead): Record<string, unknown> | null {
+  if (!lead.scanData) return null;
+  if (typeof lead.scanData === "object") return lead.scanData as Record<string, unknown>;
+  try { return JSON.parse(lead.scanData as string) as Record<string, unknown>; } catch { return null; }
+}
+
+function formatLead(l: DbLead) {
   return {
     id: l.uuid,
     url: l.url,
@@ -40,7 +55,7 @@ function formatLead(l: typeof auditLeadsTable.$inferSelect) {
     challenge: l.challenge ?? null,
     email: l.email ?? null,
     status: l.status,
-    scores: l.scores ? JSON.parse(l.scores) : null,
+    scores: getScores(l),
     businessType: l.businessType ?? null,
     budget: l.budget ?? null,
     goal: l.goal ?? null,
@@ -106,8 +121,8 @@ router.post("/audit/scan", rateLimit, async (req: Request, res: Response) => {
     await db
       .update(auditLeadsTable)
       .set({
-        scores: JSON.stringify(scanResult.scores),
-        scanData: JSON.stringify(scanResult.rawData),
+        scores: scanResult.scores as unknown as typeof auditLeadsTable.$inferInsert["scores"],
+        scanData: scanResult.rawData as unknown as typeof auditLeadsTable.$inferInsert["scanData"],
         businessType: scanResult.businessType,
         status: "scanned",
         updatedAt: new Date(),
@@ -161,12 +176,12 @@ router.post("/audit/capture", async (req: Request, res: Response) => {
   sendReportEmail(updated).catch((err: unknown) => req.log.error({ err }, "Audit report email failed"));
   notifyTeamNewLead(updated).catch((err: unknown) => req.log.error({ err }, "Team notify email failed"));
 
-  const scanData: { observations?: unknown } = updated.scanData ? JSON.parse(updated.scanData) : {};
+  const scanData = getScanData(updated);
 
   res.json({
     success: true,
-    scores: updated.scores ? JSON.parse(updated.scores) : null,
-    observations: scanData.observations ?? null,
+    scores: getScores(updated),
+    observations: scanData?.["observations"] ?? null,
     businessType: updated.businessType,
   });
 });
@@ -265,7 +280,7 @@ router.get("/audit/request-proposal", async (req: Request, res: Response) => {
   res.redirect(`${basePath}/audit?status=proposal_requested`);
 });
 
-router.get("/audit/leads", async (req: Request, res: Response) => {
+router.get("/admin/audit-leads", async (req: Request, res: Response) => {
   const rows = await db
     .select()
     .from(auditLeadsTable)
@@ -273,7 +288,7 @@ router.get("/audit/leads", async (req: Request, res: Response) => {
   res.json(rows.map(formatLead));
 });
 
-router.get("/audit/leads/:uuid", async (req: Request, res: Response) => {
+router.get("/admin/audit-leads/:uuid", async (req: Request, res: Response) => {
   const [lead] = await db
     .select()
     .from(auditLeadsTable)

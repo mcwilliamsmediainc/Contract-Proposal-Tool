@@ -166,11 +166,13 @@ function buildTeamHTML(lead: AuditLead, scores: Record<string, number>, isPropos
 export async function sendReportEmail(lead: AuditLead): Promise<void> {
   if (!lead.email) return;
 
-  const scores: Record<string, number> = lead.scores ? JSON.parse(lead.scores) : {};
-  const scanData: { observations?: Record<string, Record<string, string>> } = lead.scanData
-    ? JSON.parse(lead.scanData)
+  const scores: Record<string, number> = lead.scores
+    ? (typeof lead.scores === "object" ? (lead.scores as Record<string, number>) : JSON.parse(lead.scores as string))
     : {};
-  const obs = scanData.observations ?? {};
+  const scanDataRaw = lead.scanData
+    ? (typeof lead.scanData === "object" ? (lead.scanData as { observations?: Record<string, Record<string, string>> }) : JSON.parse(lead.scanData as string) as { observations?: Record<string, Record<string, string>> })
+    : {};
+  const obs = scanDataRaw.observations ?? {};
 
   const pdfBuffer = await generateAuditPDF(lead);
   const subject = `Your Digital Health Check — ${(lead.url ?? "").replace(/^https?:\/\//, "")}`;
@@ -196,7 +198,9 @@ export async function sendReportEmail(lead: AuditLead): Promise<void> {
 }
 
 export async function notifyTeamNewLead(lead: AuditLead): Promise<void> {
-  const scores: Record<string, number> = lead.scores ? JSON.parse(lead.scores) : {};
+  const scores: Record<string, number> = lead.scores
+    ? (typeof lead.scores === "object" ? (lead.scores as Record<string, number>) : JSON.parse(lead.scores as string))
+    : {};
   const subject = `🔔 New Audit Lead: ${lead.email ?? "No email"} — ${(lead.url ?? "").replace(/^https?:\/\//, "")}`;
   const html = buildTeamHTML(lead, scores, false);
 
@@ -212,7 +216,9 @@ export async function notifyTeamNewLead(lead: AuditLead): Promise<void> {
 }
 
 export async function notifyTeamProposalRequest(lead: AuditLead): Promise<void> {
-  const scores: Record<string, number> = lead.scores ? JSON.parse(lead.scores) : {};
+  const scores: Record<string, number> = lead.scores
+    ? (typeof lead.scores === "object" ? (lead.scores as Record<string, number>) : JSON.parse(lead.scores as string))
+    : {};
   const subject = `🚨 PROPOSAL REQUESTED: ${lead.email ?? "Unknown"} — ${lead.city}`;
   const html = buildTeamHTML(lead, scores, true);
 

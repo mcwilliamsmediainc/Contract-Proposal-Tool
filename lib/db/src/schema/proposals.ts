@@ -6,6 +6,7 @@ import {
   numeric,
   timestamp,
   boolean,
+  jsonb,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
@@ -117,8 +118,8 @@ export const auditLeadsTable = pgTable("audit_leads", {
   challenge: text("challenge"),
   email: text("email"),
   status: text("status").notNull().default("new"),
-  scores: text("scores"),
-  scanData: text("scan_data"),
+  scores: jsonb("scores"),
+  scanData: jsonb("scan_data"),
   businessType: text("business_type"),
   budget: text("budget"),
   goal: text("goal"),

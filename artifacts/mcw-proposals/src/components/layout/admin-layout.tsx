@@ -9,9 +9,9 @@ const NAV_ITEMS = [
   { href: "/admin/proposals", label: "Proposals", icon: FileText },
   { href: "/admin/contracts", label: "Contracts", icon: FileText },
   { href: "/admin/onboarding", label: "Onboarding", icon: Users },
+  { href: "/admin/lead-capture", label: "Lead Capture", icon: Radar },
   { href: "/admin/leads", label: "Leads", icon: UserPlus },
   { href: "/admin/clients", label: "Clients", icon: BookUser },
-  { href: "/admin/lead-capture", label: "Lead Capture", icon: Radar },
   { href: "/admin/payment-link", label: "Update Payment Info", icon: CreditCard },
   { href: "/admin/cancellations", label: "Client Cancellation", icon: XCircle },
 ];

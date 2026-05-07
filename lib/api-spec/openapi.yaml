@@ -20,7 +20,173 @@ tags:
     description: Gemini AI chat and image operations
   - name: onboarding
     description: Client onboarding intake form
+  - name: audit
+    description: Digital Health Check audit lead capture
 paths:
+  /audit/create:
+    post:
+      operationId: createAuditLead
+      tags: [audit]
+      summary: Create an audit lead and start the scan session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditCreateBody"
+      responses:
+        "200":
+          description: Lead created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leadId:
+                    type: string
+                    format: uuid
+                required:
+                  - leadId
+
+  /audit/scan:
+    post:
+      operationId: scanAuditLead
+      tags: [audit]
+      summary: Run Gemini AI scan on the lead's website (rate-limited 5/hr/IP)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditScanBody"
+      responses:
+        "200":
+          description: Teaser scan results (UX + SEO only; social + AI locked)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leadId:
+                    type: string
+                  scores:
+                    type: object
+                  observations:
+                    type: object
+                  businessType:
+                    type: string
+        "429":
+          description: Rate limit exceeded
+
+  /audit/capture:
+    post:
+      operationId: captureAuditEmail
+      tags: [audit]
+      summary: Capture email and return full scores; triggers PDF email delivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditCaptureBody"
+      responses:
+        "200":
+          description: Full scores and observations returned; report emailed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  scores:
+                    $ref: "#/components/schemas/AuditScores"
+                  observations:
+                    type: object
+                  businessType:
+                    type: string
+
+  /audit/qualify:
+    post:
+      operationId: qualifyAuditLead
+      tags: [audit]
+      summary: Save budget and goal qualification answers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditQualifyBody"
+      responses:
+        "200":
+          description: Qualification saved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  /audit/request-proposal:
+    post:
+      operationId: requestAuditProposal
+      tags: [audit]
+      summary: Mark lead as proposal-requested and notify the team
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuditRequestProposalBody"
+      responses:
+        "200":
+          description: Proposal request recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+
+  /admin/audit-leads:
+    get:
+      operationId: listAuditLeads
+      tags: [audit]
+      summary: List all audit leads (admin)
+      responses:
+        "200":
+          description: List of audit leads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLead"
+
+  /admin/audit-leads/{uuid}:
+    get:
+      operationId: getAuditLead
+      tags: [audit]
+      summary: Get single audit lead by UUID (admin)
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Audit lead
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLead"
+        "404":
+          description: Not found
+
   /healthz:
     get:
       operationId: healthCheck
@@ -1699,3 +1865,142 @@ components:
           type: string
       required:
         - error
+
+    AuditScores:
+      type: object
+      properties:
+        ux:
+          type: integer
+        seo:
+          type: integer
+        social:
+          type: integer
+        aiVisibility:
+          type: integer
+      required:
+        - ux
+        - seo
+        - social
+        - aiVisibility
+
+    AuditObservation:
+      type: object
+      properties:
+        summary:
+          type: string
+        friendlyTranslation:
+          type: string
+        cliffhanger:
+          type: string
+        aiQuote:
+          type: string
+          nullable: true
+
+    AuditLead:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        url:
+          type: string
+        city:
+          type: string
+        challenge:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+        status:
+          type: string
+          enum: [new, scanned, email_captured, qualified, proposal_requested]
+        scores:
+          $ref: "#/components/schemas/AuditScores"
+          nullable: true
+        businessType:
+          type: string
+          nullable: true
+        budget:
+          type: string
+          nullable: true
+        goal:
+          type: string
+          nullable: true
+        proposalRequested:
+          type: boolean
+        proposalRequestedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - url
+        - city
+        - status
+        - proposalRequested
+        - createdAt
+        - updatedAt
+
+    AuditCreateBody:
+      type: object
+      properties:
+        url:
+          type: string
+        city:
+          type: string
+        challenge:
+          type: string
+      required:
+        - url
+        - city
+
+    AuditScanBody:
+      type: object
+      properties:
+        leadId:
+          type: string
+          format: uuid
+      required:
+        - leadId
+
+    AuditCaptureBody:
+      type: object
+      properties:
+        leadId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+      required:
+        - leadId
+        - email
+
+    AuditQualifyBody:
+      type: object
+      properties:
+        leadId:
+          type: string
+          format: uuid
+        budget:
+          type: string
+        goal:
+          type: string
+      required:
+        - leadId
+
+    AuditRequestProposalBody:
+      type: object
+      properties:
+        leadId:
+          type: string
+          format: uuid
+      required:
+        - leadId

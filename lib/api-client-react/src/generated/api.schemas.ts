@@ -559,6 +559,105 @@ export interface GeminiError {
   error: string;
 }
 
+export interface AuditScores {
+  ux: number;
+  seo: number;
+  social: number;
+  aiVisibility: number;
+}
+
+export interface AuditObservation {
+  summary?: string;
+  friendlyTranslation?: string;
+  cliffhanger?: string;
+  aiQuote?: string | null;
+}
+
+export type AuditLeadStatus =
+  (typeof AuditLeadStatus)[keyof typeof AuditLeadStatus];
+
+export const AuditLeadStatus = {
+  new: "new",
+  scanned: "scanned",
+  email_captured: "email_captured",
+  qualified: "qualified",
+  proposal_requested: "proposal_requested",
+} as const;
+
+export interface AuditLead {
+  id: string;
+  url: string;
+  city: string;
+  challenge?: string | null;
+  email?: string | null;
+  status: AuditLeadStatus;
+  scores?: AuditScores | null;
+  businessType?: string | null;
+  budget?: string | null;
+  goal?: string | null;
+  proposalRequested: boolean;
+  proposalRequestedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuditCreateBody {
+  url: string;
+  city: string;
+  challenge?: string;
+}
+
+export interface AuditScanBody {
+  leadId: string;
+}
+
+export interface AuditCaptureBody {
+  leadId: string;
+  email: string;
+}
+
+export interface AuditQualifyBody {
+  leadId: string;
+  budget?: string;
+  goal?: string;
+}
+
+export interface AuditRequestProposalBody {
+  leadId: string;
+}
+
+export type CreateAuditLead200 = {
+  leadId: string;
+};
+
+export type ScanAuditLead200Scores = { [key: string]: unknown };
+
+export type ScanAuditLead200Observations = { [key: string]: unknown };
+
+export type ScanAuditLead200 = {
+  leadId?: string;
+  scores?: ScanAuditLead200Scores;
+  observations?: ScanAuditLead200Observations;
+  businessType?: string;
+};
+
+export type CaptureAuditEmail200Observations = { [key: string]: unknown };
+
+export type CaptureAuditEmail200 = {
+  success?: boolean;
+  scores?: AuditScores;
+  observations?: CaptureAuditEmail200Observations;
+  businessType?: string;
+};
+
+export type QualifyAuditLead200 = {
+  success?: boolean;
+};
+
+export type RequestAuditProposal200 = {
+  success?: boolean;
+};
+
 export type ListProposalsParams = {
   status?: ListProposalsStatus;
 };
