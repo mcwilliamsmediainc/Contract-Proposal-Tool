@@ -176,6 +176,8 @@ export default function AuditWizard() {
   const [scanProgress, setScanProgress] = useState(0);
   const [qualifySubmitting, setQualifySubmitting] = useState(false);
   const [proposalRequesting, setProposalRequesting] = useState(false);
+  const [qualifyError, setQualifyError] = useState("");
+  const [proposalRequestError, setProposalRequestError] = useState("");
 
   const stepIndex: Record<WizardStep, number> = {
     intro: 0, scanning: 1, teaser: 2, "email-gate": 3, "full-report": 4, qualify: 4, done: 4,
@@ -274,30 +276,44 @@ export default function AuditWizard() {
 
   async function handleQualify() {
     setQualifySubmitting(true);
-    await fetch(`${BASE}/api/audit/qualify`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId, budget: budget || null, goal: goal || null }),
-    });
-    // Always request a proposal when user submits the qualify form
-    await fetch(`${BASE}/api/audit/request-proposal`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId }),
-    });
-    setQualifySubmitting(false);
-    setStep("done");
+    try {
+      const qualifyRes = await fetch(`${BASE}/api/audit/qualify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId, budget: budget || null, goal: goal || null }),
+      });
+      if (!qualifyRes.ok) throw new Error("qualify failed");
+
+      const proposalRes = await fetch(`${BASE}/api/audit/request-proposal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId }),
+      });
+      if (!proposalRes.ok) throw new Error("request-proposal failed");
+
+      setStep("done");
+    } catch {
+      setQualifyError("Something went wrong — please try again or call us directly.");
+    } finally {
+      setQualifySubmitting(false);
+    }
   }
 
   async function handleRequestProposal() {
     setProposalRequesting(true);
-    await fetch(`${BASE}/api/audit/request-proposal`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId }),
-    });
-    setProposalRequesting(false);
-    setStep("done");
+    try {
+      const res = await fetch(`${BASE}/api/audit/request-proposal`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ leadId }),
+      });
+      if (!res.ok) throw new Error("request failed");
+      setStep("done");
+    } catch {
+      setProposalRequestError("Something went wrong — please try again or call us directly.");
+    } finally {
+      setProposalRequesting(false);
+    }
   }
 
   const urlClean = url.replace(/^https?:\/\//, "") || "your site";
@@ -639,8 +655,11 @@ export default function AuditWizard() {
                 Get a Free Custom Proposal
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
+              {proposalRequestError && (
+                <p className="text-red-400 text-xs text-center">{proposalRequestError}</p>
+              )}
               <button
-                onClick={handleRequestProposal}
+                onClick={() => { setProposalRequestError(""); handleRequestProposal(); }}
                 disabled={proposalRequesting}
                 className="text-xs text-[#b3cee1]/60 hover:text-[#b3cee1] transition-colors"
               >
@@ -702,8 +721,11 @@ export default function AuditWizard() {
                 </div>
               </div>
 
+              {qualifyError && (
+                <p className="text-red-400 text-sm text-center pt-1">{qualifyError}</p>
+              )}
               <Button
-                onClick={handleQualify}
+                onClick={() => { setQualifyError(""); handleQualify(); }}
                 disabled={qualifySubmitting}
                 className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold h-12 rounded-xl"
               >

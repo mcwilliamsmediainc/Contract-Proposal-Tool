@@ -15,6 +15,9 @@ import {
   Clock,
   TrendingUp,
   FilePlus,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
@@ -193,9 +196,23 @@ const FILTER_STATUSES = [
   { value: "proposal_requested", label: "Proposal Requested" },
 ];
 
+type SortKey = "createdAt" | "score";
+type SortDir = "asc" | "desc";
+
 export default function LeadCapture() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [sortKey, setSortKey] = useState<SortKey>("createdAt");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "desc" ? "asc" : "desc"));
+    } else {
+      setSortKey(key);
+      setSortDir("desc");
+    }
+  }
 
   const { data: leads, isLoading } = useQuery<AuditLeadRecord[]>({
     queryKey: ["audit-leads"],
@@ -208,6 +225,9 @@ export default function LeadCapture() {
     },
     refetchInterval: 30000,
   });
+
+  const avgScore = (l: AuditLeadRecord) =>
+    l.scores ? (l.scores.ux + l.scores.seo + l.scores.social + l.scores.aiVisibility) / 4 : -1;
 
   const filtered = useMemo(() => {
     let result = leads ?? [];
@@ -222,8 +242,17 @@ export default function LeadCapture() {
           (l.businessType ?? "").toLowerCase().includes(q)
       );
     }
+    result = [...result].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "createdAt") {
+        cmp = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      } else if (sortKey === "score") {
+        cmp = avgScore(a) - avgScore(b);
+      }
+      return sortDir === "desc" ? -cmp : cmp;
+    });
     return result;
-  }, [leads, filterStatus, search]);
+  }, [leads, filterStatus, search, sortKey, sortDir]);
 
   const stats = useMemo(() => {
     const all = leads ?? [];
@@ -371,9 +400,33 @@ export default function LeadCapture() {
                 <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Website</th>
                 <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Contact</th>
                 <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Status</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Scores</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <button
+                    onClick={() => toggleSort("score")}
+                    className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                  >
+                    Scores
+                    {sortKey === "score" ? (
+                      sortDir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
+                    ) : (
+                      <ArrowUpDown className="w-3 h-3 opacity-40" />
+                    )}
+                  </button>
+                </th>
                 <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Qualification</th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Added</th>
+                <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                  <button
+                    onClick={() => toggleSort("createdAt")}
+                    className="inline-flex items-center gap-1 hover:text-foreground transition-colors"
+                  >
+                    Added
+                    {sortKey === "createdAt" ? (
+                      sortDir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />
+                    ) : (
+                      <ArrowUpDown className="w-3 h-3 opacity-40" />
+                    )}
+                  </button>
+                </th>
               </tr>
             </thead>
             <tbody>
