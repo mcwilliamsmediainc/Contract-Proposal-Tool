@@ -17,30 +17,38 @@ interface StrategistInfo {
   headshot: string | null;
 }
 
+const MCW_TEAM_BASE = "https://mcwilliamsmedia.com/team";
+
 const STRATEGISTS: Record<string, StrategistInfo> = {
   "Matt McWilliams": {
     email: "matt@mcwilliamsmedia.com",
     title: "Owner & Creative Director",
     phone: MCW_PHONE,
-    headshot: null,
+    headshot: `${MCW_TEAM_BASE}/matt.png`,
   },
   "Tiffany King": {
     email: "tiffany@mcwilliamsmedia.com",
     title: "Digital Marketing Strategist",
     phone: MCW_PHONE,
-    headshot: null,
+    headshot: `${MCW_TEAM_BASE}/tiffany.jpg`,
   },
   "Elise Johnson": {
     email: "elise@mcwilliamsmedia.com",
     title: "Digital Marketing Strategist",
     phone: MCW_PHONE,
-    headshot: null,
+    headshot: `${MCW_TEAM_BASE}/elise.png`,
   },
   "Rachelle Hoover": {
     email: "rachelle@mcwilliamsmedia.com",
     title: "Digital Marketing Strategist",
     phone: MCW_PHONE,
-    headshot: null,
+    headshot: `${MCW_TEAM_BASE}/rachelle.png`,
+  },
+  "Ashlea Mortenson": {
+    email: "ashlea@mcwilliamsmedia.com",
+    title: "Digital Marketing Strategist",
+    phone: MCW_PHONE,
+    headshot: `${MCW_TEAM_BASE}/ashlea.png`,
   },
 };
 

@@ -23,7 +23,7 @@ import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { cn } from "@/lib/utils";
 import { clientUrl } from "@/lib/client-url";
 
-const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
+const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
 
 const formSchema = z.object({
   clientName: z.string().min(1),

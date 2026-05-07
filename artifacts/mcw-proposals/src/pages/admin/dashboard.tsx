@@ -22,7 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/react";
 
-const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
+const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
 
 type StageKey = "all" | "draft" | "sent" | "accepted" | "contract-out" | "contract-signed" | "onboarding";
 const CONTRACT_STAGES: StageKey[] = ["contract-out", "contract-signed", "onboarding"];

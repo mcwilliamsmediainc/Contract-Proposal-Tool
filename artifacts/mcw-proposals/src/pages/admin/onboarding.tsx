@@ -296,7 +296,7 @@ function ServicePicker({
 
 // ── New Onboarding Dialog ──────────────────────────────────────────────────────
 
-const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams"];
+const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
 
 function NewOnboardingDialog({
   open,
