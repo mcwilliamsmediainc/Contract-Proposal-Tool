@@ -60,6 +60,40 @@ router.post("/cancellations", async (req, res) => {
   res.status(201).json(formatCancellation(created));
 });
 
+// Public endpoint — client-submitted cancellation form
+router.post("/cancellation-form", async (req, res) => {
+  const body = req.body as {
+    clientName: string;
+    businessName?: string | null;
+    clientEmail?: string | null;
+    clientStrategist?: string | null;
+    reason?: string | null;
+    notes?: string | null;
+    cancelledAt?: string | null;
+  };
+
+  if (!body.clientName?.trim()) {
+    res.status(400).json({ error: "clientName is required" });
+    return;
+  }
+
+  const [created] = await db
+    .insert(cancellationsTable)
+    .values({
+      uuid: randomUUID(),
+      clientName: body.clientName.trim(),
+      businessName: body.businessName ?? null,
+      clientEmail: body.clientEmail ?? null,
+      clientStrategist: body.clientStrategist ?? null,
+      reason: body.reason ?? null,
+      notes: body.notes ?? null,
+      cancelledAt: body.cancelledAt ? new Date(body.cancelledAt) : null,
+    })
+    .returning();
+
+  res.status(201).json(formatCancellation(created));
+});
+
 router.delete("/cancellations/:uuid", async (req, res) => {
   const { uuid } = req.params;
   const deleted = await db

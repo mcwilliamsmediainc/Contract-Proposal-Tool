@@ -24,6 +24,7 @@ import OnboardingFormPortal from "@/pages/portal/onboarding-form";
 import UpdatePayment from "@/pages/portal/update-payment";
 import PaymentLink from "@/pages/admin/payment-link";
 import Cancellations from "@/pages/admin/cancellations";
+import CancellationForm from "@/pages/portal/cancellation-form";
 import NotFound from "@/pages/not-found";
 
 const queryClient = new QueryClient();
@@ -223,6 +224,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/contract/:id" component={ContractPortal} />
             <Route path="/intake/:id" component={OnboardingFormPortal} />
             <Route path="/update-payment" component={UpdatePayment} />
+            <Route path="/cancel" component={CancellationForm} />
 
             {/* Protected admin routes */}
             <Route path="/admin">

@@ -26,6 +26,8 @@ function isPublicPath(path: string, method: string): boolean {
   // Public intake / payment-update forms
   if (path.startsWith("/onboarding-form")) return true;
   if (path.startsWith("/payment-update")) return true;
+  // Public client cancellation form submission
+  if (path === "/cancellation-form" && method === "POST") return true;
   return false;
 }
 

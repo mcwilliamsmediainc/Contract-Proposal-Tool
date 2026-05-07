@@ -18,15 +18,19 @@ import {
   User,
   Building2,
   CalendarX,
-  AlertCircle,
   CheckCircle2,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useState } from "react";
 import { formatDistanceToNow, format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
 
-const JOTFORM_URL = "https://form.jotform.com/253135875702055";
+function getFormUrl() {
+  const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
+  return `${window.location.origin}${base}/cancel`;
+}
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
 
@@ -85,21 +89,47 @@ export default function Cancellations() {
   const [form, setForm] = useState<LogForm>(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [showEmailTemplate, setShowEmailTemplate] = useState(false);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(JOTFORM_URL).then(() => {
-      setCopied(true);
+  const formUrl = getFormUrl();
+
+  const emailSubject = "We'd Love Your Feedback — McWilliams Media";
+  const emailBody = `Hi [Client Name],
+
+We're sorry to hear you'd like to cancel your services with McWilliams Media. Before we process your request, we'd really appreciate a moment of your time to share your feedback — it helps us continue improving.
+
+Please complete our short cancellation form here:
+${formUrl}
+
+It only takes a couple of minutes, and your honest input means a lot to us.
+
+If you'd like to talk through anything or reconsider, we're always happy to connect. Just reply to this email or give us a call.
+
+Warm regards,
+The McWilliams Media Team`;
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(formUrl).then(() => {
+      setCopiedLink(true);
       toast({ title: "Link copied!", description: "Cancellation form link copied to clipboard." });
-      setTimeout(() => setCopied(false), 2500);
+      setTimeout(() => setCopiedLink(false), 2500);
     });
   };
 
-  const handleEmailClient = () => {
-    const subject = encodeURIComponent("McWilliams Media — Cancellation Form");
-    const body = encodeURIComponent(
-      `Hi,\n\nWe're sorry to see you go. Please take a moment to fill out our short cancellation form so we can better serve our clients in the future:\n\n${JOTFORM_URL}\n\nThank you for your time with McWilliams Media.\n\nWarm regards,\nMcWilliams Media Team`
-    );
+  const handleCopyEmail = () => {
+    const full = `Subject: ${emailSubject}\n\n${emailBody}`;
+    navigator.clipboard.writeText(full).then(() => {
+      setCopiedEmail(true);
+      toast({ title: "Email copied!", description: "Paste it directly into your email client." });
+      setTimeout(() => setCopiedEmail(false), 2500);
+    });
+  };
+
+  const handleCompose = () => {
+    const subject = encodeURIComponent(emailSubject);
+    const body = encodeURIComponent(emailBody);
     window.open(`mailto:?subject=${subject}&body=${body}`, "_blank");
   };
 
@@ -168,55 +198,73 @@ export default function Cancellations() {
       {/* Send Form Card */}
       <div className="rounded-2xl border border-border bg-card p-6 mb-6 shadow-sm">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
-            <AlertCircle className="w-5 h-5 text-red-500" />
+          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
+            <Mail className="w-5 h-5 text-blue-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-base font-semibold text-foreground mb-0.5">Cancellation Form</h2>
+            <h2 className="text-base font-semibold text-foreground mb-0.5">Send Cancellation Form to Client</h2>
             <p className="text-sm text-muted-foreground mb-4">
-              Send this JotForm link to clients who are cancelling. Their responses are tracked in JotForm directly.
+              Share this link with clients who are cancelling. Their submissions are recorded automatically in the tracker below.
             </p>
+
+            {/* Form link */}
             <div className="flex items-center gap-2 p-3 rounded-xl bg-muted/50 border border-border mb-4">
               <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
               <a
-                href={JOTFORM_URL}
+                href={formUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="flex-1 text-sm text-blue-600 hover:underline truncate font-mono"
               >
-                {JOTFORM_URL}
+                {formUrl}
               </a>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopy}
-                className="gap-1.5"
-              >
-                {copied ? (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-600" />
-                ) : (
-                  <Copy className="w-3.5 h-3.5" />
-                )}
-                {copied ? "Copied!" : "Copy Link"}
+
+            {/* Action buttons */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              <Button variant="outline" size="sm" onClick={handleCopyLink} className="gap-1.5">
+                {copiedLink ? <CheckCircle2 className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedLink ? "Copied!" : "Copy Link"}
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleEmailClient}
-                className="gap-1.5"
-              >
+              <Button variant="outline" size="sm" onClick={handleCompose} className="gap-1.5">
                 <Mail className="w-3.5 h-3.5" />
                 Compose Email
               </Button>
-              <a href={JOTFORM_URL} target="_blank" rel="noreferrer">
+              <a href={formUrl} target="_blank" rel="noreferrer">
                 <Button variant="outline" size="sm" className="gap-1.5">
                   <ExternalLink className="w-3.5 h-3.5" />
                   Open Form
                 </Button>
               </a>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowEmailTemplate((v) => !v)}
+                className="gap-1.5 text-muted-foreground"
+              >
+                {showEmailTemplate ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                {showEmailTemplate ? "Hide Template" : "View Email Template"}
+              </Button>
             </div>
+
+            {/* Expandable email template */}
+            {showEmailTemplate && (
+              <div className="rounded-xl border border-border bg-muted/30 overflow-hidden">
+                <div className="flex items-center justify-between px-4 py-2.5 border-b border-border bg-muted/40">
+                  <div>
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subject: </span>
+                    <span className="text-xs text-foreground">{emailSubject}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={handleCopyEmail} className="gap-1.5 h-7 text-xs">
+                    {copiedEmail ? <CheckCircle2 className="w-3 h-3 text-green-600" /> : <Copy className="w-3 h-3" />}
+                    {copiedEmail ? "Copied!" : "Copy All"}
+                  </Button>
+                </div>
+                <pre className="px-4 py-3 text-sm text-foreground leading-relaxed whitespace-pre-wrap font-sans">
+                  {emailBody}
+                </pre>
+              </div>
+            )}
           </div>
         </div>
       </div>
