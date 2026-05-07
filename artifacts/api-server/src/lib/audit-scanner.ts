@@ -1,4 +1,5 @@
 import { ai } from "@workspace/integrations-gemini-ai";
+import { lookup } from "node:dns/promises";
 
 export interface AuditScores {
   ux: number;
@@ -28,16 +29,75 @@ export interface ScanResult {
   rawData: Record<string, unknown>;
 }
 
+const PRIVATE_IP_RANGES = [
+  /^127\./,
+  /^10\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^192\.168\./,
+  /^169\.254\./,
+  /^::1$/,
+  /^fc00:/i,
+  /^fe80:/i,
+  /^0\./,
+  /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,
+];
+
+const BLOCKED_HOSTNAMES = new Set([
+  "localhost",
+  "metadata.google.internal",
+  "169.254.169.254",
+]);
+
+async function validateUrl(raw: string): Promise<URL> {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error("Invalid URL format.");
+  }
+
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("Only HTTP and HTTPS URLs are allowed.");
+  }
+
+  const hostname = parsed.hostname.toLowerCase();
+
+  if (BLOCKED_HOSTNAMES.has(hostname)) {
+    throw new Error("URL hostname is not allowed.");
+  }
+
+  // Resolve hostname to IP and check for private ranges
+  try {
+    const result = await lookup(hostname, { all: true });
+    const addrs = Array.isArray(result) ? result : [result];
+    for (const addr of addrs) {
+      const ip = addr.address;
+      if (PRIVATE_IP_RANGES.some((re) => re.test(ip))) {
+        throw new Error("URL resolves to a private or internal address.");
+      }
+    }
+  } catch (err) {
+    if (err instanceof Error && err.message.includes("private or internal")) {
+      throw err;
+    }
+    // DNS failure — still proceed, but with empty HTML (scan will use domain name only)
+  }
+
+  return parsed;
+}
+
 async function fetchPageHtml(url: string): Promise<string> {
+  const validated = await validateUrl(url);
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 10000);
   try {
-    const res = await fetch(url, {
+    const res = await fetch(validated.toString(), {
       signal: controller.signal,
       headers: {
         "User-Agent":
           "Mozilla/5.0 (compatible; McWilliamsMediaAudit/1.0; +https://mcwilliamsmedia.com)",
       },
+      redirect: "follow",
     });
     const text = await res.text();
     return text.slice(0, 15000);
@@ -49,6 +109,8 @@ async function fetchPageHtml(url: string): Promise<string> {
 }
 
 export async function scanWebsite(url: string, city: string): Promise<ScanResult> {
+  // Validate URL before any network request (SSRF protection)
+  await validateUrl(url);
   const html = await fetchPageHtml(url);
   const domain = url.replace(/^https?:\/\//, "").split("/")[0];
 

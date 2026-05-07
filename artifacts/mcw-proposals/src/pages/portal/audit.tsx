@@ -279,6 +279,12 @@ export default function AuditWizard() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ leadId, budget: budget || null, goal: goal || null }),
     });
+    // Always request a proposal when user submits the qualify form
+    await fetch(`${BASE}/api/audit/request-proposal`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ leadId }),
+    });
     setQualifySubmitting(false);
     setStep("done");
   }
@@ -587,6 +593,38 @@ export default function AuditWizard() {
                 </p>
               </div>
             )}
+
+            {/* Recommended services based on scores */}
+            {(() => {
+              const recs: { icon: React.ElementType; service: string; reason: string }[] = [];
+              if (fullData.scores.ux < 60) recs.push({ icon: Globe, service: "Website Redesign", reason: "Structural UX improvements to convert more visitors into leads." });
+              if (fullData.scores.seo < 60) recs.push({ icon: Search, service: "SEO", reason: `People searching your service in ${city} are having difficulty finding you.` });
+              if (fullData.scores.social < 60) recs.push({ icon: Share2, service: "Social Media Management", reason: "Inconsistent social presence is hurting your brand credibility." });
+              if (fullData.scores.aiVisibility < 50) recs.push({ icon: Bot, service: "AI Search Optimization", reason: "You're not showing up when customers use AI to find local businesses." });
+              if (recs.length === 0) recs.push({ icon: TrendingUp, service: "Marketing Strategy", reason: "Build on your solid foundation with a custom growth strategy." });
+              return recs.length > 0 ? (
+                <div className="mb-6">
+                  <p className="text-xs font-bold text-[#C9A959] uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <Target className="w-3.5 h-3.5" />
+                    Recommended for You
+                  </p>
+                  <div className="space-y-2">
+                    {recs.map(({ icon: Icon, service, reason }, i) => (
+                      <div key={service} className="flex items-start gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
+                        <div className="w-6 h-6 rounded-full bg-[#C9A959]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-[#C9A959] text-xs font-bold">{i + 1}</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{service}</p>
+                          <p className="text-xs text-[#b3cee1]/70 leading-relaxed mt-0.5">{reason}</p>
+                        </div>
+                        <Icon className="w-4 h-4 text-[#b3cee1]/30 flex-shrink-0 mt-1 ml-auto" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : null;
+            })()}
 
             <div className="bg-[#C9A959]/10 border border-[#C9A959]/30 rounded-2xl p-6 text-center">
               <Target className="w-8 h-8 text-[#C9A959] mx-auto mb-3" />
