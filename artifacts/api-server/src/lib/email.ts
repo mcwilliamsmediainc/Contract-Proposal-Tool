@@ -541,6 +541,165 @@ export async function sendOnboardingSubmittedEmail(opts: {
   });
 }
 
+// ── CLIENT: Onboarding Kickoff (post-signing) ─────────────────────────────────
+
+export async function sendOnboardingKickoffEmail(opts: {
+  clientName: string;
+  businessName: string;
+  clientEmail: string;
+  onboardingUuid: string;
+  services: string[];
+  hasLsa?: boolean;
+}) {
+  if (!opts.clientEmail) return;
+
+  const formUrl = `${baseUrl()}/intake/${opts.onboardingUuid}`;
+
+  const hasGoogleAds  = opts.services.includes("marketing.google_ads");
+  const hasSocialPost = opts.services.includes("marketing.social_media_posting");
+  const hasMetaAds    = opts.services.includes("marketing.social_media_ads");
+  const hasEmail      = opts.services.includes("marketing.newsletter");
+  const hasSeo        = opts.services.includes("marketing.seo");
+  const isWebsite     = opts.services.includes("website");
+  const hasLsa        = opts.hasLsa ?? false;
+
+  // Build "what you'll need" section labels
+  const sections: { icon: string; title: string; items: string[] }[] = [];
+
+  sections.push({
+    icon: "📋",
+    title: "General Info (Everyone)",
+    items: [
+      "Your company website URL",
+      "Primary point of contact email for your team",
+      "Standard & seasonal discounts or promotions",
+      "Lead magnets or freebie offers",
+      "Company logo files (Google Drive or Dropbox link)",
+      "Brand image files (Google Drive or Dropbox link)",
+      "Links to your Facebook, Instagram, LinkedIn, and other social pages",
+    ],
+  });
+
+  if (hasSeo) {
+    sections.push({
+      icon: "🔍",
+      title: "SEO",
+      items: [
+        "Business address, phone number & hours",
+        "5 cities you want to target",
+        "Your services listed in priority order",
+        "Services people think you offer that you do not",
+      ],
+    });
+  }
+
+  if (hasGoogleAds) {
+    const lsaItems = hasLsa ? [
+      "Business Insurance document (upload link)",
+      "License Number or Bar Association Number (if applicable)",
+      "Google LSA setup preference (self-complete or at kickoff call)",
+      "Your LSA monthly budget",
+    ] : [];
+    sections.push({
+      icon: "📣",
+      title: "Google Ads" + (hasLsa ? " & Local Service Ads" : ""),
+      items: [
+        "Articles of Incorporation (upload link)",
+        "Driver's License — front & back (upload link)",
+        "Your PPC monthly budget",
+        ...lsaItems,
+      ],
+    });
+  }
+
+  if (hasSocialPost) {
+    sections.push({
+      icon: "📱",
+      title: "Social Media Posting",
+      items: [
+        "Verify your Instagram Business Account is connected to your Facebook Business Page",
+        "Your preferred graphic style (up to 3): Modern, Minimalistic, Rustic, Vibrant, Upscale, Youthful, Feminine, Masculine, Elegant, Sophisticated, Fun, Trendy…",
+        "Your preferred post tone (up to 3): Humorous, Informative, Trendy, Engaging, Inspirational, Promotional, Educational, Casual…",
+        "Links to 2 inspirational social accounts in your industry",
+      ],
+    });
+  }
+
+  if (hasMetaAds) {
+    sections.push({
+      icon: "💰",
+      title: "Meta (Facebook & Instagram) Ads",
+      items: [
+        "Have you run Meta Ads before? (Yes/No)",
+        "Meta Business Manager name & Facebook Ad Account name (if existing)",
+        "Whether you have a landing page for ads",
+        "Verify Instagram is connected to your Facebook Business Page",
+        "Confirm your identity on your personal Facebook profile",
+        "Add a payment method to your Meta Ad Account",
+      ],
+    });
+  }
+
+  if (hasEmail) {
+    sections.push({
+      icon: "✉️",
+      title: "Email Marketing",
+      items: [
+        "Your existing email contact list (upload link)",
+        "Are you currently doing email marketing? (Yes/No)",
+        "Your current email platform (if applicable)",
+        "MailChimp account access (if applicable)",
+        "Current email list size",
+      ],
+    });
+  }
+
+  if (isWebsite && !hasGoogleAds && !hasSocialPost && !hasMetaAds && !hasEmail) {
+    sections.push({
+      icon: "🌐",
+      title: "Website Project",
+      items: [
+        "Brand assets and existing content you'd like us to reference",
+        "Examples of websites you love (for design direction)",
+        "Key pages, features, or functionality you need",
+      ],
+    });
+  }
+
+  const sectionsHtml = sections.map(sec => `
+    <div style="margin: 0 0 20px; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden;">
+      <div style="background: #061e57; padding: 10px 16px;">
+        <p style="margin: 0; font-size: 13px; font-weight: 700; color: #ffffff; letter-spacing: 0.3px;">${sec.icon} &nbsp;${sec.title}</p>
+      </div>
+      <ul style="margin: 0; padding: 12px 16px 12px 32px; background: #fff;">
+        ${sec.items.map(item => `<li style="margin: 0 0 6px; font-size: 13px; color: #444; line-height: 1.5;">${item}</li>`).join("")}
+      </ul>
+    </div>
+  `).join("");
+
+  await send({
+    from: FROM_CLIENT,
+    to: [opts.clientEmail],
+    subject: `Action needed: Complete your pre-kickoff form — ${opts.businessName}`,
+    html: clientLayout(`
+      <h3 style="margin: 0 0 8px; font-size: 22px; color: #0a0a0a;">You're all set, ${opts.clientName}!</h3>
+      <p style="margin: 0 0 20px; color: #555; font-size: 15px; line-height: 1.6;">
+        Your contract is signed and your project with <strong>McWilliams Media</strong> is officially underway. Before your kickoff call, please take a few minutes to complete your <strong>Pre-Kickoff Questionnaire</strong> — it helps our team hit the ground running.
+      </p>
+      <div style="text-align: center; margin: 0 0 28px;">
+        <a href="${formUrl}" style="background: #061e57; color: #ffffff; padding: 14px 36px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; display: inline-block; letter-spacing: 0.3px;">Complete Your Onboarding Form →</a>
+      </div>
+      <div style="background: #eef4f9; border-left: 4px solid #b3cee1; padding: 14px 18px; margin: 0 0 24px; border-radius: 0 6px 6px 0;">
+        <p style="margin: 0; color: #3a4856; font-size: 13px; line-height: 1.6;">
+          <strong>Before you start, gather the following items</strong> — you'll need them to complete the form. Most uploads can be shared via Google Drive or Dropbox.
+        </p>
+      </div>
+      ${sectionsHtml}
+      <p style="margin: 24px 0 0; color: #888; font-size: 13px;">Questions? Reach us at <a href="mailto:info@mcwilliamsmedia.com" style="color: #061e57;">info@mcwilliamsmedia.com</a>.</p>
+    `),
+  });
+}
+
 // ── CLIENT: Onboarding Form Submitted Confirmation ────────────────────────────
 
 export async function sendOnboardingSubmittedClientEmail(opts: {

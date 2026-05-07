@@ -2,7 +2,7 @@ import { Router } from "express";
 import { eq, desc } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, contractsTable, onboardingClientsTable, onboardingTasksTable, proposalsTable } from "@workspace/db";
-import { sendContractSignedEmail, sendContractSignedClientEmail, sendAchPaymentEmail, sendContractReadyClientEmail } from "../../lib/email";
+import { sendContractSignedEmail, sendContractSignedClientEmail, sendAchPaymentEmail, sendContractReadyClientEmail, sendOnboardingKickoffEmail } from "../../lib/email";
 import {
   CreateContractBody,
   UpdateContractBody,
@@ -248,29 +248,83 @@ router.post("/contracts/:id/sign", async (req, res) => {
     return;
   }
 
-  // Auto-create onboarding_client on signing (idempotent — keyed by contractId)
+  // ── Service-ID → onboarding-form key mapping ─────────────────────────────
+  const CATEGORY_SERVICE_IDS: Record<string, string[]> = {
+    "seo":        ["seo-pro", "seo-plus", "seo-platinum", "seo-blog", "seo-gbp-setup"],
+    "google-ads": ["ppc-397", "ppc-497", "ppc-647", "lsa"],
+    "sm-ads":     ["sm-ads-497", "sm-ads-597", "sm-ads-697"],
+    "sm-posting": ["sm-post-pro", "sm-post-plus", "sm-post-platinum", "sm-video"],
+    "email":      ["email-pro", "email-plus", "email-platinum"],
+    "brand-shoot":["brand-photos", "brand-photos-video"],
+  };
+  const CATEGORY_TO_SERVICE: Record<string, string> = {
+    "seo":        "marketing.seo",
+    "google-ads": "marketing.google_ads",
+    "sm-ads":     "marketing.social_media_ads",
+    "sm-posting": "marketing.social_media_posting",
+    "email":      "marketing.newsletter",
+    "brand-shoot":"marketing.brand_shoot",
+  };
+
+  // ── Look up linked proposal for strategist + service data ─────────────────
+  let clientStrategist: string | null = null;
+  let onboardingServices: string[] = [];
+  let hasLsa = false;
+
+  if (updated.proposalId) {
+    const [linkedProposal] = await db
+      .select({
+        clientStrategist: proposalsTable.clientStrategist,
+        selectedTier: proposalsTable.selectedTier,
+        projectType: proposalsTable.projectType,
+      })
+      .from(proposalsTable)
+      .where(eq(proposalsTable.uuid, updated.proposalId))
+      .limit(1);
+
+    clientStrategist = linkedProposal?.clientStrategist ?? null;
+
+    if (linkedProposal?.projectType === "ala-carte" && linkedProposal?.selectedTier) {
+      try {
+        const selectedIds = JSON.parse(linkedProposal.selectedTier) as string[];
+        hasLsa = selectedIds.includes("lsa");
+        for (const [catId, serviceIds] of Object.entries(CATEGORY_SERVICE_IDS)) {
+          if (serviceIds.some(sid => selectedIds.includes(sid))) {
+            onboardingServices.push(CATEGORY_TO_SERVICE[catId]);
+          }
+        }
+      } catch { /* fall through to defaults */ }
+    }
+  }
+
+  // For contracts with no ala-carte proposal, fall back to broad type-based services
+  if (onboardingServices.length === 0) {
+    if (updated.contractType === "marketing" || updated.contractType === "tiered") {
+      onboardingServices = ["marketing.google_ads", "marketing.social_media_ads", "marketing.social_media_posting", "marketing.newsletter"];
+    } else if (updated.contractType === "website") {
+      onboardingServices = ["website"];
+    } else {
+      onboardingServices = [updated.contractType];
+    }
+  }
+
+  // ── Auto-create onboarding_client on signing (idempotent) ─────────────────
   const existingOb = await db
     .select()
     .from(onboardingClientsTable)
     .where(eq(onboardingClientsTable.contractId, id))
     .limit(1);
 
-  if (existingOb.length === 0) {
-    const services = updated.contractType === "website"
-      ? ["website"]
-      : updated.contractType === "marketing"
-        ? ["marketing"]
-        : updated.contractType === "print"
-          ? ["print"]
-          : [updated.contractType];
+  let obUuid: string | null = null;
 
-    const obUuid = randomUUID();
+  if (existingOb.length === 0) {
+    obUuid = randomUUID();
     await db.insert(onboardingClientsTable).values({
       uuid: obUuid,
       clientName: updated.clientName,
       businessName: updated.businessName,
       clientEmail: updated.clientEmail,
-      services: JSON.stringify(services),
+      services: JSON.stringify(onboardingServices),
       contractId: id,
       proposalId: updated.proposalId ?? null,
       status: "active",
@@ -285,23 +339,24 @@ router.post("/contracts/:id/sign", async (req, res) => {
     ];
     await db.insert(onboardingTasksTable).values(
       DEFAULT_TASKS.map((label, idx) => ({
-        proposalUuid: obUuid,
+        proposalUuid: obUuid!,
         label,
         sortOrder: idx,
         completed: false,
       }))
     );
-  }
 
-  // Look up linked proposal to get the assigned client strategist
-  let clientStrategist: string | null = null;
-  if (updated.proposalId) {
-    const [linkedProposal] = await db
-      .select({ clientStrategist: proposalsTable.clientStrategist })
-      .from(proposalsTable)
-      .where(eq(proposalsTable.uuid, updated.proposalId))
-      .limit(1);
-    clientStrategist = linkedProposal?.clientStrategist ?? null;
+    // Send onboarding kickoff email to client
+    sendOnboardingKickoffEmail({
+      clientName: updated.clientName,
+      businessName: updated.businessName,
+      clientEmail: updated.clientEmail,
+      onboardingUuid: obUuid,
+      services: onboardingServices,
+      hasLsa,
+    }).catch(() => {});
+  } else {
+    obUuid = existingOb[0].uuid;
   }
 
   // Notify info@ (always) + strategist (if assigned)
