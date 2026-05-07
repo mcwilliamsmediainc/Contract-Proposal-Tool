@@ -315,7 +315,8 @@ ${p.pageNames ? `- Page Names/Details: ${p.pageNames}` : "- Page Descriptions: �
 
 **PRICING BREAKDOWN:**
 ${pricingBlock}
-Effective Total Shown to Client: $${effectiveTotal.toLocaleString()}
+Total Pricing (shown to client): $${effectiveTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+→ Contract will pull this as the total cost: Deposit = 50% ($${(effectiveTotal * 0.5).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}), Remaining = 50% ($${(effectiveTotal * 0.5).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
 
 ${p.specialContext ? `**SPECIAL CONTEXT / INTERNAL NOTES:**\n${p.specialContext}` : "**SPECIAL CONTEXT:** ⚠ None provided"}
 

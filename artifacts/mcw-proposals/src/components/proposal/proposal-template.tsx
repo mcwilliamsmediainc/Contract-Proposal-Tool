@@ -812,6 +812,12 @@ export function PricingSection({ numberOfPages, totalAmount, pricingItems }: {
             </tfoot>
           </table>
         </div>
+        <div className="mt-5 flex items-center justify-between px-6 py-4 rounded-xl bg-[#061e57] text-white">
+          <p className="text-sm font-bold uppercase tracking-widest opacity-80">Total Pricing</p>
+          <p className="text-2xl font-black">
+            ${displayTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </p>
+        </div>
         <p className="text-center text-xs text-gray-400 mt-4">Prices in USD · This quote is valid for 30 days</p>
       </div>
     </section>
