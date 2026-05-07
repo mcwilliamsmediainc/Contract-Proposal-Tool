@@ -392,9 +392,9 @@ export default function EditProposal() {
   // Live proposal value — declared before early returns to satisfy React hook ordering rules.
   // Uses getDefaultPricingRows (rate 450 for Web Pages) — the same defaults shown in the
   // Pricing panel editor — so the toolbar always reflects the admin's active pricing view.
-  // Returns null for tiered/ala-carte (no single dollar total applies).
+  // Returns null for all types except web/project (preserves their existing totalAmount on save).
   const liveTotal = useMemo(() => {
-    if (watched.projectType === "tiered" || watched.projectType === "ala-carte") return null;
+    if (watched.projectType !== "web" && watched.projectType !== "project") return null;
     const pages = watched.numberOfPages || 5;
     const defaultRows = getDefaultPricingRows(pages);
     let rows: PricingLineItem[];
