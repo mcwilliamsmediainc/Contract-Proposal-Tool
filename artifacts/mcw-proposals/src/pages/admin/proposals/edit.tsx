@@ -11,7 +11,7 @@ import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, Sparkles, ArrowLeft, X, Users,
-  DollarSign, Layout, ExternalLink, Plus, Trash2, Link2, ClipboardCheck, GripVertical, Download, Mail
+  DollarSign, Layout, ExternalLink, Plus, Trash2, Link2, ClipboardCheck, GripVertical, Download, Mail, Camera
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,10 +40,12 @@ const formSchema = z.object({
   loomVideoUrl: z.string().optional(),
   calendlyUrl: z.string().optional(),
   notes: z.string().optional(),
+  brandShootEnabled: z.boolean().optional(),
+  brandShootText: z.string().optional(),
 });
 type FormValues = z.infer<typeof formSchema>;
 
-type Panel = "client" | "pricing" | "settings" | "email" | null;
+type Panel = "client" | "pricing" | "brandShoot" | "settings" | "email" | null;
 
 /** Single source of truth for default pricing line items — used by both the
  *  Pricing panel editor and the live-total computation so they never diverge. */
@@ -264,6 +266,7 @@ export default function EditProposal() {
       totalAmount: undefined, numberOfPages: undefined, pageNames: "",
       pricingItems: undefined,
       specialContext: "", content: "", loomVideoUrl: "", calendlyUrl: "",
+      brandShootEnabled: true, brandShootText: "",
     },
   });
 
@@ -286,6 +289,8 @@ export default function EditProposal() {
         loomVideoUrl: proposal.loomVideoUrl || "",
         calendlyUrl: proposal.calendlyUrl || "",
         notes: proposal.notes || "",
+        brandShootEnabled: proposal.brandShootEnabled ?? true,
+        brandShootText: proposal.brandShootText || "",
       });
     }
   }, [proposal, id, form]);
@@ -423,6 +428,7 @@ export default function EditProposal() {
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
     { panel: "pricing", label: "Pricing", icon: DollarSign },
+    { panel: "brandShoot", label: "Brand Shoot", icon: Camera },
     { panel: "settings", label: "Settings", icon: ExternalLink },
   ];
 
@@ -585,6 +591,8 @@ export default function EditProposal() {
             content: watched.content,
             loomVideoUrl: watched.loomVideoUrl,
             createdAt: proposal.createdAt,
+            brandShootEnabled: watched.brandShootEnabled ?? true,
+            brandShootText: watched.brandShootText || null,
           }}
         />
       ) : isAlaCarte ? (
@@ -608,9 +616,12 @@ export default function EditProposal() {
             numberOfPages: watched.numberOfPages,
             pageNames: watched.pageNames,
             totalAmount: watched.totalAmount,
+            pricingItems: watched.pricingItems,
             content: watched.content,
             loomVideoUrl: watched.loomVideoUrl,
             createdAt: proposal.createdAt,
+            brandShootEnabled: watched.brandShootEnabled ?? true,
+            brandShootText: watched.brandShootText || null,
           }}
         />
       )}
@@ -852,6 +863,61 @@ export default function EditProposal() {
                   );
                 }}
               />
+            )}
+          </div>
+        </Form>
+      </SlidePanel>
+
+      {/* ── BRAND SHOOT PANEL ── */}
+      <SlidePanel open={activePanel === "brandShoot"} onClose={() => setActivePanel(null)} title="Brand Shoot" onSave={savePanel} saving={saving}>
+        <Form {...form}>
+          <div className="space-y-5">
+            <div className="rounded-xl bg-blue-50 border border-blue-100 p-4">
+              <p className="text-sm text-blue-800">
+                The Brand Shoot section appears in web and tiered marketing proposals. Toggle it off to remove it entirely, or customize the description text below.
+              </p>
+            </div>
+
+            <FormField control={form.control} name="brandShootEnabled" render={({ field }) => (
+              <FormItem>
+                <div className="flex items-center justify-between p-4 rounded-xl border border-gray-200 bg-gray-50">
+                  <div>
+                    <FormLabel className="text-sm font-semibold text-gray-800 cursor-pointer">Include Brand Shoot section</FormLabel>
+                    <p className="text-xs text-gray-500 mt-0.5">Show the Brand Shoot add-on in this proposal</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={field.value ?? true}
+                    onClick={() => field.onChange(!(field.value ?? true))}
+                    className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none ${
+                      (field.value ?? true) ? "bg-[#061e57]" : "bg-gray-300"
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 transform rounded-full bg-white shadow transition-transform duration-200 ${
+                        (field.value ?? true) ? "translate-x-5" : "translate-x-0"
+                      }`}
+                    />
+                  </button>
+                </div>
+              </FormItem>
+            )} />
+
+            {(watched.brandShootEnabled ?? true) && (
+              <FormField control={form.control} name="brandShootText" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description Text</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="While not required, it's often a valuable investment as high-quality, branded images and videos can significantly elevate the look and credibility of your website."
+                      className="h-36 resize-none text-sm"
+                      {...field}
+                    />
+                  </FormControl>
+                  <p className="text-xs text-gray-400">Leave blank to use the default text. The price ($850) and bullet points remain fixed.</p>
+                </FormItem>
+              )} />
             )}
           </div>
         </Form>

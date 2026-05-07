@@ -1035,6 +1035,13 @@ components:
         clientStrategist:
           type: string
           nullable: true
+        brandShootEnabled:
+          type: boolean
+          description: Whether to show the Brand Shoot section in the proposal (default true)
+        brandShootText:
+          type: string
+          nullable: true
+          description: Custom body text for the Brand Shoot section; null uses the template default
         viewCount:
           type: integer
         lastViewedAt:
@@ -1126,6 +1133,11 @@ components:
         clientStrategist:
           type: string
           nullable: true
+        brandShootEnabled:
+          type: boolean
+        brandShootText:
+          type: string
+          nullable: true
       required:
         - clientName
         - businessName
@@ -1178,6 +1190,11 @@ components:
           type: string
           nullable: true
         notes:
+          type: string
+          nullable: true
+        brandShootEnabled:
+          type: boolean
+        brandShootText:
           type: string
           nullable: true
 

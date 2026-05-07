@@ -200,6 +200,10 @@ export interface PublicProposal {
   /** JSON-encoded array of custom pricing line items for website proposals */
   pricingItems?: string | null;
   clientStrategist?: string | null;
+  /** Whether to show the Brand Shoot section in the proposal (default true) */
+  brandShootEnabled?: boolean;
+  /** Custom body text for the Brand Shoot section; null uses the template default */
+  brandShootText?: string | null;
   viewCount: number;
   lastViewedAt?: string | null;
   /** UUID of the linked contract, if one exists — used by client portal to navigate directly to signing */
@@ -251,6 +255,8 @@ export interface CreateProposalBody {
   /** JSON-encoded array of custom pricing line items for website proposals */
   pricingItems?: string | null;
   clientStrategist?: string | null;
+  brandShootEnabled?: boolean;
+  brandShootText?: string | null;
 }
 
 export type UpdateProposalBodyProjectType =
@@ -293,6 +299,8 @@ export interface UpdateProposalBody {
   pricingItems?: string | null;
   clientStrategist?: string | null;
   notes?: string | null;
+  brandShootEnabled?: boolean;
+  brandShootText?: string | null;
 }
 
 export interface AcceptProposalBody {

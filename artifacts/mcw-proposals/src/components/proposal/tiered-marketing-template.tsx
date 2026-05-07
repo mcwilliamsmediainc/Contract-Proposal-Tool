@@ -317,7 +317,10 @@ function TierSection({
   );
 }
 
-function BrandShootAddon() {
+const BRAND_SHOOT_ADDON_DEFAULT_TEXT =
+  "While not required, high-quality branded images and videos can significantly elevate the effectiveness of your marketing. We partner with our preferred professional photographer who gives McWilliams Media clients a special discounted rate and fast turnaround.";
+
+function BrandShootAddon({ text }: { text?: string | null }) {
   return (
     <section className="bg-white py-16 px-6">
       <div className="max-w-3xl mx-auto">
@@ -335,10 +338,7 @@ function BrandShootAddon() {
             $850 one-time for professional photos &nbsp;·&nbsp; +$150 for iPhone Video B-Roll add-on
           </p>
           <p className="text-gray-600 leading-relaxed mb-5">
-            While not required, high-quality branded images and videos can significantly elevate
-            the effectiveness of your marketing. We partner with our preferred professional
-            photographer who gives McWilliams Media clients a special discounted rate and fast
-            turnaround.
+            {text || BRAND_SHOOT_ADDON_DEFAULT_TEXT}
           </p>
           <ul className="space-y-2.5 text-sm text-gray-700 mb-5">
             {[
@@ -536,7 +536,9 @@ export function TieredMarketingTemplate({
         author="Chance Johnson"
       />
       <TierSection selectedTier={selectedTier} onSelectTier={onSelectTier} />
-      <BrandShootAddon />
+      {data.brandShootEnabled !== false && (
+        <BrandShootAddon text={data.brandShootText} />
+      )}
       <MarketingStrategySection />
       <TeamSection />
       <TestimonialSection

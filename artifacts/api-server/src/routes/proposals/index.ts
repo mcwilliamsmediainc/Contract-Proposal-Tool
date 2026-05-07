@@ -63,6 +63,8 @@ function formatProposalPublic(p: typeof proposalsTable.$inferSelect, contractUui
     selectedTier: p.selectedTier ?? null,
     pricingItems: p.pricingItems ?? null,
     clientStrategist: p.clientStrategist ?? null,
+    brandShootEnabled: p.brandShootEnabled,
+    brandShootText: p.brandShootText ?? null,
     viewCount: p.viewCount,
     lastViewedAt: p.lastViewedAt?.toISOString() ?? null,
     contractUuid: contractUuid ?? null,
@@ -452,6 +454,8 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.notes !== undefined) updateData.notes = data.notes;
   if (data.selectedTier !== undefined) updateData.selectedTier = data.selectedTier ?? null;
   if (data.pricingItems !== undefined) updateData.pricingItems = data.pricingItems ?? null;
+  if (data.brandShootEnabled !== undefined) updateData.brandShootEnabled = data.brandShootEnabled;
+  if (data.brandShootText !== undefined) updateData.brandShootText = data.brandShootText ?? null;
 
   const [updated] = await db
     .update(proposalsTable)

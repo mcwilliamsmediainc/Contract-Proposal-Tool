@@ -54,6 +54,18 @@ export const ListProposalsResponseItem = zod
         "JSON-encoded array of custom pricing line items for website proposals",
       ),
     clientStrategist: zod.string().nullish(),
+    brandShootEnabled: zod
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to show the Brand Shoot section in the proposal (default true)",
+      ),
+    brandShootText: zod
+      .string()
+      .nullish()
+      .describe(
+        "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -111,6 +123,8 @@ export const CreateProposalBody = zod.object({
       "JSON-encoded array of custom pricing line items for website proposals",
     ),
   clientStrategist: zod.string().nullish(),
+  brandShootEnabled: zod.boolean().optional(),
+  brandShootText: zod.string().nullish(),
 });
 
 /**
@@ -152,6 +166,18 @@ export const GetProposalResponse = zod
         "JSON-encoded array of custom pricing line items for website proposals",
       ),
     clientStrategist: zod.string().nullish(),
+    brandShootEnabled: zod
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to show the Brand Shoot section in the proposal (default true)",
+      ),
+    brandShootText: zod
+      .string()
+      .nullish()
+      .describe(
+        "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -198,6 +224,8 @@ export const UpdateProposalBody = zod.object({
     ),
   clientStrategist: zod.string().nullish(),
   notes: zod.string().nullish(),
+  brandShootEnabled: zod.boolean().optional(),
+  brandShootText: zod.string().nullish(),
 });
 
 export const UpdateProposalResponse = zod
@@ -232,6 +260,18 @@ export const UpdateProposalResponse = zod
         "JSON-encoded array of custom pricing line items for website proposals",
       ),
     clientStrategist: zod.string().nullish(),
+    brandShootEnabled: zod
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to show the Brand Shoot section in the proposal (default true)",
+      ),
+    brandShootText: zod
+      .string()
+      .nullish()
+      .describe(
+        "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -310,6 +350,18 @@ export const AcceptProposalResponse = zod
         "JSON-encoded array of custom pricing line items for website proposals",
       ),
     clientStrategist: zod.string().nullish(),
+    brandShootEnabled: zod
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to show the Brand Shoot section in the proposal (default true)",
+      ),
+    brandShootText: zod
+      .string()
+      .nullish()
+      .describe(
+        "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -434,6 +486,18 @@ export const RecordProposalViewResponse = zod
         "JSON-encoded array of custom pricing line items for website proposals",
       ),
     clientStrategist: zod.string().nullish(),
+    brandShootEnabled: zod
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to show the Brand Shoot section in the proposal (default true)",
+      ),
+    brandShootText: zod
+      .string()
+      .nullish()
+      .describe(
+        "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod
@@ -786,6 +850,18 @@ export const GetAdminProposalResponse = zod
         "JSON-encoded array of custom pricing line items for website proposals",
       ),
     clientStrategist: zod.string().nullish(),
+    brandShootEnabled: zod
+      .boolean()
+      .optional()
+      .describe(
+        "Whether to show the Brand Shoot section in the proposal (default true)",
+      ),
+    brandShootText: zod
+      .string()
+      .nullish()
+      .describe(
+        "Custom body text for the Brand Shoot section; null uses the template default",
+      ),
     viewCount: zod.number(),
     lastViewedAt: zod.coerce.date().nullish(),
     contractUuid: zod

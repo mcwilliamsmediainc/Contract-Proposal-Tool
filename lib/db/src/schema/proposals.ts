@@ -31,6 +31,8 @@ export const proposalsTable = pgTable("proposals", {
   selectedTier: text("selected_tier"),
   pricingItems: text("pricing_items"),
   notes: text("notes"),
+  brandShootEnabled: boolean("brand_shoot_enabled").notNull().default(true),
+  brandShootText: text("brand_shoot_text"),
   viewCount: integer("view_count").notNull().default(0),
   lastViewedAt: timestamp("last_viewed_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),

@@ -35,6 +35,8 @@ export interface ProposalData {
   content?: string | null;
   loomVideoUrl?: string | null;
   createdAt?: string | Date;
+  brandShootEnabled?: boolean | null;
+  brandShootText?: string | null;
 }
 
 function CheckItem({ children }: { children: React.ReactNode }) {
@@ -654,14 +656,17 @@ export function TimelineSection() {
   );
 }
 
-export function BrandShootSection() {
+const BRAND_SHOOT_DEFAULT_TEXT =
+  "While not required, it's often a valuable investment as high-quality, branded images and videos can significantly elevate the look and credibility of your website.";
+
+export function BrandShootSection({ text }: { text?: string | null }) {
   return (
     <section className="bg-white py-20 px-6 border-t border-gray-100">
       <div className="max-w-3xl mx-auto">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Brand Shoot</h2>
         <p className="text-[#061e57] font-semibold mb-2">$850 one-time for pro photos only</p>
         <p className="text-[#3a4856] text-sm mb-6">+ $150 one-time iPhone Video B-Roll Clip Add-On</p>
-        <p className="text-gray-600 leading-relaxed mb-6">While not required, it's often a valuable investment as high-quality, branded images and videos can significantly elevate the look and credibility of your website.</p>
+        <p className="text-gray-600 leading-relaxed mb-6">{text || BRAND_SHOOT_DEFAULT_TEXT}</p>
         <ul className="space-y-3 mb-6">
           <CheckItem>1 Location · Up to 2 hours · 50+ edited images</CheckItem>
         </ul>
@@ -1002,7 +1007,9 @@ export function FullProposalTemplate({ data, onAccept, isPending }: {
           <CustomWebsiteSection numberOfPages={data.numberOfPages} pageNames={data.pageNames} />
           {/* 7. Process / Timeline */}
           <TimelineSection />
-          <BrandShootSection />
+          {data.brandShootEnabled !== false && (
+            <BrandShootSection text={data.brandShootText} />
+          )}
           <EssentialsSection
             selectedHosting={onAccept ? selectedHosting : null}
             onSelectHosting={onAccept ? setSelectedHosting : undefined}
