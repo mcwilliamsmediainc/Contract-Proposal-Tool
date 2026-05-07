@@ -434,13 +434,12 @@ export function TimelineSection() {
           <div className="mcw-step" style={{ animationDelay: ".05s" }}>
             <div className="mcw-step-spine">
               <div className="mcw-step-dot">
-                <svg width="24" height="24" viewBox="0 0 28 28" fill="none">
-                  <rect x="4" y="8" width="20" height="14" rx="2" stroke="#061e57" strokeWidth="1.6" fill="none"/>
-                  <line x1="14" y1="8" x2="14" y2="22" stroke="#061e57" strokeWidth="1.5"/>
-                  <circle cx="9"  cy="14" r="2.2" stroke="#061e57" strokeWidth="1.3" fill="none"/>
-                  <circle cx="19" cy="14" r="2.2" stroke="#061e57" strokeWidth="1.3" fill="none"/>
-                  <path d="M6 6.5L9 8M22 6.5L19 8"    stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                  <path d="M7 19L5 22.5M21 19L23 22.5" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                <svg className="mcw-shake-svg" width="24" height="24" viewBox="0 0 28 28" fill="none">
+                  <path d="M3 16l4-4 3 2 4-4 3 2 4-3 4 4" stroke="#061e57" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  <path d="M3 16l4 4h4l2-2 2 2h4l4-4" stroke="#061e57" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  <circle cx="10" cy="8" r="2.5" stroke="#061e57" strokeWidth="1.4" fill="none"/>
+                  <circle cx="18" cy="8" r="2.5" stroke="#061e57" strokeWidth="1.4" fill="none"/>
+                  <path d="M7.5 10.5C7.5 10.5 9 12 10 12M20.5 10.5C20.5 10.5 19 12 18 12" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round" fill="none"/>
                 </svg>
               </div>
               <div className="mcw-connector"/>
@@ -448,7 +447,6 @@ export function TimelineSection() {
             <div className="mcw-step-body">
               <p className="mcw-step-label">Kick-off meeting</p>
               <p className="mcw-step-desc">We align on your goals, audience, and timeline — then we get to work.</p>
-              <span className="mcw-step-tag mcw-tag-note">You are here</span>
             </div>
           </div>
 
@@ -468,7 +466,7 @@ export function TimelineSection() {
             </div>
             <div className="mcw-step-body">
               <p className="mcw-step-label">Wireframe</p>
-              <p className="mcw-step-desc">A blueprint of every page — layouts, navigation, and structure — sent to you for review before design begins.</p>
+              <p className="mcw-step-desc">A working home page with design elements, header, and footer — sent to you for review before the full build begins.</p>
               <span className="mcw-step-tag mcw-tag-days">Goal: 12 business days</span>
             </div>
           </div>
@@ -478,17 +476,14 @@ export function TimelineSection() {
             <div className="mcw-loop-box">
               <div className="mcw-loop-header">
                 <span className="mcw-loop-header-text">Review &amp; revise</span>
-                <span className="mcw-loop-repeat">Repeats until approved</span>
               </div>
               <div className="mcw-loop-row">
                 <div className="mcw-loop-icon-wrap">
-                  <svg className="mcw-dot-pulse" width="20" height="20" viewBox="0 0 28 28" fill="none">
-                    <rect x="5" y="8" width="18" height="13" rx="3" stroke="#061e57" strokeWidth="1.6" fill="none"/>
-                    <circle cx="9.5"  cy="14.5" r="1.4" fill="#061e57"/>
-                    <circle cx="14"   cy="14.5" r="1.4" fill="#061e57"/>
-                    <circle cx="18.5" cy="14.5" r="1.4" fill="#061e57"/>
-                    <path d="M10 21L8 25M18 21L20 25" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <path d="M8 8Q14 4 20 8"          stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <path d="M6 8h16M6 13h10M6 18h13" stroke="#061e57" strokeWidth="1.8" strokeLinecap="round"/>
+                    <circle cx="22" cy="20" r="5" stroke="#061e57" strokeWidth="1.5" fill="none"/>
+                    <line x1="22" y1="17.5" x2="22" y2="20.5" stroke="#061e57" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="22" cy="22.5" r=".8" fill="#061e57"/>
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -499,16 +494,9 @@ export function TimelineSection() {
               </div>
               <div className="mcw-loop-row">
                 <div className="mcw-loop-icon-wrap">
-                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-                    <rect x="3" y="3" width="13" height="13" rx="2" stroke="#061e57" strokeWidth="1.5" fill="none"/>
-                    <line x1="6" y1="8"  x2="13" y2="8"  stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
-                    <line x1="6" y1="11" x2="11" y2="11" stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
-                    <circle className="mcw-gear-svg" cx="21" cy="21" r="5.5" stroke="#061e57" strokeWidth="1.5" fill="none"/>
-                    <circle cx="21" cy="21" r="1.8" fill="#061e57"/>
-                    <line x1="21" y1="14"   x2="21" y2="16.2" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <line x1="21" y1="25.8" x2="21" y2="28"   stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <line x1="14"   y1="21" x2="16.2" y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <line x1="25.8" y1="21" x2="28"   y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  <svg className="mcw-plane-svg" width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <polygon points="3,14 25,7 20,14 25,21" stroke="#061e57" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
+                    <line x1="20" y1="14" x2="13" y2="18" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -567,7 +555,7 @@ export function TimelineSection() {
             </div>
             <div className="mcw-step-body">
               <p className="mcw-step-label">Website buildout</p>
-              <p className="mcw-step-desc">Every page designed and built — colors, fonts, images, content. Up to 2 full drafts sent to you for review.</p>
+              <p className="mcw-step-desc">Every page designed and built — colors, fonts, images, and content. Drafts sent to you for review.</p>
               <span className="mcw-step-tag mcw-tag-days">Goal: 12 business days</span>
             </div>
           </div>
@@ -577,17 +565,14 @@ export function TimelineSection() {
             <div className="mcw-loop-box">
               <div className="mcw-loop-header">
                 <span className="mcw-loop-header-text">Review &amp; revise</span>
-                <span className="mcw-loop-repeat">Up to 2 rounds</span>
               </div>
               <div className="mcw-loop-row">
                 <div className="mcw-loop-icon-wrap">
-                  <svg className="mcw-dot-pulse" width="20" height="20" viewBox="0 0 28 28" fill="none">
-                    <rect x="5" y="8" width="18" height="13" rx="3" stroke="#061e57" strokeWidth="1.6" fill="none"/>
-                    <circle cx="9.5"  cy="14.5" r="1.4" fill="#061e57"/>
-                    <circle cx="14"   cy="14.5" r="1.4" fill="#061e57"/>
-                    <circle cx="18.5" cy="14.5" r="1.4" fill="#061e57"/>
-                    <path d="M10 21L8 25M18 21L20 25" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <path d="M8 8Q14 4 20 8"          stroke="#061e57" strokeWidth="1.3" fill="none"/>
+                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <path d="M6 8h16M6 13h10M6 18h13" stroke="#061e57" strokeWidth="1.8" strokeLinecap="round"/>
+                    <circle cx="22" cy="20" r="5" stroke="#061e57" strokeWidth="1.5" fill="none"/>
+                    <line x1="22" y1="17.5" x2="22" y2="20.5" stroke="#061e57" strokeWidth="1.5" strokeLinecap="round"/>
+                    <circle cx="22" cy="22.5" r=".8" fill="#061e57"/>
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -598,16 +583,9 @@ export function TimelineSection() {
               </div>
               <div className="mcw-loop-row">
                 <div className="mcw-loop-icon-wrap">
-                  <svg width="20" height="20" viewBox="0 0 28 28" fill="none">
-                    <rect x="3" y="3" width="13" height="13" rx="2" stroke="#061e57" strokeWidth="1.5" fill="none"/>
-                    <line x1="6" y1="8"  x2="13" y2="8"  stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
-                    <line x1="6" y1="11" x2="11" y2="11" stroke="#061e57" strokeWidth="1.2" strokeLinecap="round"/>
-                    <circle className="mcw-gear-svg" cx="21" cy="21" r="5.5" stroke="#061e57" strokeWidth="1.5" fill="none"/>
-                    <circle cx="21" cy="21" r="1.8" fill="#061e57"/>
-                    <line x1="21" y1="14"   x2="21" y2="16.2" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <line x1="21" y1="25.8" x2="21" y2="28"   stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <line x1="14"   y1="21" x2="16.2" y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
-                    <line x1="25.8" y1="21" x2="28"   y2="21" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
+                  <svg className="mcw-plane-svg" width="20" height="20" viewBox="0 0 28 28" fill="none">
+                    <polygon points="3,14 25,7 20,14 25,21" stroke="#061e57" strokeWidth="1.6" strokeLinejoin="round" fill="none"/>
+                    <line x1="20" y1="14" x2="13" y2="18" stroke="#061e57" strokeWidth="1.3" strokeLinecap="round"/>
                   </svg>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -661,12 +639,6 @@ export function TimelineSection() {
               <p className="mcw-step-label">Site goes live</p>
               <p className="mcw-step-desc">We publish and hand over logins, docs, and next steps.</p>
             </div>
-          </div>
-
-          {/* Timeline note */}
-          <div className="mcw-timeline-note">
-            <p className="mcw-timeline-note-title">Timelines move with your feedback</p>
-            <p className="mcw-timeline-note-body">The faster you submit notes within each review window, the sooner we launch. All feedback via <strong>MarkUp</strong> or <strong>written email</strong>.</p>
           </div>
 
         </div>

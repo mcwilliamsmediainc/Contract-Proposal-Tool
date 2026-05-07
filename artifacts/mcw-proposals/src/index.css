@@ -204,6 +204,7 @@
 @keyframes mcwFadeUp    { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
 @keyframes mcwFly       { 0%,100%{transform:translate(0,0) rotate(0deg)} 45%{transform:translate(6px,-6px) rotate(-8deg)} }
 @keyframes mcwFloatRkt  { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes mcwHandshake { 0%,100%{transform:rotate(0deg)} 25%{transform:rotate(-8deg)} 75%{transform:rotate(8deg)} }
 @keyframes mcwSpinGear  { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
 @keyframes mcwPulseDot  { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.15);opacity:.8} }
 @keyframes mcwCheckDraw { from{stroke-dashoffset:24} to{stroke-dashoffset:0} }
@@ -260,3 +261,4 @@
 .mcw-gear-svg   { animation: mcwSpinGear  9s   linear      infinite; transform-origin: 21px 21px; }
 .mcw-dot-pulse  { animation: mcwPulseDot  2s   ease-in-out infinite; }
 .mcw-check-path { stroke-dasharray: 24; stroke-dashoffset: 24; animation: mcwCheckDraw .5s ease forwards .3s; }
+.mcw-shake-svg  { animation: mcwHandshake 2.5s ease-in-out infinite; transform-origin: center; }
