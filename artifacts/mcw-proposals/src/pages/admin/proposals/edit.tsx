@@ -13,7 +13,7 @@ import {
   Loader2, Sparkles, ArrowLeft, X, Users,
   DollarSign, Layout, ExternalLink, Plus, Trash2, Link2, ClipboardCheck, GripVertical, Download, Mail
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Controller } from "react-hook-form";
 import { FullProposalTemplate, PricingLineItem } from "@/components/proposal/proposal-template";
