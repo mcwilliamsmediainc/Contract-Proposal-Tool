@@ -153,8 +153,6 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "• Social media links and contact form integration",
       "• Screen-recorded backend training session",
       "• Privacy Policy, Terms & Conditions, and Site Map pages",
-      "",
-      `Total Investment: ${formatted}`,
     ].join("\n").trimEnd();
   }
 
@@ -164,8 +162,6 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       `Monthly Marketing Retainer — ${tier.charAt(0).toUpperCase() + tier.slice(1)} Plan`,
       "",
       "Services include ongoing digital marketing strategy and execution as detailed in the accepted proposal.",
-      "",
-      `Total Investment: ${formatted}/month`,
     ].join("\n").trimEnd();
   }
 
@@ -174,8 +170,6 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "Monthly Marketing Services — Ala Carte Package",
       "",
       "Services selected by client as outlined in the accepted proposal.",
-      "",
-      `Total Investment: ${formatted}/month`,
     ].join("\n").trimEnd();
   }
 
@@ -184,12 +178,10 @@ function buildScheduleA(p: typeof proposalsTable.$inferSelect): string {
       "Print & Brand Design Services",
       "",
       "Design deliverables as outlined in the accepted proposal.",
-      "",
-      `Total Investment: ${formatted}`,
     ].join("\n").trimEnd();
   }
 
-  return `Services as outlined in the accepted proposal.\n\nTotal Investment: ${formatted}`;
+  return `Services as outlined in the accepted proposal.`;
 }
 
 router.get("/proposals/generate", (req, res) => {
