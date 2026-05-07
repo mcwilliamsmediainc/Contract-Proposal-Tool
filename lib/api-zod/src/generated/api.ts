@@ -849,6 +849,48 @@ export const SignContractResponse = zod.object({
 });
 
 /**
+ * @summary List all client cancellations
+ */
+export const ListCancellationsResponseItem = zod.object({
+  id: zod.string(),
+  clientName: zod.string(),
+  businessName: zod.string().nullish(),
+  clientEmail: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
+  reason: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  cancelledAt: zod.coerce.date().nullish(),
+  createdAt: zod.coerce.date(),
+});
+export const ListCancellationsResponse = zod.array(
+  ListCancellationsResponseItem,
+);
+
+/**
+ * @summary Log a new cancellation
+ */
+export const CreateCancellationBody = zod.object({
+  clientName: zod.string(),
+  businessName: zod.string().nullish(),
+  clientEmail: zod.string().nullish(),
+  clientStrategist: zod.string().nullish(),
+  reason: zod.string().nullish(),
+  notes: zod.string().nullish(),
+  cancelledAt: zod.coerce.date().nullish(),
+});
+
+/**
+ * @summary Delete a cancellation record
+ */
+export const DeleteCancellationParams = zod.object({
+  uuid: zod.coerce.string(),
+});
+
+export const DeleteCancellationResponse = zod.object({
+  success: zod.boolean(),
+});
+
+/**
  * @summary List all onboarding clients
  */
 export const ListOnboardingClientsResponseItem = zod.object({

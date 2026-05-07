@@ -21,12 +21,15 @@ import type {
   AddOnboardingTaskBody,
   AdminStats,
   ApiError,
+  Cancellation,
   ClientRecord,
   Contract,
+  CreateCancellationBody,
   CreateContractBody,
   CreateGeminiConversationBody,
   CreateOnboardingClientBody,
   CreateProposalBody,
+  DeleteCancellation200,
   GeminiConversation,
   GeminiConversationWithMessages,
   GeminiError,
@@ -1876,6 +1879,251 @@ export const useSignContract = <
   TContext
 > => {
   return useMutation(getSignContractMutationOptions(options));
+};
+
+/**
+ * @summary List all client cancellations
+ */
+export const getListCancellationsUrl = () => {
+  return `/api/cancellations`;
+};
+
+export const listCancellations = async (
+  options?: RequestInit,
+): Promise<Cancellation[]> => {
+  return customFetch<Cancellation[]>(getListCancellationsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListCancellationsQueryKey = () => {
+  return [`/api/cancellations`] as const;
+};
+
+export const getListCancellationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listCancellations>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listCancellations>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListCancellationsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listCancellations>>
+  > = ({ signal }) => listCancellations({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listCancellations>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListCancellationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listCancellations>>
+>;
+export type ListCancellationsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List all client cancellations
+ */
+
+export function useListCancellations<
+  TData = Awaited<ReturnType<typeof listCancellations>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listCancellations>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListCancellationsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * @summary Log a new cancellation
+ */
+export const getCreateCancellationUrl = () => {
+  return `/api/cancellations`;
+};
+
+export const createCancellation = async (
+  createCancellationBody: CreateCancellationBody,
+  options?: RequestInit,
+): Promise<Cancellation> => {
+  return customFetch<Cancellation>(getCreateCancellationUrl(), {
+    ...options,
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(createCancellationBody),
+  });
+};
+
+export const getCreateCancellationMutationOptions = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCancellation>>,
+    TError,
+    { data: BodyType<CreateCancellationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createCancellation>>,
+  TError,
+  { data: BodyType<CreateCancellationBody> },
+  TContext
+> => {
+  const mutationKey = ["createCancellation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createCancellation>>,
+    { data: BodyType<CreateCancellationBody> }
+  > = (props) => {
+    const { data } = props ?? {};
+
+    return createCancellation(data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateCancellationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createCancellation>>
+>;
+export type CreateCancellationMutationBody = BodyType<CreateCancellationBody>;
+export type CreateCancellationMutationError = ErrorType<unknown>;
+
+/**
+ * @summary Log a new cancellation
+ */
+export const useCreateCancellation = <
+  TError = ErrorType<unknown>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createCancellation>>,
+    TError,
+    { data: BodyType<CreateCancellationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createCancellation>>,
+  TError,
+  { data: BodyType<CreateCancellationBody> },
+  TContext
+> => {
+  return useMutation(getCreateCancellationMutationOptions(options));
+};
+
+/**
+ * @summary Delete a cancellation record
+ */
+export const getDeleteCancellationUrl = (uuid: string) => {
+  return `/api/cancellations/${uuid}`;
+};
+
+export const deleteCancellation = async (
+  uuid: string,
+  options?: RequestInit,
+): Promise<DeleteCancellation200> => {
+  return customFetch<DeleteCancellation200>(getDeleteCancellationUrl(uuid), {
+    ...options,
+    method: "DELETE",
+  });
+};
+
+export const getDeleteCancellationMutationOptions = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCancellation>>,
+    TError,
+    { uuid: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteCancellation>>,
+  TError,
+  { uuid: string },
+  TContext
+> => {
+  const mutationKey = ["deleteCancellation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteCancellation>>,
+    { uuid: string }
+  > = (props) => {
+    const { uuid } = props ?? {};
+
+    return deleteCancellation(uuid, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteCancellationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteCancellation>>
+>;
+
+export type DeleteCancellationMutationError = ErrorType<void>;
+
+/**
+ * @summary Delete a cancellation record
+ */
+export const useDeleteCancellation = <
+  TError = ErrorType<void>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteCancellation>>,
+    TError,
+    { uuid: string },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteCancellation>>,
+  TError,
+  { uuid: string },
+  TContext
+> => {
+  return useMutation(getDeleteCancellationMutationOptions(options));
 };
 
 /**

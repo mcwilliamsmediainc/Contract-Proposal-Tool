@@ -499,6 +499,63 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
 
+  /cancellations:
+    get:
+      operationId: listCancellations
+      tags: [proposals]
+      summary: List all client cancellations
+      responses:
+        "200":
+          description: List of cancellations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Cancellation"
+    post:
+      operationId: createCancellation
+      tags: [proposals]
+      summary: Log a new cancellation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCancellationBody"
+      responses:
+        "201":
+          description: Created cancellation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cancellation"
+
+  /cancellations/{uuid}:
+    delete:
+      operationId: deleteCancellation
+      tags: [proposals]
+      summary: Delete a cancellation record
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                required: [success]
+        "404":
+          description: Not found
+
   /onboarding-clients:
     get:
       operationId: listOnboardingClients
@@ -1485,6 +1542,63 @@ components:
         - clientName
         - businessName
         - services
+
+    Cancellation:
+      type: object
+      required: [id, clientName, createdAt]
+      properties:
+        id:
+          type: string
+        clientName:
+          type: string
+        businessName:
+          type: string
+          nullable: true
+        clientEmail:
+          type: string
+          nullable: true
+        clientStrategist:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateCancellationBody:
+      type: object
+      required: [clientName]
+      properties:
+        clientName:
+          type: string
+        businessName:
+          type: string
+          nullable: true
+        clientEmail:
+          type: string
+          nullable: true
+        clientStrategist:
+          type: string
+          nullable: true
+        reason:
+          type: string
+          nullable: true
+        notes:
+          type: string
+          nullable: true
+        cancelledAt:
+          type: string
+          format: date-time
+          nullable: true
 
     ApiError:
       type: object

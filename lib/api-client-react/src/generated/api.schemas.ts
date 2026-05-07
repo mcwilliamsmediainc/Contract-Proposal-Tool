@@ -491,6 +491,28 @@ export interface CreateOnboardingClientBody {
   services: string[];
 }
 
+export interface Cancellation {
+  id: string;
+  clientName: string;
+  businessName?: string | null;
+  clientEmail?: string | null;
+  clientStrategist?: string | null;
+  reason?: string | null;
+  notes?: string | null;
+  cancelledAt?: string | null;
+  createdAt: string;
+}
+
+export interface CreateCancellationBody {
+  clientName: string;
+  businessName?: string | null;
+  clientEmail?: string | null;
+  clientStrategist?: string | null;
+  reason?: string | null;
+  notes?: string | null;
+  cancelledAt?: string | null;
+}
+
 export interface ApiError {
   error: string;
 }
@@ -563,3 +585,7 @@ export const ListContractsStatus = {
   sent: "sent",
   signed: "signed",
 } as const;
+
+export type DeleteCancellation200 = {
+  success: boolean;
+};

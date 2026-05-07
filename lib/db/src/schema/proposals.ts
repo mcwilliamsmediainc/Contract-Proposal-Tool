@@ -42,6 +42,22 @@ export const proposalsTable = pgTable("proposals", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const cancellationsTable = pgTable("cancellations", {
+  id: serial("id").primaryKey(),
+  uuid: text("uuid").notNull().unique(),
+  clientName: text("client_name").notNull(),
+  businessName: text("business_name"),
+  clientEmail: text("client_email"),
+  clientStrategist: text("client_strategist"),
+  reason: text("reason"),
+  notes: text("notes"),
+  cancelledAt: timestamp("cancelled_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type Cancellation = typeof cancellationsTable.$inferSelect;
+
 export const onboardingClientsTable = pgTable("onboarding_clients", {
   id: serial("id").primaryKey(),
   uuid: text("uuid").notNull().unique(),

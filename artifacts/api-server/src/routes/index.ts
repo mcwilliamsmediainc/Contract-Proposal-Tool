@@ -6,6 +6,7 @@ import adminRouter from "./admin";
 import geminiRouter from "./gemini";
 import onboardingFormRouter from "./onboarding-form";
 import paymentUpdateRouter from "./payment-update";
+import cancellationsRouter from "./cancellations";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -42,5 +43,6 @@ router.use(adminRouter);
 router.use(geminiRouter);
 router.use(onboardingFormRouter);
 router.use(paymentUpdateRouter);
+router.use(cancellationsRouter);
 
 export default router;
