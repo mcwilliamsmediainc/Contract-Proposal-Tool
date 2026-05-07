@@ -8,10 +8,9 @@ import { Link } from "wouter";
 import {
   Loader2,
   Search,
-  BookUser,
+  UserPlus,
   FileText,
   FileSignature,
-  CheckSquare,
   ArrowRight,
   Mail,
   User,
@@ -24,16 +23,9 @@ const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt M
 
 type Stage = ClientRecord["stage"];
 
-interface StageConfig {
-  label: string;
-  dot: string;
-  badge: string;
-  pipelineIndex: number;
-}
+const LEAD_STAGES: Stage[] = ["proposal_draft", "proposal_sent", "proposal_accepted", "contract_draft", "contract_sent"];
 
-const CLIENT_STAGES: Stage[] = ["contract_signed", "onboarding"];
-
-const STAGE_CONFIG: Record<Stage, StageConfig> = {
+const STAGE_CONFIG: Record<Stage, { label: string; dot: string; badge: string; pipelineIndex: number }> = {
   proposal_draft:    { label: "Proposal Draft",    dot: "bg-gray-400",   badge: "bg-gray-100 text-gray-600 border-gray-200",       pipelineIndex: 0 },
   proposal_sent:     { label: "Proposal Sent",     dot: "bg-blue-500",   badge: "bg-blue-50 text-blue-700 border-blue-200",         pipelineIndex: 1 },
   proposal_accepted: { label: "Proposal Accepted", dot: "bg-amber-400",  badge: "bg-amber-50 text-amber-700 border-amber-200",      pipelineIndex: 2 },
@@ -54,9 +46,12 @@ const PIPELINE_STEPS = [
 ] as const;
 
 const FILTER_STAGES: { value: string; label: string }[] = [
-  { value: "all",             label: "All Clients" },
-  { value: "contract_signed", label: "Contract Signed" },
-  { value: "onboarding",      label: "Onboarding" },
+  { value: "all",               label: "All Leads" },
+  { value: "proposal_draft",    label: "Proposal Draft" },
+  { value: "proposal_sent",     label: "Proposal Sent" },
+  { value: "proposal_accepted", label: "Proposal Accepted" },
+  { value: "contract_draft",    label: "Contract Draft" },
+  { value: "contract_sent",     label: "Contract Sent" },
 ];
 
 function PipelineBar({ stage }: { stage: Stage }) {
@@ -80,7 +75,7 @@ function PipelineBar({ stage }: { stage: Stage }) {
   );
 }
 
-function ClientCard({ client }: { client: ClientRecord }) {
+function LeadCard({ client }: { client: ClientRecord }) {
   const cfg = STAGE_CONFIG[client.stage];
   const initials = client.clientName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
@@ -151,15 +146,6 @@ function ClientCard({ client }: { client: ClientRecord }) {
                 </span>
               </Link>
             )}
-            {client.onboardingStatus && (
-              <Link href="/admin/onboarding">
-                <span className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors cursor-pointer">
-                  <CheckSquare className="w-3 h-3" />
-                  Onboarding
-                  <ArrowRight className="w-3 h-3" />
-                </span>
-              </Link>
-            )}
           </div>
         </div>
       </div>
@@ -167,16 +153,16 @@ function ClientCard({ client }: { client: ClientRecord }) {
   );
 }
 
-export default function Clients() {
-  const { data: clients, isLoading } = useListClients();
+export default function Leads() {
+  const { data: allClients, isLoading } = useListClients();
   const [search, setSearch] = useState("");
   const [filterStage, setFilterStage] = useState("all");
   const [filterStrategist, setFilterStrategist] = useState("all");
 
-  const contractClients = useMemo(() => (clients ?? []).filter(c => CLIENT_STAGES.includes(c.stage)), [clients]);
+  const leads = useMemo(() => (allClients ?? []).filter(c => LEAD_STAGES.includes(c.stage)), [allClients]);
 
   const filtered = useMemo(() => {
-    let result = contractClients;
+    let result = leads;
     if (filterStage !== "all") result = result.filter((c) => c.stage === filterStage);
     if (filterStrategist !== "all") result = result.filter((c) => c.clientStrategist === filterStrategist);
     if (search.trim()) {
@@ -189,16 +175,16 @@ export default function Clients() {
       );
     }
     return result;
-  }, [contractClients, filterStage, filterStrategist, search]);
+  }, [leads, filterStage, filterStrategist, search]);
 
   const stageCounts = useMemo(() => {
-    const base = filterStrategist !== "all" ? contractClients.filter((c) => c.clientStrategist === filterStrategist) : contractClients;
+    const base = filterStrategist !== "all" ? leads.filter((c) => c.clientStrategist === filterStrategist) : leads;
     const counts: Record<string, number> = { all: base.length };
-    for (const s of CLIENT_STAGES) {
+    for (const s of LEAD_STAGES) {
       counts[s] = base.filter((c) => c.stage === s).length;
     }
     return counts;
-  }, [contractClients, filterStrategist]);
+  }, [leads, filterStrategist]);
 
   return (
     <AdminLayout>
@@ -206,16 +192,16 @@ export default function Clients() {
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <BookUser className="w-6 h-6 text-primary" />
-            Clients
+            <UserPlus className="w-6 h-6 text-primary" />
+            Leads
           </h1>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Master list of all clients and their pipeline status
+            Prospects with active proposals — moves to Clients once contract is signed
           </p>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
-          <span className="w-2 h-2 rounded-full bg-primary" />
-          {isLoading ? "—" : `${contractClients.length} total`}
+          <span className="w-2 h-2 rounded-full bg-blue-500" />
+          {isLoading ? "—" : `${leads.length} total`}
         </div>
       </div>
 
@@ -279,22 +265,22 @@ export default function Clients() {
       {isLoading ? (
         <div className="flex items-center justify-center py-20 text-muted-foreground">
           <Loader2 className="w-5 h-5 animate-spin mr-2" />
-          Loading clients…
+          Loading leads…
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <BookUser className="w-10 h-10 text-muted-foreground/40 mb-3" />
-          <p className="text-sm font-medium text-muted-foreground">No clients found</p>
+          <UserPlus className="w-10 h-10 text-muted-foreground/40 mb-3" />
+          <p className="text-sm font-medium text-muted-foreground">No leads found</p>
           <p className="text-xs text-muted-foreground/70 mt-1">
             {(search || filterStage !== "all" || filterStrategist !== "all")
               ? "Try adjusting your filters"
-              : "Clients appear here once proposals are created"}
+              : "Leads appear here once proposals are created"}
           </p>
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
           {filtered.map((client) => (
-            <ClientCard key={client.id} client={client} />
+            <LeadCard key={client.id} client={client} />
           ))}
         </div>
       )}

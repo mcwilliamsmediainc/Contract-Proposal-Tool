@@ -15,6 +15,7 @@ import NewProposal from "@/pages/admin/proposals/new";
 import EditProposal from "@/pages/admin/proposals/edit";
 import Onboarding from "@/pages/admin/onboarding";
 import Clients from "@/pages/admin/clients";
+import Leads from "@/pages/admin/leads";
 import ContractsList from "@/pages/admin/contracts/list";
 import NewContract from "@/pages/admin/contracts/new";
 import EditContract from "@/pages/admin/contracts/edit";
@@ -238,6 +239,9 @@ function ClerkProviderWithRoutes() {
             </Route>
             <Route path="/admin/proposals/:id/edit">
               {() => <RequireSignIn><EditProposal /></RequireSignIn>}
+            </Route>
+            <Route path="/admin/leads">
+              {() => <RequireSignIn><Leads /></RequireSignIn>}
             </Route>
             <Route path="/admin/clients">
               {() => <RequireSignIn><Clients /></RequireSignIn>}

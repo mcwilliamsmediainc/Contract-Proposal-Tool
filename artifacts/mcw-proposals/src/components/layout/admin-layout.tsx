@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard, LogOut, FileText, XCircle } from "lucide-react";
+import { LayoutDashboard, Users, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard, LogOut, FileText, XCircle, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useUser, useClerk } from "@clerk/react";
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/admin/proposals", label: "Proposals", icon: FileText },
   { href: "/admin/contracts", label: "Contracts", icon: FileText },
   { href: "/admin/onboarding", label: "Onboarding", icon: Users },
+  { href: "/admin/leads", label: "Leads", icon: UserPlus },
   { href: "/admin/clients", label: "Clients", icon: BookUser },
   { href: "/admin/payment-link", label: "Update Payment Info", icon: CreditCard },
   { href: "/admin/cancellations", label: "Client Cancellation", icon: XCircle },
