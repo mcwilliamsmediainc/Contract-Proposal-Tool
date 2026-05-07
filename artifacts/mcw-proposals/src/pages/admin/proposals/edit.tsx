@@ -297,14 +297,8 @@ export default function EditProposal() {
     setSaving(true);
     try {
       const values = form.getValues();
-      // If totalAmount override is blank, compute from pricingItems line items
-      let effectiveTotal = values.totalAmount ?? 0;
-      if (!effectiveTotal && values.pricingItems) {
-        try {
-          const items = JSON.parse(values.pricingItems) as { price: number }[];
-          effectiveTotal = items.reduce((s, r) => s + Number(r.price), 0);
-        } catch { /* keep 0 */ }
-      }
+      // effectiveTotal is computed live from pricingItems/totalAmount override (see liveTotal)
+      const effectiveTotal = liveTotal ?? 0;
       const data = await updateProposal.mutateAsync({
         id,
         data: { ...values, totalAmount: effectiveTotal }
@@ -392,6 +386,30 @@ export default function EditProposal() {
   const isTiered = watched.projectType === "tiered";
   const isAlaCarte = watched.projectType === "ala-carte";
   const isProject = watched.projectType === "project";
+
+  // Live proposal value — mirrors PricingSection logic so toolbar always shows what will be saved
+  const liveTotal = useMemo(() => {
+    if (isTiered || isAlaCarte) return null;
+    const pages = watched.numberOfPages || 5;
+    const defaultRows: PricingLineItem[] = [
+      { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
+      { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
+      { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
+      { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
+      { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
+      { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
+    ];
+    let rows: PricingLineItem[];
+    try {
+      const parsed = watched.pricingItems ? JSON.parse(watched.pricingItems) as PricingLineItem[] : null;
+      rows = parsed && parsed.length > 0 ? parsed : defaultRows;
+    } catch {
+      rows = defaultRows;
+    }
+    const lineTotal = rows.reduce((s, r) => s + Number(r.price), 0);
+    return (watched.totalAmount && watched.totalAmount > 0) ? watched.totalAmount : lineTotal;
+  }, [watched.pricingItems, watched.totalAmount, watched.numberOfPages, isTiered, isAlaCarte]);
+
   const toolbarButtons: { panel: Panel; label: string; icon: React.ElementType }[] = [
     { panel: "client", label: "Client Info", icon: Users },
     { panel: "pricing", label: "Pricing", icon: DollarSign },
@@ -434,6 +452,22 @@ export default function EditProposal() {
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Live proposal value — updates as pricing is edited */}
+            {liveTotal !== null ? (
+              <button
+                type="button"
+                onClick={() => setActivePanel("pricing")}
+                title="Click to edit pricing"
+                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-900/20 text-amber-950 border border-amber-900/30 hover:bg-amber-900/30 transition-all"
+              >
+                <DollarSign className="w-3 h-3" />
+                {liveTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
+              </button>
+            ) : (isTiered || isAlaCarte) ? (
+              <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-900/10 text-amber-900/60">
+                {isTiered ? "Tiered" : "A La Carte"}
+              </span>
+            ) : null}
             <button
               onClick={doSave}
               disabled={saving}

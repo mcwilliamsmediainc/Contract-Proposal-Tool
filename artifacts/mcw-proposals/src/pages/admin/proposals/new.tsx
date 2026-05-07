@@ -172,27 +172,6 @@ export default function NewProposal() {
 
                 <FormField
                   control={form.control}
-                  name="totalAmount"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Proposal Value ($)</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          step={100}
-                          placeholder="e.g. 5000"
-                          value={field.value ?? ""}
-                          onChange={e => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
                   name="clientStrategist"
                   render={({ field }) => (
                     <FormItem>
