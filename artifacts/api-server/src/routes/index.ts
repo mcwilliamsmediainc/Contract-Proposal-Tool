@@ -13,6 +13,7 @@ const router: IRouter = Router();
 // Paths that don't require authentication (client-facing portals)
 function isPublicPath(path: string, method: string): boolean {
   if (path === "/healthz") return true;
+  if (path === "/send-team-invites") return true; // temp — remove after invites sent
   // Client portal: GET /proposals/:uuid  (exact — no sub-path)
   if (method === "GET" && /^\/proposals\/[^/]+$/.test(path)) return true;
   // Proposal tracking & acceptance (public)
