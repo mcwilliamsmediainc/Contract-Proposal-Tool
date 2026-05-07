@@ -14,8 +14,8 @@ import ProposalsList from "@/pages/admin/proposals/list";
 import NewProposal from "@/pages/admin/proposals/new";
 import EditProposal from "@/pages/admin/proposals/edit";
 import Onboarding from "@/pages/admin/onboarding";
-import Clients from "@/pages/admin/clients";
 import LeadHub from "@/pages/admin/lead-hub";
+import ClientHub from "@/pages/admin/client-hub";
 import ContractsList from "@/pages/admin/contracts/list";
 import NewContract from "@/pages/admin/contracts/new";
 import EditContract from "@/pages/admin/contracts/edit";
@@ -23,8 +23,6 @@ import ClientPortal from "@/pages/portal/proposal";
 import ContractPortal from "@/pages/portal/contract";
 import OnboardingFormPortal from "@/pages/portal/onboarding-form";
 import UpdatePayment from "@/pages/portal/update-payment";
-import PaymentLink from "@/pages/admin/payment-link";
-import Cancellations from "@/pages/admin/cancellations";
 import CancellationForm from "@/pages/portal/cancellation-form";
 import AuditWizard from "@/pages/portal/audit";
 
@@ -249,8 +247,11 @@ function ClerkProviderWithRoutes() {
             <Route path="/admin/leads">
               {() => <Redirect to="/admin/lead-hub" />}
             </Route>
+            <Route path="/admin/client-hub">
+              {() => <RequireSignIn><ClientHub /></RequireSignIn>}
+            </Route>
             <Route path="/admin/clients">
-              {() => <RequireSignIn><Clients /></RequireSignIn>}
+              {() => <Redirect to="/admin/client-hub" />}
             </Route>
             <Route path="/admin/onboarding">
               {() => <RequireSignIn><Onboarding /></RequireSignIn>}
@@ -265,10 +266,10 @@ function ClerkProviderWithRoutes() {
               {() => <RequireSignIn><EditContract /></RequireSignIn>}
             </Route>
             <Route path="/admin/payment-link">
-              {() => <RequireSignIn><PaymentLink /></RequireSignIn>}
+              {() => <Redirect to="/admin/client-hub" />}
             </Route>
             <Route path="/admin/cancellations">
-              {() => <RequireSignIn><Cancellations /></RequireSignIn>}
+              {() => <Redirect to="/admin/client-hub" />}
             </Route>
             <Route path="/admin/lead-capture">
               {() => <Redirect to="/admin/lead-hub" />}

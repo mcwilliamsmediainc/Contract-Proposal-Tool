@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Users, ChevronLeft, ChevronRight, Menu, BookUser, CreditCard, LogOut, FileText, XCircle, UserPlus } from "lucide-react";
+import { LayoutDashboard, Users, ChevronLeft, ChevronRight, Menu, BookUser, LogOut, FileText, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useUser, useClerk } from "@clerk/react";
@@ -10,9 +10,7 @@ const NAV_ITEMS = [
   { href: "/admin/contracts", label: "Contracts", icon: FileText },
   { href: "/admin/onboarding", label: "Onboarding", icon: Users },
   { href: "/admin/lead-hub", label: "Lead Hub", icon: UserPlus },
-  { href: "/admin/clients", label: "Clients", icon: BookUser },
-  { href: "/admin/payment-link", label: "Update Payment Info", icon: CreditCard },
-  { href: "/admin/cancellations", label: "Client Cancellation", icon: XCircle },
+  { href: "/admin/client-hub", label: "Client Hub", icon: BookUser },
 ];
 
 const SIDEBAR_BG = "bg-[#061e57]";
