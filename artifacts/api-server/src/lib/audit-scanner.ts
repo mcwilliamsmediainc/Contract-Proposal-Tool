@@ -1,4 +1,4 @@
-import { ai } from "@workspace/integrations-gemini-ai";
+import { anthropic } from "@workspace/integrations-anthropic-ai";
 import { lookup } from "node:dns/promises";
 
 export interface AuditScores {
@@ -190,15 +190,16 @@ Scoring guidance:
 - Be honest and realistic. Most small business websites score 40-70. Only score 80+ if there is strong evidence.
 - For social, if no HTML was fetched, default to 35-55 range`;
 
-  const response = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    config: { maxOutputTokens: 2048 },
+  const message = await anthropic.messages.create({
+    model: "claude-sonnet-4-6",
+    max_tokens: 8192,
+    messages: [{ role: "user", content: prompt }],
   });
 
-  const raw = response.text ?? "";
+  const block = message.content[0];
+  const raw = block.type === "text" ? block.text : "";
   const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Gemini returned no valid JSON");
+  if (!jsonMatch) throw new Error("Claude returned no valid JSON");
 
   const parsed = JSON.parse(jsonMatch[0]) as {
     businessType: string;
