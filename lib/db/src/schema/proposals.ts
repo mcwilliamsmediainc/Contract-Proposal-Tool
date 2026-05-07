@@ -125,6 +125,7 @@ export const auditLeadsTable = pgTable("audit_leads", {
   goal: text("goal"),
   proposalRequested: boolean("proposal_requested").notNull().default(false),
   proposalRequestedAt: timestamp("proposal_requested_at"),
+  archivedAt: timestamp("archived_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

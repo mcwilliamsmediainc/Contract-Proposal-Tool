@@ -6,14 +6,15 @@ import { Link } from "wouter";
 import {
   Loader2, Search, UserPlus, Radar, Globe, MapPin, Mail, DollarSign, Target,
   CheckCircle2, AlertCircle, Clock, TrendingUp, FilePlus, FileText, FileSignature,
-  ArrowRight, User, ArrowUpDown, ArrowUp, ArrowDown,
+  ArrowRight, User, ArrowUpDown, ArrowUp, ArrowDown, Archive, ArchiveRestore, Trash2,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { useQuery } from "@tanstack/react-query";
-import { useListClients } from "@workspace/api-client-react";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useListClients, useDeleteProposal } from "@workspace/api-client-react";
 import type { ClientRecord } from "@workspace/api-client-react";
+import { useToast } from "@/hooks/use-toast";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
@@ -84,11 +85,17 @@ function AverageScore({ scores }: { scores: AuditLeadRecord["scores"] }) {
   return <span className={cn("text-lg font-bold font-mono", scoreColor(avg))}>{avg}</span>;
 }
 
-function AuditLeadRow({ lead }: { lead: AuditLeadRecord }) {
+function AuditLeadRow({ lead, showArchived, onArchive, onUnarchive, onDelete }: {
+  lead: AuditLeadRecord;
+  showArchived: boolean;
+  onArchive: (id: string) => void;
+  onUnarchive: (id: string) => void;
+  onDelete: (id: string) => void;
+}) {
   const cfg = AUDIT_STATUS_CONFIG[lead.status] ?? AUDIT_STATUS_CONFIG["new"];
   const urlClean = lead.url.replace(/^https?:\/\//, "").replace(/\/$/, "");
   return (
-    <tr className="border-b border-border/50 hover:bg-muted/30 transition-colors">
+    <tr className="border-b border-border/50 hover:bg-muted/30 transition-colors group">
       <td className="py-3 px-4">
         <div className="flex items-start gap-2.5">
           <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -160,13 +167,43 @@ function AuditLeadRow({ lead }: { lead: AuditLeadRecord }) {
           <Clock className="w-3 h-3" />
           {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
         </div>
-        <a
-          href={`/admin/proposals/new?clientEmail=${encodeURIComponent(lead.email ?? "")}&clientName=${encodeURIComponent(lead.businessType ?? "")}&city=${encodeURIComponent(lead.city)}&url=${encodeURIComponent(lead.url)}`}
-          className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
-        >
-          <FilePlus className="w-3 h-3" />
-          Create Proposal →
-        </a>
+        {!showArchived && (
+          <a
+            href={`/admin/proposals/new?clientEmail=${encodeURIComponent(lead.email ?? "")}&clientName=${encodeURIComponent(lead.businessType ?? "")}&city=${encodeURIComponent(lead.city)}&url=${encodeURIComponent(lead.url)}`}
+            className="inline-flex items-center gap-1 mt-2 text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+          >
+            <FilePlus className="w-3 h-3" />
+            Create Proposal →
+          </a>
+        )}
+      </td>
+      <td className="py-3 px-3">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {showArchived ? (
+            <button
+              onClick={() => onUnarchive(lead.id)}
+              title="Restore from archive"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-amber-600 hover:bg-amber-50 transition-colors"
+            >
+              <ArchiveRestore className="w-3.5 h-3.5" />
+            </button>
+          ) : (
+            <button
+              onClick={() => onArchive(lead.id)}
+              title="Archive lead"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-amber-600 hover:bg-amber-50 transition-colors"
+            >
+              <Archive className="w-3.5 h-3.5" />
+            </button>
+          )}
+          <button
+            onClick={() => onDelete(lead.id)}
+            title="Delete permanently"
+            className="p-1.5 rounded-md text-muted-foreground hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </td>
     </tr>
   );
@@ -222,11 +259,11 @@ function PipelineBar({ stage }: { stage: Stage }) {
   );
 }
 
-function PipelineLeadCard({ client }: { client: ClientRecord }) {
+function PipelineLeadCard({ client, onDelete }: { client: ClientRecord; onDelete: (id: string) => void }) {
   const cfg = STAGE_CONFIG[client.stage];
   const initials = client.clientName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
   return (
-    <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/30 hover:shadow-sm transition-all">
+    <div className="bg-card border border-border rounded-xl p-5 hover:border-primary/30 hover:shadow-sm transition-all group">
       <div className="flex items-start gap-4">
         <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-mono font-bold text-sm flex-shrink-0">
           {initials}
@@ -237,10 +274,19 @@ function PipelineLeadCard({ client }: { client: ClientRecord }) {
               <p className="font-semibold text-foreground truncate">{client.clientName}</p>
               <p className="text-sm text-muted-foreground truncate">{client.businessName}</p>
             </div>
-            <Badge variant="outline" className={cn("text-xs font-medium border shrink-0", cfg.badge)}>
-              <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5 inline-block", cfg.dot)} />
-              {cfg.label}
-            </Badge>
+            <div className="flex items-center gap-2 shrink-0">
+              <Badge variant="outline" className={cn("text-xs font-medium border", cfg.badge)}>
+                <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5 inline-block", cfg.dot)} />
+                {cfg.label}
+              </Badge>
+              <button
+                onClick={() => onDelete(client.proposalId)}
+                title="Delete lead"
+                className="p-1 rounded-md text-muted-foreground/40 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
             <span className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -288,21 +334,70 @@ function AuditLeadsTab() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortKey, setSortKey] = useState<"createdAt" | "score">("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
+  const [showArchived, setShowArchived] = useState(false);
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   function toggleSort(key: "createdAt" | "score") {
     if (sortKey === key) setSortDir((d) => (d === "desc" ? "asc" : "desc"));
     else { setSortKey(key); setSortDir("desc"); }
   }
 
+  const queryKey = ["audit-leads", showArchived ? "archived" : "active"];
+
   const { data: leads, isLoading } = useQuery<AuditLeadRecord[]>({
-    queryKey: ["audit-leads"],
+    queryKey,
     queryFn: async () => {
-      const r = await fetch(`${BASE}/api/admin/audit-leads`, { headers: { "Content-Type": "application/json" } });
+      const url = showArchived
+        ? `${BASE}/api/admin/audit-leads?archived=true`
+        : `${BASE}/api/admin/audit-leads`;
+      const r = await fetch(url, { headers: { "Content-Type": "application/json" } });
       if (!r.ok) throw new Error("Failed to load audit leads");
       return r.json() as Promise<AuditLeadRecord[]>;
     },
     refetchInterval: 30000,
   });
+
+  const archiveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const r = await fetch(`${BASE}/api/admin/audit-leads/${id}/archive`, { method: "POST" });
+      if (!r.ok) throw new Error("Failed to archive");
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["audit-leads"] });
+      toast({ title: "Lead archived" });
+    },
+    onError: () => toast({ title: "Failed to archive lead", variant: "destructive" }),
+  });
+
+  const unarchiveMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const r = await fetch(`${BASE}/api/admin/audit-leads/${id}/unarchive`, { method: "POST" });
+      if (!r.ok) throw new Error("Failed to unarchive");
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["audit-leads"] });
+      toast({ title: "Lead restored" });
+    },
+    onError: () => toast({ title: "Failed to restore lead", variant: "destructive" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const r = await fetch(`${BASE}/api/admin/audit-leads/${id}`, { method: "DELETE" });
+      if (!r.ok) throw new Error("Failed to delete");
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["audit-leads"] });
+      toast({ title: "Lead deleted" });
+    },
+    onError: () => toast({ title: "Failed to delete lead", variant: "destructive" }),
+  });
+
+  const handleDelete = (id: string) => {
+    if (!confirm("Permanently delete this lead? This cannot be undone.")) return;
+    deleteMutation.mutate(id);
+  };
 
   const avgScore = (l: AuditLeadRecord) =>
     l.scores ? (l.scores.ux + l.scores.seo + l.scores.social + l.scores.aiVisibility) / 4 : -1;
@@ -366,28 +461,42 @@ function AuditLeadsTab() {
         ))}
       </div>
 
-      {/* Status filters */}
-      <div className="flex flex-wrap gap-2 mb-5">
-        {AUDIT_FILTER_STATUSES.map(({ value, label }) => {
-          const count = statusCounts[value] ?? 0;
-          const isActive = filterStatus === value;
-          return (
-            <button key={value} onClick={() => setFilterStatus(value)}
-              className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
-                isActive ? "bg-primary text-primary-foreground border-primary"
-                  : "bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
-              )}>
-              {value !== "all" && !isActive && (
-                <span className={cn("w-1.5 h-1.5 rounded-full", AUDIT_STATUS_CONFIG[value]?.dot ?? "bg-gray-400")} />
-              )}
-              {label}
-              <span className={cn("ml-0.5 font-mono text-[10px] rounded px-1",
-                isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground")}>
-                {count}
-              </span>
-            </button>
-          );
-        })}
+      {/* Status filters + archive toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-2 mb-5">
+        <div className="flex flex-wrap gap-2">
+          {!showArchived && AUDIT_FILTER_STATUSES.map(({ value, label }) => {
+            const count = statusCounts[value] ?? 0;
+            const isActive = filterStatus === value;
+            return (
+              <button key={value} onClick={() => setFilterStatus(value)}
+                className={cn("inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+                  isActive ? "bg-primary text-primary-foreground border-primary"
+                    : "bg-background text-muted-foreground border-border hover:border-primary/40 hover:text-foreground"
+                )}>
+                {value !== "all" && !isActive && (
+                  <span className={cn("w-1.5 h-1.5 rounded-full", AUDIT_STATUS_CONFIG[value]?.dot ?? "bg-gray-400")} />
+                )}
+                {label}
+                <span className={cn("ml-0.5 font-mono text-[10px] rounded px-1",
+                  isActive ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground")}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <button
+          onClick={() => { setShowArchived((v) => !v); setFilterStatus("all"); }}
+          className={cn(
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all",
+            showArchived
+              ? "bg-amber-100 text-amber-800 border-amber-300"
+              : "bg-background text-muted-foreground border-border hover:border-amber-300 hover:text-amber-700"
+          )}
+        >
+          <Archive className="w-3 h-3" />
+          {showArchived ? "← Active Leads" : "View Archived"}
+        </button>
       </div>
 
       {/* Search */}
@@ -441,10 +550,20 @@ function AuditLeadsTab() {
                     {sortKey === "createdAt" ? (sortDir === "desc" ? <ArrowDown className="w-3 h-3" /> : <ArrowUp className="w-3 h-3" />) : <ArrowUpDown className="w-3 h-3 opacity-40" />}
                   </button>
                 </th>
+                <th className="w-16 px-3 py-3" />
               </tr>
             </thead>
             <tbody>
-              {filtered.map((lead) => <AuditLeadRow key={lead.id} lead={lead} />)}
+              {filtered.map((lead) => (
+                <AuditLeadRow
+                  key={lead.id}
+                  lead={lead}
+                  showArchived={showArchived}
+                  onArchive={(id) => archiveMutation.mutate(id)}
+                  onUnarchive={(id) => unarchiveMutation.mutate(id)}
+                  onDelete={handleDelete}
+                />
+              ))}
             </tbody>
           </table>
         </div>
@@ -455,9 +574,26 @@ function AuditLeadsTab() {
 
 function PipelineLeadsTab() {
   const { data: allClients, isLoading } = useListClients();
+  const deleteProposal = useDeleteProposal();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [search, setSearch] = useState("");
   const [filterStage, setFilterStage] = useState("all");
   const [filterStrategist, setFilterStrategist] = useState("all");
+
+  const handleDelete = (proposalId: string) => {
+    if (!confirm("Delete this lead and its proposal? This cannot be undone.")) return;
+    deleteProposal.mutate(
+      { id: proposalId },
+      {
+        onSuccess: () => {
+          void queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
+          toast({ title: "Lead deleted" });
+        },
+        onError: () => toast({ title: "Failed to delete lead", variant: "destructive" }),
+      }
+    );
+  };
 
   const leads = useMemo(() => (allClients ?? []).filter((c) => LEAD_STAGES.includes(c.stage)), [allClients]);
 
@@ -543,7 +679,7 @@ function PipelineLeadsTab() {
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
-          {filtered.map((client) => <PipelineLeadCard key={client.id} client={client} />)}
+          {filtered.map((client) => <PipelineLeadCard key={client.id} client={client} onDelete={handleDelete} />)}
         </div>
       )}
     </div>

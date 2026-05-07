@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, isNull, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
 import { db, auditLeadsTable } from "@workspace/db";
 import { scanWebsite } from "../lib/audit-scanner.js";
@@ -281,9 +281,11 @@ router.get("/audit/request-proposal", async (req: Request, res: Response) => {
 });
 
 router.get("/admin/audit-leads", async (req: Request, res: Response) => {
+  const showArchived = req.query["archived"] === "true";
   const rows = await db
     .select()
     .from(auditLeadsTable)
+    .where(showArchived ? isNotNull(auditLeadsTable.archivedAt) : isNull(auditLeadsTable.archivedAt))
     .orderBy(desc(auditLeadsTable.createdAt));
   res.json(rows.map(formatLead));
 });
@@ -301,6 +303,35 @@ router.get("/admin/audit-leads/:uuid", async (req: Request, res: Response) => {
   }
 
   res.json(formatLead(lead));
+});
+
+router.post("/admin/audit-leads/:uuid/archive", async (req: Request, res: Response) => {
+  const [updated] = await db
+    .update(auditLeadsTable)
+    .set({ archivedAt: new Date(), updatedAt: new Date() })
+    .where(eq(auditLeadsTable.uuid, req.params["uuid"] ?? ""))
+    .returning();
+  if (!updated) { res.status(404).json({ error: "Lead not found." }); return; }
+  res.json({ success: true });
+});
+
+router.post("/admin/audit-leads/:uuid/unarchive", async (req: Request, res: Response) => {
+  const [updated] = await db
+    .update(auditLeadsTable)
+    .set({ archivedAt: null, updatedAt: new Date() })
+    .where(eq(auditLeadsTable.uuid, req.params["uuid"] ?? ""))
+    .returning();
+  if (!updated) { res.status(404).json({ error: "Lead not found." }); return; }
+  res.json({ success: true });
+});
+
+router.delete("/admin/audit-leads/:uuid", async (req: Request, res: Response) => {
+  const [deleted] = await db
+    .delete(auditLeadsTable)
+    .where(eq(auditLeadsTable.uuid, req.params["uuid"] ?? ""))
+    .returning();
+  if (!deleted) { res.status(404).json({ error: "Lead not found." }); return; }
+  res.json({ success: true });
 });
 
 export default router;
