@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles, FileText, Link2, AlertCircle } from "lucide-react";
+import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles, FileText, Link2, AlertCircle, ArrowLeft } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef, useState, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
@@ -426,6 +426,14 @@ export default function EditContract() {
           </p>
         </div>
         <div className="flex gap-2">
+          {proposalId && (
+            <Link href={`/admin/proposals/${proposalId}/edit`}>
+              <Button variant="outline" className="border-[#b3cee1] text-[#061e57] hover:bg-[#eef4f9]">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Proposal
+              </Button>
+            </Link>
+          )}
           <Button
             variant="outline"
             onClick={() => setReviewOpen(true)}
