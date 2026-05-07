@@ -252,8 +252,8 @@ router.post("/gemini/review", async (req, res) => {
       selectedTier?: string; clientStrategist?: string;
     };
 
-    // Parse pricing items for math verification
-    type PricingItem = { label?: string; description?: string; price: number; qty?: number; unit?: string };
+    // Parse pricing items — actual fields: desc, rate, qty, price
+    type PricingItem = { desc?: string; rate?: number; qty?: string; price: number };
     let parsedItems: PricingItem[] = [];
     try {
       if (p.pricingItems) parsedItems = JSON.parse(p.pricingItems) as PricingItem[];
@@ -263,68 +263,92 @@ router.post("/gemini/review", async (req, res) => {
     const statedTotal = Number(p.totalAmount ?? 0);
     const effectiveTotal = statedTotal || itemsSum;
 
+    const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
     const pricingBlock = parsedItems.length > 0
       ? parsedItems.map(item => {
-          const qty = item.qty && item.qty !== 1 ? `${item.qty} × ` : "";
-          return `  - ${item.label ?? "Item"}${item.description ? ` (${item.description})` : ""}: ${qty}$${Number(item.price).toLocaleString()}`;
+          const desc = item.desc ?? "⚠ No description";
+          const rate = item.rate != null ? `$${Number(item.rate).toLocaleString()}/unit` : "—";
+          const qty  = item.qty ?? "1 Unit";
+          const price = `$${fmt(Number(item.price))}`;
+          return `  | ${desc} | Rate: ${rate} | Qty: ${qty} | Line Total: ${price} |`;
         }).join("\n") +
-        `\n  ITEMS SUM: $${itemsSum.toLocaleString()}` +
-        `\n  STATED TOTAL: $${statedTotal.toLocaleString()}` +
+        `\n\n  Items sum: $${fmt(itemsSum)}` +
+        `\n  Stated total override: ${statedTotal > 0 ? `$${fmt(statedTotal)}` : "none (using item sum)"}` +
         (Math.abs(itemsSum - statedTotal) > 0.01 && statedTotal > 0
-          ? `\n  ⚠ MATH MISMATCH: items sum to $${itemsSum.toLocaleString()} but stated total is $${statedTotal.toLocaleString()}`
-          : statedTotal > 0 ? "\n  ✓ Math checks out" : "\n  ⚠ Total is $0 — not set")
-      : "  *(No pricing line items defined)*";
+          ? `\n  ⚠ MATH MISMATCH — items sum to $${fmt(itemsSum)} but stated total is $${fmt(statedTotal)}`
+          : `\n  ✓ Totals check out`)
+      : "  ⚠ No pricing line items defined — proposal shows $0";
 
-    prompt = `You are a senior strategist and editor at McWilliams Media reviewing a client proposal before it is sent. You are thorough and exacting. Use markdown with headers.
+    const pageList = p.pageNames
+      ? p.pageNames.split("|").map(pg => `  • ${pg.trim()}`).join("\n")
+      : "  ⚠ None provided";
 
-Review ALL of the following areas:
-
-## Overall Impression
-Is this proposal ready to send? What would a client feel receiving it right now?
-
-## Spelling & Grammar
-Read every word of the proposal content and special context carefully. List every spelling mistake, typo, or grammatical error you find — quote the exact wrong text and provide the correction. If none, say "No issues found."
-
-## Pricing Math
-Verify the numbers:
-- Do the line items add up to the stated total?
-- Are any prices missing, $0, or suspiciously low?
-- Flag any math errors explicitly.
-
-## Content Quality
-Evaluate the writing — is it compelling, professional, and persuasive? Quote specific weak or vague phrases and suggest sharper alternatives.
-
-## Completeness
-Check for: missing content, empty fields, $0 pricing, no strategist assigned, no page descriptions, missing special context, or any other gaps that would make this look unprofessional.
-
-## Value Proposition
-Does the proposal clearly communicate why McWilliams Media is the right partner for this specific client and their goals?
-
-## Action Items
-List the 3–5 most important fixes needed before this proposal should be sent, in priority order.
+    prompt = `You are a senior strategist and editor at McWilliams Media reviewing a client proposal before it is sent. You are thorough, exacting, and direct. Use markdown with headers. Be specific — quote exact text for every issue you find.
 
 ---
-**PROPOSAL DATA:**
-- Client: ${p.clientName ?? "⚠ MISSING"} at ${p.businessName ?? "⚠ MISSING"}
+**FULL PROPOSAL DATA FOR REVIEW:**
+
+CLIENT & PROJECT
+- Client Name: ${p.clientName ?? "⚠ MISSING"}
+- Business Name: ${p.businessName ?? "⚠ MISSING"}
 - Project Type: ${p.projectType ?? "⚠ MISSING"}
-- Strategist: ${p.clientStrategist ?? "⚠ UNASSIGNED"}
-- Status: ${p.status ?? "draft"}
+- Assigned Strategist: ${p.clientStrategist ?? "⚠ UNASSIGNED — no one owns this"}
+- Proposal Status: ${p.status ?? "draft"}
 ${p.selectedTier ? `- Selected Tier: ${p.selectedTier}` : ""}
-${p.numberOfPages ? `- Number of Pages: ${p.numberOfPages}` : "- Pages: ⚠ not set"}
-${p.pageNames ? `- Page Names/Details: ${p.pageNames}` : "- Page Descriptions: ⚠ none provided"}
 
-**PRICING BREAKDOWN:**
+WEBSITE SCOPE
+- Number of Pages: ${p.numberOfPages ?? "⚠ NOT SET"}
+- Pages Included:
+${pageList}
+
+PRICING BREAKDOWN (each line: Description | Rate | Qty | Line Total)
 ${pricingBlock}
-Total Pricing (shown to client): $${effectiveTotal.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-→ Contract will pull this as the total cost: Deposit = 50% ($${(effectiveTotal * 0.5).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}), Remaining = 50% ($${(effectiveTotal * 0.5).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })})
+→ TOTAL INVESTMENT shown to client: $${fmt(effectiveTotal)}
+→ Contract deposit (50%): $${fmt(effectiveTotal * 0.5)} | Remaining (50%): $${fmt(effectiveTotal * 0.5)}
 
-${p.specialContext ? `**SPECIAL CONTEXT / INTERNAL NOTES:**\n${p.specialContext}` : "**SPECIAL CONTEXT:** ⚠ None provided"}
+INTERNAL CONTEXT & NOTES (not shown to client)
+${p.specialContext?.trim() ? p.specialContext.trim() : "⚠ NONE PROVIDED — strategist has given us nothing to personalise this proposal with"}
 
-**PROPOSAL BODY CONTENT:**
-${p.content ? p.content : "⚠ NO CONTENT WRITTEN YET — this proposal is blank"}
+PROPOSAL BODY / PROJECT NARRATIVE (the main written content the client reads)
+${p.content?.trim() ? p.content.trim() : "⚠ COMPLETELY BLANK — no narrative, no problem statement, no value prop, nothing"}
 
 ---
-Important: Be specific about every issue. Quote exact text when flagging spelling or grammar errors. Do not generalize.`;
+Now review ALL of the following areas thoroughly:
+
+## 1. Overall Readiness
+Is this proposal ready to send TODAY? Give a clear yes/no and one sentence explaining why.
+
+## 2. Client Experience & First Impression
+If ${p.clientName ?? "the client"} at ${p.businessName ?? "their company"} received this right now, what would they think? Be specific about the emotional reaction and professional impression.
+
+## 3. Project Narrative & Problem Statement
+Does the proposal body acknowledge the client's specific situation, pain points, or goals? Quote exact weak/missing text and provide sharper alternatives. A great proposal makes the client feel heard before it sells anything.
+
+## 4. Value Proposition
+Does the proposal explain WHY McWilliams Media is the right partner for THIS client — not just what we do, but why it matters for their specific business? Flag generic or missing claims.
+
+## 5. Pricing Clarity & Math
+- Is every line item clearly described? Flag any vague descriptions (e.g. "1 Unit" with no context).
+- Do the numbers add up correctly?
+- Is the rate/qty/price relationship unambiguous for each line?
+- Are any items $0 or suspiciously priced?
+
+## 6. Spelling, Grammar & Professionalism
+Read every word. Quote every error with its correction. If none, say "No issues found."
+
+## 7. Completeness Checklist
+Check each of these and flag any that are missing or weak:
+- [ ] Client name & business name
+- [ ] Assigned strategist
+- [ ] Number of pages + named page list
+- [ ] Internal context / special notes
+- [ ] Written proposal narrative
+- [ ] All pricing line items described
+- [ ] Total matches line items
+
+## 8. Prioritised Action Items
+List the top 3–5 fixes needed before this proposal should be sent, in order of urgency. Be specific — name the exact field or section that needs work.`;
   } else if (type === "contract") {
     const c = data as {
       clientName?: string; businessName?: string; contractType?: string;
