@@ -5,7 +5,9 @@ import {
   useGetContract,
   useUpdateContract,
   useSendContract,
+  useGetProposal,
   getGetContractQueryKey,
+  getGetProposalQueryKey,
   getListContractsQueryKey,
 } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
@@ -31,9 +33,9 @@ import {
 } from "@/components/ui/select";
 import { useParams, Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles, FileText } from "lucide-react";
+import { Loader2, Send, Eye, CheckCircle2, Rocket, Sparkles, FileText, Link2, AlertCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useWatch, type UseFormReturn } from "react-hook-form";
 import { AiReviewDrawer } from "@/components/ai-review-drawer";
 import { Badge } from "@/components/ui/badge";
@@ -47,11 +49,46 @@ const formSchema = z.object({
   totalCost: z.coerce.number().min(0),
   depositAmount: z.coerce.number().min(0),
   remainingBalance: z.coerce.number().min(0),
-  hostingOption: z.enum(["none", "basic", "platinum"]),
   scheduleA: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+interface PricingLineItem {
+  desc?: string;
+  rate?: number;
+  qty?: string;
+  price: number;
+}
+
+function computeProposalTotal(
+  pricingItems: string | null | undefined,
+  totalAmount: number | null | undefined,
+  numberOfPages?: number | null,
+): number {
+  const pages = numberOfPages || 5;
+  const defaultItems: PricingLineItem[] = [
+    { desc: "Website Setup & Required Pages", rate: 110, qty: "10 Hours", price: 1100 },
+    { desc: "Revisions & Launch", rate: 350, qty: "1 Unit", price: 350 },
+    { desc: "Google Analytics & Search Console Setup", rate: 110, qty: "1 Unit", price: 110 },
+    { desc: `Web Pages (${pages})`, rate: 450, qty: `${pages} Pages`, price: 450 * pages },
+    { desc: "Website Theme", rate: 75, qty: "1 Unit", price: 75 },
+    { desc: "Timeline Deposit (eligible for refund)", rate: 500, qty: "1 Unit", price: 500 },
+  ];
+
+  if (totalAmount && totalAmount > 0) return totalAmount;
+
+  let items: PricingLineItem[] = [];
+  if (pricingItems) {
+    try { items = JSON.parse(pricingItems) as PricingLineItem[]; } catch { /* fallback */ }
+  }
+  if (items.length === 0) items = defaultItems;
+  return items.reduce((s, i) => s + Number(i.price), 0);
+}
+
+function fmt(n: number) {
+  return n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
 
 function statusBadge(status: string) {
   if (status === "signed") return <Badge className="bg-green-100 text-green-800 border-green-200 font-mono uppercase text-[10px] tracking-wider">Signed</Badge>;
@@ -64,6 +101,53 @@ function contractTypeLabel(type: string) {
   if (type === "marketing") return "Marketing Services";
   if (type === "print") return "Print & Brand";
   return type;
+}
+
+function FeesDisplay({
+  total,
+  deposit,
+  remaining,
+  proposalId,
+  isLinked,
+}: {
+  total: number;
+  deposit: number;
+  remaining: number;
+  proposalId?: string | null;
+  isLinked: boolean;
+}) {
+  return (
+    <div className="space-y-4">
+      {isLinked ? (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-mono">
+          <Link2 className="w-3.5 h-3.5 flex-shrink-0" />
+          Financials sourced from linked proposal — updated automatically when the proposal pricing changes
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 text-xs font-mono">
+          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+          No linked proposal — enter financials manually below
+        </div>
+      )}
+      <div className="grid grid-cols-3 gap-4">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+          <p className="text-xs text-gray-500 font-mono uppercase tracking-wide mb-1">Total Investment</p>
+          <p className="text-xl font-bold text-gray-900">${fmt(total)}</p>
+        </div>
+        <div className="rounded-lg border border-[#061e57]/20 bg-[#061e57]/5 px-4 py-3">
+          <p className="text-xs text-[#061e57]/70 font-mono uppercase tracking-wide mb-1">Deposit (50%)</p>
+          <p className="text-xl font-bold text-[#061e57]">${fmt(deposit)}</p>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+          <p className="text-xs text-gray-500 font-mono uppercase tracking-wide mb-1">Remaining (50%)</p>
+          <p className="text-xl font-bold text-gray-900">${fmt(remaining)}</p>
+        </div>
+      </div>
+      <p className="text-[11px] text-muted-foreground/60 font-mono">
+        Hosting option is selected by the client during contract signing
+      </p>
+    </div>
+  );
 }
 
 function ContractDraftPreview({
@@ -181,6 +265,28 @@ export default function EditContract() {
     query: { enabled: !!id, queryKey: getGetContractQueryKey(id) },
   });
 
+  const proposalId = contract?.proposalId ?? null;
+
+  const { data: linkedProposal } = useGetProposal(proposalId ?? "", {
+    query: {
+      enabled: !!proposalId,
+      queryKey: getGetProposalQueryKey(proposalId ?? ""),
+    },
+  });
+
+  const proposalTotal = useMemo(() => {
+    if (!linkedProposal) return null;
+    return computeProposalTotal(
+      linkedProposal.pricingItems,
+      linkedProposal.totalAmount,
+      linkedProposal.numberOfPages,
+    );
+  }, [linkedProposal]);
+
+  const effectiveTotal = proposalTotal ?? (contract ? Number(contract.totalCost) : 0);
+  const effectiveDeposit = Math.round(effectiveTotal * 0.5 * 100) / 100;
+  const effectiveRemaining = Math.round((effectiveTotal - effectiveDeposit) * 100) / 100;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -191,7 +297,6 @@ export default function EditContract() {
       totalCost: 0,
       depositAmount: 0,
       remainingBalance: 0,
-      hostingOption: "none",
       scheduleA: "",
     },
   });
@@ -205,21 +310,38 @@ export default function EditContract() {
         businessName: contract.businessName,
         clientEmail: contract.clientEmail,
         contractType: contract.contractType as "website" | "marketing" | "print",
-        totalCost: contract.totalCost,
-        depositAmount: contract.depositAmount,
-        remainingBalance: contract.remainingBalance,
-        hostingOption: contract.hostingOption as "none" | "basic" | "platinum",
+        totalCost: Number(contract.totalCost),
+        depositAmount: Number(contract.depositAmount),
+        remainingBalance: Number(contract.remainingBalance),
         scheduleA: contract.scheduleA || "",
       });
     }
   }, [contract, id, form]);
 
+  useEffect(() => {
+    if (proposalTotal !== null) {
+      form.setValue("totalCost", proposalTotal, { shouldDirty: false });
+      form.setValue("depositAmount", effectiveDeposit, { shouldDirty: false });
+      form.setValue("remainingBalance", effectiveRemaining, { shouldDirty: false });
+    }
+  }, [proposalTotal, effectiveDeposit, effectiveRemaining, form]);
+
   const updateContract = useUpdateContract();
   const sendContract = useSendContract();
 
   const onSubmit = async (values: FormValues) => {
+    const payload = {
+      clientName: values.clientName,
+      businessName: values.businessName,
+      clientEmail: values.clientEmail,
+      contractType: values.contractType,
+      totalCost: values.totalCost,
+      depositAmount: values.depositAmount,
+      remainingBalance: values.remainingBalance,
+      scheduleA: values.scheduleA,
+    };
     try {
-      const updated = await updateContract.mutateAsync({ id, data: values });
+      const updated = await updateContract.mutateAsync({ id, data: payload });
       queryClient.setQueryData(getGetContractQueryKey(id), updated);
       await queryClient.invalidateQueries({ queryKey: getListContractsQueryKey() });
       toast({ title: "Saved", description: "Contract updated." });
@@ -344,32 +466,37 @@ export default function EditContract() {
               <CardHeader>
                 <CardTitle className="font-mono text-sm uppercase tracking-wider text-muted-foreground">Fees & Hosting</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField control={form.control} name="totalCost" render={({ field }) => (
-                    <FormItem><FormLabel>Total Cost ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="depositAmount" render={({ field }) => (
-                    <FormItem><FormLabel>Deposit ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                  <FormField control={form.control} name="remainingBalance" render={({ field }) => (
-                    <FormItem><FormLabel>Remaining ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                  )} />
-                </div>
-                <FormField control={form.control} name="hostingOption" render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hosting Option</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No Hosting</SelectItem>
-                        <SelectItem value="basic">Gold — $60/mo</SelectItem>
-                        <SelectItem value="platinum">Platinum — $100/mo</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )} />
+              <CardContent>
+                {proposalId ? (
+                  <FeesDisplay
+                    total={effectiveTotal}
+                    deposit={effectiveDeposit}
+                    remaining={effectiveRemaining}
+                    proposalId={proposalId}
+                    isLinked={true}
+                  />
+                ) : (
+                  <div className="space-y-4">
+                    <FeesDisplay
+                      total={effectiveTotal}
+                      deposit={effectiveDeposit}
+                      remaining={effectiveRemaining}
+                      proposalId={null}
+                      isLinked={false}
+                    />
+                    <div className="grid grid-cols-3 gap-4">
+                      <FormField control={form.control} name="totalCost" render={({ field }) => (
+                        <FormItem><FormLabel>Total Cost ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                      <FormField control={form.control} name="depositAmount" render={({ field }) => (
+                        <FormItem><FormLabel>Deposit ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                      <FormField control={form.control} name="remainingBalance" render={({ field }) => (
+                        <FormItem><FormLabel>Remaining ($)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                      )} />
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -397,7 +524,6 @@ export default function EditContract() {
           </form>
         </Form>
 
-        {/* ── Live Contract Draft Preview ── */}
         <ContractDraftPreview form={form} contract={contract} />
       </div>
       <AiReviewDrawer
@@ -409,9 +535,9 @@ export default function EditContract() {
           clientName: contract.clientName,
           businessName: contract.businessName,
           contractType: contract.contractType,
-          totalCost: contract.totalCost,
-          depositAmount: contract.depositAmount,
-          remainingBalance: contract.remainingBalance,
+          totalCost: effectiveTotal,
+          depositAmount: effectiveDeposit,
+          remainingBalance: effectiveRemaining,
           hostingOption: contract.hostingOption,
           scheduleA: contract.scheduleA,
           status: contract.status,
