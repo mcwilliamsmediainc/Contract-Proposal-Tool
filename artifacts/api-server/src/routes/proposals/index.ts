@@ -474,12 +474,13 @@ router.patch("/proposals/:id", async (req, res) => {
     return;
   }
 
-  // Sync the linked draft contract whenever client info or total changes
+  // Sync the linked draft contract whenever client info, total, or hosting changes
   if (
     data.clientName !== undefined ||
     data.businessName !== undefined ||
     data.clientEmail !== undefined ||
-    data.totalAmount !== undefined
+    data.totalAmount !== undefined ||
+    data.selectedTier !== undefined
   ) {
     const linkedContracts = await db
       .select()
@@ -498,6 +499,9 @@ router.patch("/proposals/:id", async (req, res) => {
         contractUpdate.depositAmount = String(newDeposit);
         contractUpdate.remainingBalance = String(newTotal - newDeposit);
         contractUpdate.scheduleA = buildScheduleA(updated);
+      }
+      if (data.selectedTier !== undefined) {
+        contractUpdate.hostingOption = mapHostingOption(updated.selectedTier);
       }
       await db
         .update(contractsTable)
@@ -700,6 +704,26 @@ router.post("/proposals/:id/accept", async (req, res) => {
       totalCost: total,
       clientStrategist: updated.clientStrategist,
     }).catch(() => {});
+  } else {
+    // Contract already exists (auto-created when proposal was built) —
+    // sync the hosting selection and recalculate totals from the proposal.
+    const total = Number(updated.totalAmount ?? 0);
+    const deposit = Math.round(total * 0.5 * 100) / 100;
+    const remaining = Math.round((total - deposit) * 100) / 100;
+    const contractUpdate: Partial<typeof contractsTable.$inferInsert> = {
+      totalCost: String(total),
+      depositAmount: String(deposit),
+      remainingBalance: String(remaining),
+      scheduleA: buildScheduleA(updated),
+      updatedAt: new Date(),
+    };
+    if (updated.selectedTier !== undefined) {
+      contractUpdate.hostingOption = mapHostingOption(updated.selectedTier);
+    }
+    await db
+      .update(contractsTable)
+      .set(contractUpdate)
+      .where(eq(contractsTable.uuid, existingContract[0].uuid));
   }
 
   // Notify strategist of acceptance
@@ -721,7 +745,14 @@ router.post("/proposals/:id/accept", async (req, res) => {
     }).catch(() => {});
   }
 
-  res.json(formatProposal(updated));
+  // Look up contract UUID for response so the frontend can navigate directly to signing
+  const acceptContractRow = await db
+    .select({ uuid: contractsTable.uuid })
+    .from(contractsTable)
+    .where(eq(contractsTable.proposalId, id))
+    .limit(1);
+
+  res.json(formatProposal(updated, acceptContractRow[0]?.uuid ?? null));
 });
 
 router.post("/proposals/:id/view", async (req, res) => {

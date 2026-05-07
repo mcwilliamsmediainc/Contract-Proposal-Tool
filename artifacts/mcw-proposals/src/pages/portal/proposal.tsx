@@ -38,8 +38,9 @@ export default function ClientPortal() {
         data: { signatureData: "", ...(selectedTierValue ? { selectedTier: selectedTierValue } : {}) } as { signatureData: string },
       });
       queryClient.setQueryData(getGetProposalQueryKey(id), data);
-      if (proposal?.contractUuid) {
-        setLocation(`/contract/${proposal.contractUuid}`);
+      const contractUuid = data?.contractUuid ?? proposal?.contractUuid;
+      if (contractUuid) {
+        setLocation(`/contract/${contractUuid}`);
       }
     } catch {}
   };
