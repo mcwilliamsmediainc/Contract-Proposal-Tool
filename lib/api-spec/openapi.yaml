@@ -952,6 +952,10 @@ components:
       properties:
         signatureData:
           type: string
+        hostingOption:
+          type: string
+          enum: [none, basic, platinum]
+          nullable: true
         referralSource:
           type: string
           nullable: true

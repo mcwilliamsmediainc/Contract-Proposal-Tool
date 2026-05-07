@@ -632,6 +632,7 @@ export const SignContractParams = zod.object({
 
 export const SignContractBody = zod.object({
   signatureData: zod.string(),
+  hostingOption: zod.enum(["none", "basic", "platinum"]).nullish(),
   referralSource: zod.string().nullish(),
   teamMember: zod.string().nullish(),
   companyAddress: zod.string().nullish(),

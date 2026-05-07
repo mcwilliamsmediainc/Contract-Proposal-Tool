@@ -133,8 +133,19 @@ export interface UpdateContractBody {
   scheduleA?: string | null;
 }
 
+export type SignContractBodyHostingOption =
+  | (typeof SignContractBodyHostingOption)[keyof typeof SignContractBodyHostingOption]
+  | null;
+
+export const SignContractBodyHostingOption = {
+  none: "none",
+  basic: "basic",
+  platinum: "platinum",
+} as const;
+
 export interface SignContractBody {
   signatureData: string;
+  hostingOption?: SignContractBodyHostingOption;
   referralSource?: string | null;
   teamMember?: string | null;
   companyAddress?: string | null;

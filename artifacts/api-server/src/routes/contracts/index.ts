@@ -219,6 +219,7 @@ router.post("/contracts/:id/sign", async (req, res) => {
       status: "signed",
       signatureData: data.signatureData,
       signedAt: new Date(),
+      ...(data.hostingOption ? { hostingOption: data.hostingOption } : {}),
       referralSource: data.referralSource ?? null,
       teamMember: data.teamMember ?? null,
       companyAddress: data.companyAddress ?? null,

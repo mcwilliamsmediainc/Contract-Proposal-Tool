@@ -40,6 +40,8 @@ export default function ContractPortal() {
 
   const [view, setView] = useState<View>("agreement");
   const [sigError, setSigError] = useState(false);
+  const [selectedHosting, setSelectedHosting] = useState<"none" | "basic" | "platinum" | null>(null);
+  const [hostingError, setHostingError] = useState(false);
 
   // ACH form state
   const [achLoading, setAchLoading] = useState(false);
@@ -87,15 +89,25 @@ export default function ContractPortal() {
   const dateStr = `${today.getDate()}th day of ${today.toLocaleString("default", { month: "long" })}, ${today.getFullYear()}`;
 
   const handleSign = async () => {
+    let hasError = false;
     if (!sigPadRef.current || sigPadRef.current.isEmpty()) {
       setSigError(true);
-      return;
+      hasError = true;
+    } else {
+      setSigError(false);
     }
-    setSigError(false);
-    const signatureData = sigPadRef.current.getTrimmedCanvas().toDataURL("image/png");
+    if (!selectedHosting) {
+      setHostingError(true);
+      hasError = true;
+      document.getElementById("hosting-selection")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    } else {
+      setHostingError(false);
+    }
+    if (hasError) return;
 
+    const signatureData = sigPadRef.current!.getTrimmedCanvas().toDataURL("image/png");
     try {
-      const updated = await signContract.mutateAsync({ id, data: { signatureData } });
+      const updated = await signContract.mutateAsync({ id, data: { signatureData, hostingOption: selectedHosting ?? undefined } });
       queryClient.setQueryData(getGetContractQueryKey(id), updated);
       setView("ach");
     } catch {
@@ -187,12 +199,56 @@ export default function ContractPortal() {
               <p className="mb-3"><strong>2.3. Payments.</strong> Client agrees that all payments shall be made via ACH transfer, which is the preferred method of payment for all services. Alternative payment methods, including check or credit card, may be accepted at Developer's discretion.</p>
               <p className="mb-3"><strong>2.4. Late Fees.</strong> Late Payments shall be subject to a late fee of $75.00 per month. If Client's account becomes ninety (90) days past due, Developer shall have the right to suspend all Services, including hosting.</p>
 
-              {contract.hostingOption !== "none" && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                  <h4 className="font-semibold text-blue-900 mb-1">Selected Hosting</h4>
-                  <p className="text-blue-800 text-sm">{hostingLabel(contract.hostingOption)}</p>
+              {/* ── Hosting Selection ── */}
+              <div id="hosting-selection" className={`rounded-xl border-2 p-5 mb-4 transition-colors ${hostingError ? "border-red-400 bg-red-50" : selectedHosting ? "border-[#061e57] bg-[#eef4f9]" : "border-amber-300 bg-amber-50"}`}>
+                <div className="flex items-start gap-3 mb-4">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold ${hostingError ? "bg-red-500 text-white" : selectedHosting ? "bg-[#061e57] text-white" : "bg-amber-400 text-amber-900"}`}>
+                    {selectedHosting ? "✓" : "!"}
+                  </div>
+                  <div>
+                    <p className={`font-bold text-sm ${hostingError ? "text-red-700" : selectedHosting ? "text-[#061e57]" : "text-amber-800"}`}>
+                      {selectedHosting ? "Hosting plan selected" : "Action required: Select a hosting plan"}
+                    </p>
+                    <p className={`text-xs mt-0.5 ${hostingError ? "text-red-600" : selectedHosting ? "text-[#3a4856]" : "text-amber-700"}`}>
+                      {hostingError
+                        ? "Please select a hosting plan before submitting your agreement."
+                        : selectedHosting
+                          ? "Your selection is included in this agreement. You can change it below."
+                          : "Your website needs a hosting plan to stay live after launch. Please choose one below before signing."}
+                    </p>
+                  </div>
                 </div>
-              )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {([
+                    { value: "none",     label: "No Hosting",    price: "",           desc: "I'll manage hosting myself" },
+                    { value: "basic",    label: "Basic",         price: "$50/month",   desc: "Managed hosting & support" },
+                    { value: "platinum", label: "Platinum",      price: "$100/month",  desc: "Priority hosting & updates" },
+                  ] as const).map(({ value, label, price, desc }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => { setSelectedHosting(value); setHostingError(false); }}
+                      className={`text-left rounded-lg border-2 p-4 transition-all ${
+                        selectedHosting === value
+                          ? "border-[#061e57] bg-white shadow-md"
+                          : "border-gray-200 bg-white hover:border-[#b3cee1] hover:shadow-sm"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`font-bold text-sm ${selectedHosting === value ? "text-[#061e57]" : "text-gray-800"}`}>{label}</span>
+                        {selectedHosting === value && (
+                          <span className="w-4 h-4 rounded-full bg-[#061e57] flex items-center justify-center shrink-0">
+                            <svg className="w-2.5 h-2.5 text-white fill-white" viewBox="0 0 12 12"><path d="M1 6l4 4 6-7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          </span>
+                        )}
+                      </div>
+                      {price && <p className={`text-base font-extrabold mb-1 ${selectedHosting === value ? "text-[#061e57]" : "text-gray-700"}`}>{price}</p>}
+                      <p className="text-xs text-gray-500">{desc}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <h3 className="font-bold text-gray-900 mt-4 mb-2">3.0. Schedules</h3>
               <p className="mb-3">Developer shall use all reasonable efforts to meet the delivery schedules set herein. Any delay or non-performance caused by conditions beyond the reasonable control of Developer shall not constitute a breach of this Agreement.</p>
