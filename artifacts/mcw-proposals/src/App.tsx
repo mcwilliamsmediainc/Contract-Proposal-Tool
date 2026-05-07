@@ -224,7 +224,7 @@ function ClerkProviderWithRoutes() {
             <Route path="/contract/:id" component={ContractPortal} />
             <Route path="/intake/:id" component={OnboardingFormPortal} />
             <Route path="/update-payment" component={UpdatePayment} />
-            <Route path="/cancel" component={CancellationForm} />
+            <Route path="/offboarding" component={CancellationForm} />
 
             {/* Protected admin routes */}
             <Route path="/admin">

@@ -29,7 +29,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 function getFormUrl() {
   const base = (import.meta.env.BASE_URL ?? "").replace(/\/$/, "");
-  return `${window.location.origin}${base}/cancel`;
+  return `${window.location.origin}${base}/offboarding`;
 }
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
