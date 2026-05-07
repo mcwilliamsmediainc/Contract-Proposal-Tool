@@ -184,21 +184,15 @@ function ContractDraftPreview({
 
         <div className="px-8 py-6 prose prose-sm max-w-none text-gray-700 leading-relaxed">
           <p className="text-sm text-gray-500 mb-4 font-medium">
-            THIS DEVELOPMENT AGREEMENT, ("Agreement") dated this {dateStr} is entered into between{" "}
-            <strong>MCWILLIAMS MEDIA INC.</strong>, an Oklahoma Corporation, ("Developer") and{" "}
-            <strong>{clientName}</strong> ("Client").
+            This Agreement is entered into between <strong>MCWILLIAMS MEDIA INC.</strong> ("Developer") and{" "}
+            <strong>{clientName}</strong> ("Client"), dated {dateStr}.
           </p>
 
-          <p className="mb-4">
-            WHEREAS Developer is in the business of custom professional {contractTypeLabel(contractType).toLowerCase()} services. WHEREAS Client desires to retain Developer to create and provide services per the Deliverables detailed herein. NOW THEREFORE, in consideration of the mutual promises, conditions, covenants and warranties contained herein and for other good and valuable consideration, the receipt and sufficiency of which are hereby acknowledged, the parties hereto agree as follows:
-          </p>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">1. Services</h3>
+          <p className="mb-3">Developer will design, build, and deliver a website ("Site") as described in Schedule A. All work will be tested before delivery.</p>
+          <p className="mb-3"><strong>1.1. Revisions.</strong> Two rounds of revisions are included per project phase. Additional rounds are billed at Developer's hourly rate. Major revisions (scope changes) require a revised quote and written approval before work begins. All revision requests must be submitted through Developer's project management tool.</p>
 
-          <h3 className="font-bold text-gray-900 mt-4 mb-2">1.0. Developer Services</h3>
-          <p className="mb-3">Developer will perform the Services described herein for Client. Before delivering work to Client, Developer will test its components to ensure everything works correctly.</p>
-          <p className="mb-3"><strong>1.2. Buildout.</strong> Developer shall complete the requirements and host/deliver it in a manner that Client can view and approve. Edits will be done in accordance with the specific outlined in the proposal.</p>
-          <p className="mb-3"><strong>1.3. Major Revisions.</strong> If Client desires to implement major revisions, Client shall submit all edit requests through our 3rd party tool. Developer shall provide a revised cost and time frame, and upon approval, shall proceed to implement changes within the new schedule.</p>
-
-          <h3 className="font-bold text-gray-900 mt-4 mb-2">Fees and Schedule</h3>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">2. Fees &amp; Payment</h3>
           <div className="bg-gray-50 rounded-lg p-4 mb-4 border border-gray-200">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
@@ -206,32 +200,64 @@ function ContractDraftPreview({
                 <div className="text-lg font-bold text-gray-900">${totalCost.toLocaleString()}</div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Deposit</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Deposit (Non-Refundable)</div>
                 <div className="text-lg font-bold text-[#061e57]">${deposit.toLocaleString()}</div>
               </div>
               <div>
-                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Remaining</div>
+                <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Remaining Balance</div>
                 <div className="text-lg font-bold text-gray-900">${remaining.toLocaleString()}</div>
               </div>
             </div>
           </div>
+          <p className="mb-3">The non-refundable Deposit is due before work begins. Preferred payment is ACH transfer; check or credit card accepted at Developer's discretion. Invoices are due within 15 days. Late payments are subject to a $75/month fee. Accounts 90+ days past due may have services, including hosting, suspended until current.</p>
+          <p className="mb-3"><strong>Expenses.</strong> Client will be invoiced at cost for any required third-party software, plugins, or licenses. Developer will obtain written approval before any such purchase.</p>
 
-          <p className="mb-3"><strong>2.1. Deposit.</strong> Client shall pay a non-refundable Deposit prior to the commencement of any work by Developer.</p>
-          <p className="mb-3"><strong>2.2. Expenses.</strong> Client shall reimburse Developer for any and all out of pocket expenses incurred by Developer pursuant to this Agreement.</p>
-          <p className="mb-3"><strong>2.3. Payments.</strong> Client agrees that all payments shall be made via ACH transfer, which is the preferred method of payment for all services. Alternative payment methods, including check or credit card, may be accepted at Developer's discretion.</p>
-          <p className="mb-3"><strong>2.4. Late Fees.</strong> Late Payments shall be subject to a late fee of $75.00 per month. If Client's account becomes ninety (90) days past due, Developer shall have the right to suspend all Services, including hosting.</p>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">3. Schedule</h3>
+          <p className="mb-3">Developer will make reasonable efforts to meet agreed deadlines. Timelines may be extended by written notice. Delays caused by events outside Developer's control (natural disasters, power failures, acts of government, etc.) are not a breach of this Agreement.</p>
 
-          <h3 className="font-bold text-gray-900 mt-4 mb-2">3.0. Schedules</h3>
-          <p className="mb-3">Developer shall use all reasonable efforts to meet the delivery schedules set herein. Any delay or non-performance caused by conditions beyond the reasonable control of Developer shall not constitute a breach of this Agreement.</p>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">4. Client Approval</h3>
+          <p className="mb-3">Developer will present the Site for Client review at each major milestone. Client has 7 business days to respond with approval or revision requests. No response within that window is considered approval. Final written approval authorizes launch and constitutes acceptance of the delivered work.</p>
 
-          <h3 className="font-bold text-gray-900 mt-4 mb-2">4.0. Copyright</h3>
-          <p className="mb-3">Client owns copyright to the content of the work. Client gives us permission to record any video meetings for design purposes.</p>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">5. Post-Launch Support</h3>
+          <p className="mb-3">Developer provides 30 days of post-launch support for bugs or errors caused by Developer's work at no charge. This does not cover new requests, client-made changes, plugin updates, or content edits. Work outside this scope is billed at Developer's hourly rate.</p>
 
-          <h3 className="font-bold text-gray-900 mt-4 mb-2">9.0. Termination</h3>
-          <p className="mb-3">Each Party may terminate this Agreement by written notice for material breach, provided such breach remains uncured within thirty (30) days. If Client cancels for any reason, Developer shall retain the non-refundable Deposit and all payments made to date.</p>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">6. Copyright &amp; License</h3>
+          <p className="mb-3">Client owns the copyright to all content it provides. Upon payment in full, Client receives a non-exclusive license to use Developer's tools solely to operate the Site. Developer retains all rights to its tools and development resources. Developer may display the Site in its portfolio and marketing materials and tag Client on social media at launch. No confidential business information will be disclosed without Client's consent. Client consents to Developer recording video meetings for design and training purposes.</p>
 
-          <h3 className="font-bold text-gray-900 mt-4 mb-2">11.0. Applicable Law</h3>
-          <p className="mb-3">This Agreement shall be governed by the laws of the State of Oklahoma with jurisdiction and venue in Tulsa County, Oklahoma.</p>
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">7. Domain Name</h3>
+          <p className="mb-3">Client is responsible for obtaining and maintaining its own domain name at its own expense. Developer has no interest in Client's domain.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">8. Client Content</h3>
+          <p className="mb-3">Client is responsible for all content provided for the Site. Client warrants that it owns or has rights to all such content and that it does not infringe any third-party rights or violate any laws. Developer is not liable for claims arising from Client-supplied content.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">9. Third-Party Assets</h3>
+          <p className="mb-3">The Site may use licensed third-party assets (fonts, stock photos, plugins, etc.). Developer will disclose these to Client. Client is responsible for maintaining required licenses after delivery. Developer is not liable for claims arising from Client's failure to do so.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">10. Hosting</h3>
+          <p className="mb-3">If Developer provides hosting, it will make reasonable efforts to maintain Site availability but does not guarantee uninterrupted service. Client is responsible for maintaining its own backups. Hosting accounts in Developer's name remain under Developer's control until all fees are paid and the account is transferred. Hosting may be suspended for accounts 90+ days past due.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">11. Disclaimers &amp; Warranties</h3>
+          <p className="mb-3">ALL WORK IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. DEVELOPER DOES NOT WARRANT THAT THE SITE WILL OPERATE ERROR-FREE OR WITHOUT INTERRUPTION.</p>
+          <p className="mb-3"><strong>AI Tools.</strong> Developer may use AI-assisted tools during the project. Developer does not warrant the originality, accuracy, or legal clearance of AI-assisted outputs. Developer reviews all AI-assisted work before delivery, but this is not a guarantee against defects or third-party claims. Client is responsible for any AI-generated content it provides.</p>
+          <p className="mb-3"><strong>SEO.</strong> Developer makes no guarantee of search engine rankings, traffic, or business outcomes. Any SEO configuration is technical setup only.</p>
+          <p className="mb-3"><strong>Browsers.</strong> The Site will be compatible with current stable versions of Chrome, Firefox, Safari, and Edge on standard mobile and desktop devices. Legacy browsers and non-standard devices are not covered.</p>
+          <p className="mb-3"><strong>Privacy &amp; Compliance.</strong> Client is solely responsible for the Site's compliance with applicable laws, including GDPR, CCPA, and CAN-SPAM. Any privacy tools Developer configures are not legal compliance advice.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">12. Liability</h3>
+          <p className="mb-3">Developer is not liable for lost profits or consequential damages. Client agrees to indemnify Developer against third-party claims arising from Client's use of the Site or Client-supplied content.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">13. Termination</h3>
+          <p className="mb-3">Either party may terminate for material breach with 30 days' written notice if the breach is not cured. If Client cancels for any reason, Developer retains the Deposit and all payments made to date. If Client goes 30 days without responding to a written request, Developer may stop work and retain all payments, then either deliver unfinished files and close the project, or negotiate a new schedule.</p>
+          <p className="mb-3"><strong>Abandonment.</strong> If the project is inactive for 90+ days due to Client, it is considered abandoned. A 25% restart fee applies to resume work.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">14. File Retention</h3>
+          <p className="mb-3">After termination, Developer will retain Client's project files for 6 months. Client may request file delivery at any time during this period. After 6 months, files may be permanently deleted without notice. Developer is not liable for file loss after this period. Developer may retain copies for portfolio or legal purposes.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">15. Confidentiality</h3>
+          <p className="mb-3">Both parties agree not to disclose the terms of this Agreement without the other's written consent, except as required by law.</p>
+
+          <h3 className="font-bold text-gray-900 mt-4 mb-2">16. Governing Law</h3>
+          <p className="mb-3">This Agreement is governed by Oklahoma law, with jurisdiction in Tulsa County. Disputes will first go to mediation under the American Arbitration &amp; Mediation Association. The prevailing party in any legal action is entitled to recover attorney's fees and costs.</p>
 
           {scheduleA && (
             <div className="mt-4">
