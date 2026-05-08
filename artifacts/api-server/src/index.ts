@@ -1,5 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
+import { seedMasterClientsIfEmpty } from "./seed-master-clients";
 
 const rawPort = process.env["PORT"];
 
@@ -22,4 +23,8 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
+
+  seedMasterClientsIfEmpty().catch((seedErr) => {
+    logger.error({ err: seedErr }, "master_clients seed failed");
+  });
 });
