@@ -724,8 +724,10 @@ function MasterClientsTab() {
 
   const load = useCallback(async () => {
     try {
-      const data = await fetch("/api/master-clients").then((r) => r.json()) as MasterClientRow[];
-      setRows(data);
+      const r = await fetch("/api/master-clients");
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const data = await r.json() as MasterClientRow[];
+      setRows(Array.isArray(data) ? data : []);
     } catch { toast({ title: "Failed to load clients", variant: "destructive" }); }
     finally { setLoading(false); }
   }, [toast]);
