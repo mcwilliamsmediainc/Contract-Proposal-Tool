@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Client List 2026 — McWilliams Media</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:#ffffff; --bg2:#f8f8f6; --bgh:#f1f0ec;
+    --border:rgba(0,0,0,0.09); --border-med:rgba(0,0,0,0.16);
+    --text:#1a1a1a; --muted:#6b6b68; --faint:#9a9a97;
+    --focus:#378add; --rh:28px;
+  }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13px; background:var(--bg2); color:var(--text); min-height:100vh; }
+  .app-header { background:var(--bg); border-bottom:1px solid var(--border-med); padding:9px 14px; display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; position:sticky; top:0; z-index:100; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+  .app-title { font-size:14px; font-weight:600; }
+  .app-sub { font-size:11px; color:var(--muted); margin-top:1px; }
+  .controls { display:flex; gap:5px; flex-wrap:wrap; align-items:center; }
+  input[type=text], select { font-size:12px; height:27px; padding:0 8px; border-radius:7px; border:1px solid var(--border-med); background:var(--bg); color:var(--text); outline:none; font-family:inherit; }
+  input[type=text]:focus, select:focus { border-color:var(--focus); box-shadow:0 0 0 2px rgba(55,138,221,.14); }
+  #search { width:190px; }
+  .btn { font-size:12px; height:27px; padding:0 11px; border-radius:7px; border:1px solid var(--border-med); background:var(--bg); color:var(--text); cursor:pointer; display:inline-flex; align-items:center; gap:4px; font-family:inherit; white-space:nowrap; }
+  .btn:hover { background:var(--bg2); }
+  .btn-primary { background:#1a1a1a; color:#fff; border-color:#1a1a1a; }
+  .btn-primary:hover { background:#333; }
+  .stats { font-size:11px; color:var(--muted); white-space:nowrap; }
+  .unsaved { width:7px; height:7px; border-radius:50%; background:#e24b4a; display:inline-block; margin-left:5px; opacity:0; transition:opacity .2s; }
+  .unsaved.on { opacity:1; }
+  .sheet-outer { margin:10px; border:1px solid var(--border-med); border-radius:11px; background:var(--bg); overflow:hidden; }
+  .sheet-scroll { overflow-x:auto; max-height:calc(100vh - 80px); overflow-y:auto; }
+  table { border-collapse:collapse; white-space:nowrap; min-width:100%; font-size:12px; }
+  thead { position:sticky; top:0; z-index:50; }
+  thead tr { background:var(--bgh); }
+  th { padding:0 7px; height:26px; font-size:10px; font-weight:600; color:var(--muted); text-align:left; border-bottom:1px solid var(--border-med); border-right:1px solid var(--border); cursor:pointer; user-select:none; text-transform:uppercase; letter-spacing:.04em; }
+  th:last-child { border-right:none; cursor:default; }
+  th:hover:not(:last-child) { color:var(--text); background:#eae9e4; }
+  .thi { display:flex; align-items:center; gap:2px; }
+  .sa { font-size:9px; opacity:.5; }
+  td { height:var(--rh); padding:0; border-bottom:1px solid var(--border); border-right:1px solid var(--border); vertical-align:middle; }
+  td:last-child { border-right:none; }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#fafaf8 !important; }
+  .ci { width:100%; height:var(--rh); padding:0 7px; border:none; background:transparent; font-size:12px; color:var(--text); font-family:inherit; outline:none; }
+  .ci:focus { background:#eef6ff; outline:2px solid var(--focus); outline-offset:-2px; position:relative; z-index:1; }
+  .cs { width:100%; height:var(--rh); padding:0 5px; border:none; background:transparent; font-size:12px; color:var(--text); font-family:inherit; outline:none; cursor:pointer; }
+  .cs:focus { background:#eef6ff; outline:2px solid var(--focus); outline-offset:-2px; }
+  .cbc { display:flex; align-items:center; justify-content:center; height:var(--rh); }
+  .cbc input { width:13px; height:13px; cursor:pointer; accent-color:#185FA5; }
+  .fc { display:flex; align-items:center; justify-content:center; height:var(--rh); cursor:pointer; font-size:12px; font-weight:700; user-select:none; }
+  .fq{color:#ba7517;} .fd{color:#888780;} .fx{color:#e24b4a;}
+  .cn{width:36px;min-width:36px;background:var(--bgh);border-right:1px solid var(--border-med)!important;text-align:center;font-size:10px;color:var(--faint);padding:0 3px}
+  .cf{width:30px;min-width:30px;text-align:center}
+  .cc{min-width:200px;width:200px} .cst{min-width:88px;width:88px} .csv{min-width:64px;width:64px;text-align:center}
+  .ctr{min-width:74px;width:74px} .ctp{min-width:130px;width:130px} .cup{min-width:165px;width:165px}
+  .cnx{min-width:108px;width:108px} .cot{min-width:230px;width:230px} .cdl{width:28px;min-width:28px;text-align:center}
+  .db{border:none;background:none;padding:2px 4px;height:auto;color:var(--faint);cursor:pointer;border-radius:4px;font-size:12px;line-height:1}
+  .db:hover{color:#a32d2d;background:#fcebeb}
+  .empty{text-align:center;padding:28px;color:var(--muted);font-size:13px}
+  #toast{position:fixed;bottom:18px;right:18px;background:#1a1a1a;color:#fff;font-size:12px;padding:7px 14px;border-radius:8px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9999}
+  #toast.show{opacity:1}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div>
+    <div class="app-title">Master Client List 2026 <span class="unsaved" id="ud"></span></div>
+    <div class="app-sub">McWilliams Media — 234 clients</div>
+  </div>
+  <div class="controls">
+    <input type="text" id="search" placeholder="🔍 Search clients…" oninput="render()">
+    <select id="f-strat" onchange="render()">
+      <option value="">All strategists</option>
+      <option>Tiffany</option><option>Rachelle</option><option>Matt</option><option>Elise</option><option>Support</option>
+    </select>
+    <select id="f-tier" onchange="render()">
+      <option value="">All tiers</option>
+      <option value="Tier 1">Tier 1</option><option value="Tier 2">Tier 2</option><option value="Tier 3">Tier 3</option>
+    </select>
+    <select id="f-svc" onchange="render()">
+      <option value="">All services</option>
+      <option value="website">Website/1x</option><option value="hosting">Hosting</option><option value="seo">SEO</option>
+      <option value="adwords">Google Ads</option><option value="fbads">FB Ads</option><option value="lsa">LSA</option>
+      <option value="email">Email</option><option value="social">Social Media</option><option value="blog">Blog</option>
+      <option value="mailbox">Mailbox</option><option value="photo">Photo/Video</option>
+    </select>
+    <span class="stats" id="stats"></span>
+    <button class="btn" onclick="addRow()">+ Add client</button>
+    <button class="btn" onclick="exportCSV()">↓ Export CSV</button>
+    <button class="btn btn-primary" onclick="saveData()">✓ Save</button>
+  </div>
+</div>
+<div class="sheet-outer"><div class="sheet-scroll">
+<table id="tbl">
+<thead><tr>
+  <th class="cn" style="cursor:default">#</th>
+  <th class="cf" onclick="sortBy('flag')"><span class="thi">⚑<span class="sa" id="sa-flag"></span></span></th>
+  <th class="cc" onclick="sortBy('client')"><span class="thi">Client<span class="sa" id="sa-client"></span></span></th>
+  <th class="cst" onclick="sortBy('strat')"><span class="thi">Strategist<span class="sa" id="sa-strat"></span></span></th>
+  <th class="csv" onclick="sortBy('website')"><span class="thi">Website<span class="sa" id="sa-website"></span></span></th>
+  <th class="csv" onclick="sortBy('hosting')"><span class="thi">Hosting<span class="sa" id="sa-hosting"></span></span></th>
+  <th class="csv" onclick="sortBy('seo')"><span class="thi">SEO<span class="sa" id="sa-seo"></span></span></th>
+  <th class="csv" onclick="sortBy('adwords')"><span class="thi">G.Ads<span class="sa" id="sa-adwords"></span></span></th>
+  <th class="csv" onclick="sortBy('fbads')"><span class="thi">FB Ads<span class="sa" id="sa-fbads"></span></span></th>
+  <th class="csv" onclick="sortBy('lsa')"><span class="thi">LSA<span class="sa" id="sa-lsa"></span></span></th>
+  <th class="csv" onclick="sortBy('email')"><span class="thi">Email<span class="sa" id="sa-email"></span></span></th>
+  <th class="csv" onclick="sortBy('social')"><span class="thi">Social<span class="sa" id="sa-social"></span></span></th>
+  <th class="csv" onclick="sortBy('blog')"><span class="thi">Blog<span class="sa" id="sa-blog"></span></span></th>
+  <th class="csv" onclick="sortBy('mailbox')"><span class="thi">Mailbox<span class="sa" id="sa-mailbox"></span></span></th>
+  <th class="csv" onclick="sortBy('photo')"><span class="thi">Photo/Vid<span class="sa" id="sa-photo"></span></span></th>
+  <th class="ctr" onclick="sortBy('tier')"><span class="thi">Tier<span class="sa" id="sa-tier"></span></span></th>
+  <th class="ctp" onclick="sortBy('touchpoint')"><span class="thi">Sched. touchpoint<span class="sa" id="sa-touchpoint"></span></span></th>
+  <th class="cup" onclick="sortBy('upsell')"><span class="thi">Potential upsell<span class="sa" id="sa-upsell"></span></span></th>
+  <th class="cnx" onclick="sortBy('next')"><span class="thi">Next target<span class="sa" id="sa-next"></span></span></th>
+  <th class="cot" onclick="sortBy('other')"><span class="thi">Other<span class="sa" id="sa-other"></span></span></th>
+  <th class="cdl"></th>
+</tr></thead>
+<tbody id="tbody"></tbody>
+</table>
+</div></div>
+<div id="toast"></div>
+<script>
+const FLAG_CYCLE=['','?','-','!'];
+const SVCS=['website','hosting','seo','adwords','fbads','lsa','email','social','blog','mailbox','photo'];
+const STRATS=['Tiffany','Rachelle','Matt','Elise','Support'];
+const SEED=[["", "141 Peoria (Pine Ridge website)", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "3 Delta Window Films", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "360+ Construction", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "5th Quarter Officiating", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Accounting Outsourcing Solutions", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "Action COACH Tulsa", "Tiffany", 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Action Pest Management", "Tiffany", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "Week of 7/7", "Blog Add-On + Google LSA", "July 2026", "TK Sent proposal on 7/18 with follow-up call scheduled for 7/21"], ["", "Acura Neon", "Tiffany", 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, "Tier 1", "Week of 7/7", "SEO + Blog", "July 2026", "TK sent proposal on 7/18"], ["", "Adept Patriot Services", "Rachelle", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Align Sport & Spine", "Elise", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "All Dry Services, LLC", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "", "", "", "", ""], ["", "All Dry of OKC", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "All Dry of Tulsa", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "All India Sourcing Group", "Tiffany", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Alli Hayes Real Estate Group", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "Allied Broadcasting", "Tiffany", 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "American Pipe Bending", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "AMV Exterior Contracting", "Rachelle", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Antiquities (Mike Withers)", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "Archer HR Consulting", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 8/19", "", "", ""], ["", "Archer Insurance", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "July 2026", ""], ["", "Ark Roofing", "Rachelle", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "ArtsOK", "Elise", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Ashes Away Chimney Sweep", "Matt", 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Atlas Lounge/SJS Hospitality", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 1", "Week of 7/21", "New Website!", "", "Doing a one time Newsletter, won't be a monthly plan"], ["", "Atmos Design Build", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 8/19", "", "", ""], ["", "BA Buzz", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/7", "", "", ""], ["", "BAPS Foundation", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 8/19", "What's your goals?", "", ""], ["", "BCB Energy Solutions", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "Week 7/7", "Signed contract for SEO services with GMB", "July 2026", ""], ["", "Bella Vita Spa and Salon", "Rachelle", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Blackwood Real Estate", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Bledsoe, Hewitt, & Gullekson", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 8/19", "", "", ""], ["", "Blessings International", "Rachelle", 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 3", "Week of 8/19", "Meeting set for 8/20", "November 2025", ""], ["", "Blue Dome Dining", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Box Construction", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Bright Home Health", "Tiffany", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Broken Arrow Family Dentistry", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Broken Arrow Varsity Football Booster Club", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Bruner Law Firm", "Tiffany", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Buccal Up - Denistry for You OKC", "Matt", 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Buccal Up Dental - Your Olathe Dentist", "Matt", 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, "Tier 3", "", "", "", ""], ["", "Buccal Up Dental- Corp", "Matt", 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 3", "", "", "", "CA facebook pg checks"], ["", "Buccal Up Dentistry for you Broken Arrow", "Matt", 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, "Tier 3", "", "", "", ""], ["-", "Buccal Up McDougall", "Matt", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 3", "", "", "", ""], ["-", "Buccal Up- Denistry for You SS", "Matt", 0, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, "Tier 3", "", "", "", ""], ["", "CamTech", "Matt", 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Care Family Medical & Chiropractic", "Matt", 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "CFC Law", "Tiffany", 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Chapman Edge & Engine", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Child Advocacy Network", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Chiropractic Association", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Christian Family Institute", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Coffman & Seidenberger, PLLC", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/28", "", "July 2026", ""], ["", "Cole Tech", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Colton's Support (DND)", "Support", 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Conklin, Gilpin, Wertz", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/28", "", "", ""], ["", "Core Rehab", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "Week of 7/14", "", "July 2026", ""], ["", "Cornerstone FSOK", "Elise", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["?", "Crown Office Furnishings", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Cultivate Primary Care", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["?", "CWC Interiors", "Tiffany", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "DMD Alarm Pro", "Tiffany", 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, "", "", "", "", ""], ["", "DomesticAide", "Rachelle", 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Dr. Chadwick Webster DDS", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Dragonfly Enterprises (DND)", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Eagle Rock Realty & Property Management", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Eastern Oklahoma Chiropractic-Travis Ring", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Eastern Oklahoma Wellness & Chiropractic", "Rachelle", 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Elite Home Pest Service (DND)", "Rachelle", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Elite Outdoor Services LLC", "Rachelle", 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, "Tier 3", "", "", "", ""], ["", "Emerald House Design Co", "Rachelle", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Emerald Quest", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Empowered Life Counseling (DND)", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Encore Coummincations", "Tiffany", 1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Envirovalve", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "EOWC Medical-Rick Barnes", "Rachelle", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Events By Lisa", "Matt", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Evolution Mental Health", "Rachelle", 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Expanded Solutions", "Tiffany", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Faith Tabernacle", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Floor and Restore by George", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Foundation Law Wesley Cherry", "Matt", 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Frasier Law", "Tiffany", 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 0, "", "", "", "", ""], ["", "Fusion Enterprises LLC", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Gary W. Crews, PLLC", "Rachelle", 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, "Tier 3", "", "", "", ""], ["", "Genesis Technologies Inc.", "Tiffany", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Good Guy's Roofing", "Matt", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Grace and Peace Presbyterian Church", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Grassroots Essentials", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Green Country Business Solutions", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Gunter Training", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Hagen Enviromental", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, "Tier 3", "", "", "", ""], ["", "Harvest Acupuncture", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "HBI Global Partners", "Matt", 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Healing Broken Trust", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Heritage Waste Management", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "High Point Grace Church", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Hillenburg Coffee Company", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Holly Mechanical", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Home of Grace Ministry, Inc", "Elise", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Honeycomb Company of America, Inc", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Hopper Dental", "Matt", 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Integrity Pools", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Integrity Staffing Solutions", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "ION Sports ☠️", "Elise", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "J. Miller Law Firm, PLLC", "Rachelle", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Jared Haley(The Property Center)", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Joie de Vie Interiors", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Jolly Lane Lights", "Tiffany", 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Kimberly Haar - Author", "Tiffany", 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Kimberly K. Hays, PLLC", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Daytona", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Evansville", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Gulf Port", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Hampton Roads", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Lehigh Valley", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Louisville", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Mufreesboro", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - OC", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Kwik Dry - OKC", "Matt", 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Palm Beach", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Phoenix", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - LA", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Kwik Dry Tulsa", "Matt", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Kwik Dry- Central Florida", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Kwik Dry - Rio Grande Valley", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "L. Eads, LLC", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Lamb Homes (same owner as 141)", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Lane Publishing/Tulsa Pet (Moved Sites)", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "LDC", "Rachelle", 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, "Tier 3", "", "", "", "FB Ad"], ["", "Legacy Financial & Consulting", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Legalis Connection Hub", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Len Mink Ministries", "Support", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "LoneStar Vapor Shop, LLC", "Tiffany", 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "M&D Contracting", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Magnolia Family Dental Care", "Tiffany", 1, 1, 1, 1, 0, 0, 0, 1, 0, 0, 0, "Tier 3", "qtr strategy", "", "", "building new site"], ["", "Maplebrook Acupuncture Clinc", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Mari Coffee and Tea", "Rachelle", 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Martinez Law", "Tiffany", 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, "Tier 3", "", "", "", ""], ["", "Mathis Homes", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "MC2 Homes, LLC", "Matt", 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, "", "", "", "", ""], ["", "McDougall DDS", "Matt", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "McWilliams Media", "Matt", 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, "Tier 3", "everyday", "", "", ""], ["", "Monitoring America Alarm Co-Op", "Rachelle", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Mr Electric", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "MS Moving Soulutions", "Elise", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Nantz Mower & Small Engine LLC", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Neurogenesis Brain and Spine", "Tiffany", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Nikki Burgett", "Support", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Now Someday Adventures", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "OFSA", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "OK Compliance Testing Lab", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Ok Traffic Ticket Defense", "Tiffany", 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, "Tier 3", "", "", "", ""], ["", "Okieolier-Jan Collins", "Support", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Oklahoma Mortgage Group", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Oklahoma Recycling Association", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Oklahome Inspections", "Matt", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "On The Rock", "Tiffany", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Oren", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Pain Management of Oklahoma BA", "Matt", 1, 1, 1, 1, 1, 0, 0, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Pain Management of Oklahoma Grove", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Pain Management of Oklahoma Mcalester", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Pain Management of Oklahoma Sallisaw", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Pain Managmet of Oklahome Sand Springs", "Matt", 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Petty Family Floors", "Tiffany", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Pharma Freedom", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Premier Janitorial", "Tiffany", 0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, "Tier 3", "", "", "", ""], ["", "Premier Rheum of OK", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Precision Finishing LLC", "Elise", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Professional Driven Solutions", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Property Arts Inc", "Tiffany", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Pryor Creek Dental", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "PSS Enterprises, Inc", "Rachelle", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Quilter's Hideaway", "Rachelle", 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Reimagined Health", "Matt", 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Renaissance Reatly", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Revitalize Osteopractic Physical Therapy", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Riverside Heat & Air", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Roof Sixty-Six Bar", "Tiffany", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Roofs-R-Us (DND)", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", "Stopping SEO and would like to prorate the first week of June SEO and nothing more if possible. He called 6/7/2022 to cancel and ask for prorated SEO told him Matt was the decision maker and he was out of town AERODGERS"], ["", "Ryan's Manufacturing", "Matt", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Sam the Concrete Man", "Tiffany", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, "Tier 1", "", "", "", "New client as of 4/30"], ["", "Seasons OK, MO", "Matt", 1, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Semi Crazy Truck Wash", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "siHi Minstries", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Silver Canyon RV Park", "Matt", 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, "", "", "", "", ""], ["", "SJS Hospitality", "Tiffany", 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Southern Safe Rooms", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Southern Sheet Metal", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "SpecTest LLC", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Spradlin Service Company", "Rachelle", 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "SRC Fixtures", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Standard Roofing and Contracting", "Matt", 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Starting Strength", "Tiffany", 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Step by Step Therapy, Inc.", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Stephen DeCanio", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Stubque", "Matt", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "SubStruct", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Sundance Office Furniture", "Matt", 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Swineheart Insurance Agency", "Matt", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Tellez Heating & Air", "Matt", 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "The Blanchard Law Firm", "Rachelle", 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, "Tier 3", "", "", "", ""], ["", "The Connecting Co", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "The Dental Studio of South Tulsa", "Tiffany", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "The Office", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "The Poop Fairy", "Rachelle", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Thorny Nettles", "Matt", 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, "", "", "", "", ""], ["", "Tokyo Garden", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Tower Business Complex", "Rachelle", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", "Linds"], ["", "Transcend Dental Implants & Perio", "Rachelle", 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Truskett Law", "Matt", 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, "Tier 2", "1/month", "", "", ""], ["", "Tulsa Elite Meet", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Tulsa Executive Cleaning", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Tulsa Gun Club", "Tiffany", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Tulsa Insurance Guy", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Tulsa Modern Dental", "Matt", 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, "", "", "", "", ""], ["", "Tulsa Surveillance Tech", "Tiffany", 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Ultimate Cabinets", "Tiffany", 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Ultimate project, Inc", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "UpClosets", "Tiffany", 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, "Tier 3", "", "", "", ""], ["", "Via Sophia Bookkeeping", "Tiffany", 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Wagner & Lynch Law Firms", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Wagner for House", "Matt", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Watson Tree Academy", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "West Tulsa Tag", "Tiffany", 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, "Tier 1", "", "", "", ""], ["", "Whipp Law", "Tiffany", 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Whitacre Glass", "Rachelle", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Wiemann/IMG (DND)", "Support", 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Willow Landscape & Design", "Tiffany", 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""], ["", "Winches Inc", "Tiffany", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "Winds of Change", "Tiffany", 1, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, "", "", "", "", ""], ["", "Word of Life Church", "Support", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "World Dental Relief", "Support", 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, "Tier 1", "", "", "", ""], ["", "ZEIDERS LAW GROUP, PLLC", "Rachelle", 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, "Tier 2", "", "", "", ""]];
+
+let rows=[], nextId=5000, sortCol='', sortDir=1;
+
+function initData(){
+  try{ const s=localStorage.getItem('mcw_master_v5'); if(s){rows=JSON.parse(s);return;} }catch(e){}
+  rows=SEED.map((r,i)=>({
+    id:i+1, flag:r[0], client:r[1], strat:r[2],
+    website:r[3],hosting:r[4],seo:r[5],adwords:r[6],fbads:r[7],lsa:r[8],
+    email:r[9],social:r[10],blog:r[11],mailbox:r[12],photo:r[13],
+    tier:r[14]||'', touchpoint:r[15]||'', upsell:r[16]||'', next:r[17]||'', other:r[18]||''
+  }));
+}
+
+function saveData(){
+  try{ localStorage.setItem('mcw_master_v5',JSON.stringify(rows)); }catch(e){ toast('Save failed.'); return; }
+  document.getElementById('ud').classList.remove('on');
+  toast('Saved \u2713');
+}
+
+function markUnsaved(){ document.getElementById('ud').classList.add('on'); }
+
+function render(){
+  const q=document.getElementById('search').value.toLowerCase();
+  const fs=document.getElementById('f-strat').value;
+  const ft=document.getElementById('f-tier').value;
+  const fv=document.getElementById('f-svc').value;
+  let list=rows.filter(r=>{
+    if(q&&!r.client.toLowerCase().includes(q)&&!r.strat.toLowerCase().includes(q)&&!(r.other||'').toLowerCase().includes(q)&&!(r.upsell||'').toLowerCase().includes(q)&&!(r.touchpoint||'').toLowerCase().includes(q))return false;
+    if(fs&&r.strat!==fs)return false;
+    if(ft&&r.tier!==ft)return false;
+    if(fv&&!r[fv])return false;
+    return true;
+  });
+  if(sortCol){
+    list=[...list].sort((a,b)=>{
+      const av=a[sortCol],bv=b[sortCol];
+      if(typeof av==='number')return sortDir*(av-bv);
+      return sortDir*(av||'').localeCompare(bv||'');
+    });
+  }
+  const total=rows.length;
+  document.getElementById('stats').textContent=list.length===total?`${total} clients`:`${list.length} of ${total}`;
+  const allCols=['flag','client','strat','tier',...SVCS,'touchpoint','upsell','next','other'];
+  allCols.forEach(c=>{ const el=document.getElementById('sa-'+c); if(el)el.textContent=sortCol===c?(sortDir===1?' \u2191':' \u2193'):''; });
+  const gi={};rows.forEach((r,i)=>{gi[r.id]=i+1;});
+  const tbody=document.getElementById('tbody');
+  if(!list.length){ tbody.innerHTML='<tr><td colspan="22" class="empty">No clients match the current filters.</td></tr>'; return; }
+  tbody.innerHTML=list.map(r=>{
+    const fc_cls={'-':'fd','?':'fq','!':'fx'}[r.flag]||'';
+    return`<tr data-id="${r.id}">
+      <td class="cn">${gi[r.id]}</td>
+      <td class="cf"><div class="fc ${fc_cls}" onclick="cycleFlag(${r.id})" title="Toggle flag">${esc(r.flag)}</div></td>
+      <td class="cc"><input class="ci" value="${esc(r.client)}" onchange="setF(${r.id},'client',this.value)" onblur="saveData()"></td>
+      <td class="cst"><select class="cs" onchange="setF(${r.id},'strat',this.value);saveData();render()">
+        ${STRATS.map(s=>`<option${r.strat===s?' selected':''}>${s}</option>`).join('')}
+      </select></td>
+      ${SVCS.map(s=>`<td class="csv"><div class="cbc"><input type="checkbox"${r[s]?' checked':''} onchange="setF(${r.id},'${s}',this.checked?1:0);saveData()"></div></td>`).join('')}
+      <td class="ctr"><select class="cs" onchange="setF(${r.id},'tier',this.value);saveData();render()">
+        <option value=""${!r.tier?' selected':''}>—</option>
+        ${['Tier 1','Tier 2','Tier 3'].map(t=>`<option${r.tier===t?' selected':''}>${t}</option>`).join('')}
+      </select></td>
+      <td class="ctp"><input class="ci" value="${esc(r.touchpoint)}" onchange="setF(${r.id},'touchpoint',this.value)" onblur="saveData()"></td>
+      <td class="cup"><input class="ci" value="${esc(r.upsell)}" onchange="setF(${r.id},'upsell',this.value)" onblur="saveData()"></td>
+      <td class="cnx"><input class="ci" value="${esc(r.next)}" onchange="setF(${r.id},'next',this.value)" onblur="saveData()"></td>
+      <td class="cot"><input class="ci" value="${esc(r.other)}" onchange="setF(${r.id},'other',this.value)" onblur="saveData()"></td>
+      <td class="cdl"><button class="db" onclick="delRow(${r.id})" title="Delete">\u2715</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(s){ return(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function setF(id,f,v){ const r=rows.find(x=>x.id===id); if(r){r[f]=v;markUnsaved();} }
+function cycleFlag(id){ const r=rows.find(x=>x.id===id); if(!r)return; r.flag=FLAG_CYCLE[(FLAG_CYCLE.indexOf(r.flag)+1)%FLAG_CYCLE.length]; markUnsaved();saveData();render(); }
+function delRow(id){ const r=rows.find(x=>x.id===id); if(!r||!confirm(`Delete "${r.client}"?`))return; rows=rows.filter(x=>x.id!==id); saveData();render();toast('Deleted.'); }
+function addRow(){
+  rows.push({id:++nextId,flag:'',client:'New client',strat:'Tiffany',website:0,hosting:0,seo:0,adwords:0,fbads:0,lsa:0,email:0,social:0,blog:0,mailbox:0,photo:0,tier:'',touchpoint:'',upsell:'',next:'',other:''});
+  markUnsaved();render();
+  setTimeout(()=>{ const rs=document.querySelectorAll('#tbody tr'); const last=rs[rs.length-1]; if(last){const inp=last.querySelector('input.ci'); if(inp){inp.focus();inp.select();}} },40);
+}
+function sortBy(col){ if(sortCol===col)sortDir*=-1; else{sortCol=col;sortDir=1;} render(); }
+function exportCSV(){
+  const h=['Flag','Client','Strategist','Website/1x','Hosting','SEO','Google Ads','FB Ads','LSA','Email','Social Media','Blog','Mailbox','Photo/Video','Tier','Scheduled Touchpoint','Potential Upsell','Next Target Touchpoint','Other'];
+  const b=rows.map(r=>[r.flag,r.client,r.strat,r.website,r.hosting,r.seo,r.adwords,r.fbads,r.lsa,r.email,r.social,r.blog,r.mailbox,r.photo,r.tier,r.touchpoint,r.upsell,r.next,r.other]);
+  const csv=[h,...b].map(row=>row.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'})); a.download='master_client_list_2026.csv'; a.click(); toast('Exported.');
+}
+function toast(msg){ const el=document.getElementById('toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200); }
+document.addEventListener('keydown',e=>{ if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();} });
+initData(); render();
+</script>
+</body>
+</html>
