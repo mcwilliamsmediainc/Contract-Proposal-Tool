@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PublicHeader } from "@/components/layout/public-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,6 @@ import {
   Loader2,
   Globe,
   MapPin,
-  MessageSquare,
   Mail,
   ChevronRight,
   CheckCircle2,
@@ -17,23 +16,20 @@ import {
   Share2,
   Bot,
   Lock,
-  Unlock,
+  Star,
+  Shield,
+  FileText,
   Target,
-  DollarSign,
+  MapPinned,
   ArrowRight,
   Zap,
 } from "lucide-react";
 
 const BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
 
-type WizardStep = "intro" | "scanning" | "teaser" | "email-gate" | "full-report" | "qualify" | "done";
+type WizardStep = "challenge" | "intro" | "scanning" | "results" | "qualify" | "done";
 
-interface TeaserScores {
-  ux: number | null;
-  seo: number | null;
-  social: number | null;
-  aiVisibility: number | null;
-}
+// ── Types ─────────────────────────────────────────────────────────────────
 
 interface Observation {
   summary: string;
@@ -42,88 +38,202 @@ interface Observation {
   aiQuote?: string;
 }
 
-interface FullData {
-  scores: { ux: number; seo: number; social: number; aiVisibility: number };
-  observations: { ux: Observation; seo: Observation; social: Observation; aiVisibility: Observation };
-  businessType: string;
+interface NinePillarScores {
+  ux:          number | null;
+  seo:         number | null;
+  gbp:         number | null;
+  reviews:     number | null;
+  trust:       number | null;
+  content:     number | null;
+  leadCapture: number | null;
+  social:      number | null;
+  aiVisibility:number | null;
 }
 
-function scoreColor(s: number | null): string {
-  if (s === null) return "text-white/30";
+interface NinePillarObs {
+  ux?:          Observation;
+  seo?:         Observation;
+  gbp?:         Observation;
+  reviews?:     Observation;
+  trust?:       Observation;
+  content?:     Observation;
+  leadCapture?: Observation;
+  social?:      Observation;
+  aiVisibility?:Observation;
+}
+
+// ── Pillar config ─────────────────────────────────────────────────────────
+
+const PILLARS: {
+  key: keyof NinePillarScores;
+  label: string;
+  Icon: React.ElementType;
+  gated?: boolean;
+}[] = [
+  { key: "ux",          label: "Website UX",              Icon: Globe     },
+  { key: "seo",         label: "SEO Presence",            Icon: Search    },
+  { key: "gbp",         label: "Google Business Profile", Icon: MapPinned },
+  { key: "reviews",     label: "Review Signals",          Icon: Star      },
+  { key: "trust",       label: "Trust Signals",           Icon: Shield    },
+  { key: "content",     label: "Content Health",          Icon: FileText  },
+  { key: "leadCapture", label: "Lead Capture",            Icon: Target    },
+  { key: "social",      label: "Social Media",            Icon: Share2,   gated: true },
+  { key: "aiVisibility",label: "AI Visibility",           Icon: Bot,      gated: true },
+];
+
+const CHALLENGES = [
+  { id: "leads",    label: "We're not getting enough leads",     emoji: "📉" },
+  { id: "google",   label: "We can't be found on Google",        emoji: "🔍" },
+  { id: "outdated", label: "Our website looks outdated",          emoji: "🖥️" },
+  { id: "reviews",  label: "We need more reviews / reputation",  emoji: "⭐" },
+];
+
+const SCAN_STEPS = [
+  { icon: Globe,     label: "Checking page speed & UX…"           },
+  { icon: Search,    label: "Analyzing SEO structure…"             },
+  { icon: MapPinned, label: "Evaluating Google Business Profile…"  },
+  { icon: Star,      label: "Scanning review signals…"             },
+  { icon: Shield,    label: "Checking trust indicators…"           },
+  { icon: FileText,  label: "Reviewing content strategy…"          },
+  { icon: Target,    label: "Testing lead capture readiness…"      },
+  { icon: Share2,    label: "Analyzing social presence…"           },
+  { icon: Bot,       label: "Assessing AI visibility…"             },
+];
+
+// ── Score helpers ─────────────────────────────────────────────────────────
+
+function scoreColor(s: number | null | undefined) {
+  if (s == null) return "text-white/30";
   if (s >= 70) return "text-emerald-400";
   if (s >= 50) return "text-amber-400";
   return "text-red-400";
 }
 
-function scoreBg(s: number | null): string {
-  if (s === null) return "bg-white/5 border-white/10";
+function scoreBgClass(s: number | null | undefined) {
+  if (s == null) return "bg-white/5 border-white/10";
   if (s >= 70) return "bg-emerald-500/10 border-emerald-500/30";
   if (s >= 50) return "bg-amber-500/10 border-amber-500/30";
   return "bg-red-500/10 border-red-500/30";
 }
 
-function scoreLabel(s: number | null): string {
-  if (s === null) return "Locked";
+function scoreLabel(s: number | null | undefined) {
+  if (s == null) return "Locked";
   if (s >= 70) return "Good";
   if (s >= 50) return "Needs Work";
   return "Critical";
 }
 
-function scoreLabelColor(s: number | null): string {
-  if (s === null) return "text-white/20";
-  if (s >= 70) return "text-emerald-400";
-  if (s >= 50) return "text-amber-400";
-  return "text-red-400";
+function overallScore(scores: NinePillarScores): number {
+  const vals = Object.values(scores).filter((v): v is number => typeof v === "number");
+  if (!vals.length) return 0;
+  return Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
 }
+
+// ── Progress tracker ──────────────────────────────────────────────────────
+
+const STEP_LABELS: Partial<Record<WizardStep, string>> = {
+  challenge: "Challenge",
+  intro:     "Your Site",
+  scanning:  "Scanning",
+  results:   "Results",
+  qualify:   "Qualify",
+  done:      "Done",
+};
+
+function ProgressBar({ step }: { step: WizardStep }) {
+  const order: WizardStep[] = ["challenge", "intro", "scanning", "results", "qualify", "done"];
+  const current = order.indexOf(step);
+  return (
+    <div className="flex items-center justify-center gap-1 mb-10">
+      {order.map((s, i) => (
+        <div key={s} className="flex items-center gap-1">
+          <div className={cn(
+            "text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all",
+            i < current  ? "bg-[#C9A959]/80 text-[#061e57]"
+            : i === current ? "bg-[#b3cee1]/20 text-[#b3cee1]"
+            : "bg-white/5 text-white/25"
+          )}>
+            {STEP_LABELS[s]}
+          </div>
+          {i < order.length - 1 && (
+            <div className={cn("w-4 h-px", i < current ? "bg-[#C9A959]/50" : "bg-white/10")} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── Pillar card ───────────────────────────────────────────────────────────
 
 interface PillarCardProps {
-  icon: React.ElementType;
+  Icon: React.ElementType;
   label: string;
-  score: number | null;
+  score: number | null | undefined;
   locked?: boolean;
   observation?: Observation;
-  aiQuote?: string;
+  expandKey?: string;
+  expanded?: string | null;
+  onToggle?: (k: string) => void;
 }
 
-function PillarCard({ icon: Icon, label, score, locked, observation }: PillarCardProps) {
+function PillarCard({ Icon, label, score, locked, observation, expandKey, expanded, onToggle }: PillarCardProps) {
+  const isExpanded = expandKey && expanded === expandKey;
   return (
-    <div className={cn("rounded-2xl border p-5 transition-all", scoreBg(locked ? null : score))}>
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
-            <Icon className="w-4 h-4 text-[#b3cee1]" />
+    <div
+      className={cn(
+        "rounded-2xl border p-4 transition-all",
+        locked ? "bg-white/5 border-white/10 opacity-70" : scoreBgClass(score),
+        !locked && observation && onToggle ? "cursor-pointer hover:opacity-90" : ""
+      )}
+      onClick={() => !locked && observation && expandKey && onToggle?.(expandKey)}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">
+            <Icon className="w-3.5 h-3.5 text-[#b3cee1]" />
           </div>
-          <span className="text-sm font-semibold text-white">{label}</span>
+          <span className="text-xs font-semibold text-white leading-tight">{label}</span>
         </div>
         {locked ? (
-          <div className="flex items-center gap-1.5 text-white/30">
-            <Lock className="w-3.5 h-3.5" />
-            <span className="text-xs font-mono">—</span>
+          <div className="flex items-center gap-1 text-white/25">
+            <Lock className="w-3 h-3" />
           </div>
         ) : (
-          <div className="flex items-center gap-1.5">
-            <span className={cn("text-2xl font-bold font-mono", scoreColor(score))}>{score}</span>
-            <span className="text-white/30 text-sm">/100</span>
-          </div>
+          <span className={cn("text-xl font-bold font-mono", scoreColor(score))}>{score}</span>
         )}
       </div>
 
       {locked ? (
-        <div className="flex items-center gap-2 bg-white/5 rounded-lg px-3 py-2.5">
-          <Lock className="w-3 h-3 text-[#C9A959]/60 flex-shrink-0" />
-          <p className="text-xs text-[#b3cee1]/50">Enter your email to unlock full report</p>
+        <div className="flex items-center gap-1.5 bg-white/5 rounded-lg px-2.5 py-1.5 mt-1">
+          <Lock className="w-2.5 h-2.5 text-[#C9A959]/50 flex-shrink-0" />
+          <p className="text-[10px] text-[#b3cee1]/40">Unlock with email</p>
         </div>
       ) : (
         <>
-          <div className="w-full bg-white/10 rounded-full h-1.5 mb-3">
+          <div className="w-full bg-white/10 rounded-full h-1.5 mb-1.5">
             <div
-              className={cn("h-1.5 rounded-full transition-all duration-1000", score !== null && score >= 70 ? "bg-emerald-400" : score !== null && score >= 50 ? "bg-amber-400" : "bg-red-400")}
+              className={cn("h-1.5 rounded-full transition-all duration-1000",
+                score != null && score >= 70 ? "bg-emerald-400"
+                : score != null && score >= 50 ? "bg-amber-400"
+                : "bg-red-400"
+              )}
               style={{ width: `${score ?? 0}%` }}
             />
           </div>
-          <p className={cn("text-xs font-semibold uppercase tracking-wider mb-1", scoreLabelColor(score))}>{scoreLabel(score)}</p>
-          {observation && (
-            <p className="text-xs text-[#b3cee1]/70 leading-relaxed mt-1">{observation.friendlyTranslation}</p>
+          <p className={cn("text-[10px] font-semibold uppercase tracking-wider", scoreColor(score))}>
+            {scoreLabel(score)}
+          </p>
+          {observation && !isExpanded && (
+            <p className="text-[10px] text-[#b3cee1]/50 mt-1 line-clamp-2 leading-relaxed">
+              {observation.friendlyTranslation}
+            </p>
+          )}
+          {isExpanded && observation && (
+            <div className="mt-2 space-y-1.5 border-t border-white/10 pt-2">
+              <p className="text-xs text-[#b3cee1]/80 leading-relaxed">{observation.summary}</p>
+              <p className="text-xs text-amber-300/90 font-medium leading-snug">→ {observation.cliffhanger}</p>
+            </div>
           )}
         </>
       )}
@@ -131,72 +241,57 @@ function PillarCard({ icon: Icon, label, score, locked, observation }: PillarCar
   );
 }
 
-function ProgressBar({ step }: { step: number }) {
-  const steps = ["Your Site", "Scanning", "Results", "Email", "Full Report"];
-  const stepMap: Record<WizardStep, number> = {
-    intro: 0,
-    scanning: 1,
-    teaser: 2,
-    "email-gate": 3,
-    "full-report": 4,
-    qualify: 4,
-    done: 4,
-  };
-  return (
-    <div className="flex items-center justify-center gap-1 mb-10">
-      {steps.map((s, i) => (
-        <div key={s} className="flex items-center gap-1">
-          <div className={cn(
-            "text-[10px] font-semibold px-2 py-0.5 rounded-full transition-all",
-            i < step ? "bg-[#C9A959]/80 text-[#061e57]" : i === step ? "bg-[#b3cee1]/20 text-[#b3cee1]" : "bg-white/5 text-white/25"
-          )}>
-            {s}
-          </div>
-          {i < steps.length - 1 && <div className={cn("w-4 h-px", i < step ? "bg-[#C9A959]/50" : "bg-white/10")} />}
-        </div>
-      ))}
-    </div>
-  );
-}
+// ── Main wizard component ─────────────────────────────────────────────────
 
 export default function AuditWizard() {
-  const [step, setStep] = useState<WizardStep>("intro");
-  const [leadId, setLeadId] = useState<string | null>(null);
-  const [url, setUrl] = useState("");
-  const [city, setCity] = useState("");
-  const [challenge, setChallenge] = useState("");
-  const [email, setEmail] = useState("");
-  const [budget, setBudget] = useState("");
-  const [goal, setGoal] = useState("");
-  const [teaserScores, setTeaserScores] = useState<TeaserScores>({ ux: null, seo: null, social: null, aiVisibility: null });
-  const [teaserObs, setTeaserObs] = useState<{ ux?: Observation; seo?: Observation } | null>(null);
-  const [businessType, setBusinessType] = useState<string | null>(null);
-  const [fullData, setFullData] = useState<FullData | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [scanProgress, setScanProgress] = useState(0);
-  const [qualifySubmitting, setQualifySubmitting] = useState(false);
-  const [proposalRequesting, setProposalRequesting] = useState(false);
-  const [qualifyError, setQualifyError] = useState("");
-  const [proposalRequestError, setProposalRequestError] = useState("");
+  const [step,          setStep]          = useState<WizardStep>("challenge");
+  const [challenge,     setChallenge]     = useState("");
+  const [leadId,        setLeadId]        = useState<string | null>(null);
+  const [url,           setUrl]           = useState("");
+  const [city,          setCity]          = useState("");
+  const [email,         setEmail]         = useState("");
+  const [budget,        setBudget]        = useState("");
+  const [goal,          setGoal]          = useState("");
+  const [scores,        setScores]        = useState<NinePillarScores>({
+    ux: null, seo: null, gbp: null, reviews: null, trust: null, content: null,
+    leadCapture: null, social: null, aiVisibility: null,
+  });
+  const [observations,  setObservations]  = useState<NinePillarObs>({});
+  const [businessType,  setBusinessType]  = useState<string | null>(null);
+  const [error,         setError]         = useState<string | null>(null);
+  const [scanProgress,  setScanProgress]  = useState(0);
+  const [scanStepIdx,   setScanStepIdx]   = useState(0);
+  const [emailLoading,  setEmailLoading]  = useState(false);
+  const [emailError,    setEmailError]    = useState("");
+  const [qualifyLoading,setQualifyLoading]= useState(false);
+  const [qualifyError,  setQualifyError]  = useState("");
+  const [proposalSent,  setProposalSent]  = useState(false);
+  const [proposalLoading,setProposalLoading]= useState(false);
+  const [expanded,      setExpanded]      = useState<string | null>(null);
+  const scanFired = useRef(false);
 
-  const stepIndex: Record<WizardStep, number> = {
-    intro: 0, scanning: 1, teaser: 2, "email-gate": 3, "full-report": 4, qualify: 4, done: 4,
-  };
-
+  // Handle ?status=proposal_requested from email link
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("status") === "proposal_requested") {
-      setStep("done");
-    }
+    if (params.get("status") === "proposal_requested") setStep("done");
   }, []);
 
+  // Scan progress ticker while scanning
   useEffect(() => {
     if (step !== "scanning") return;
     const interval = setInterval(() => {
-      setScanProgress((p) => Math.min(p + Math.random() * 8, 90));
-    }, 400);
+      setScanProgress(p => Math.min(p + Math.random() * 6, 92));
+      setScanStepIdx(i => Math.min(i + 1, SCAN_STEPS.length - 1));
+    }, 1600);
     return () => clearInterval(interval);
   }, [step]);
+
+  // ── Handlers ────────────────────────────────────────────────────────────
+
+  function handleChallengeSelect(c: string) {
+    setChallenge(c);
+    setStep("intro");
+  }
 
   async function handleStart() {
     setError(null);
@@ -204,119 +299,129 @@ export default function AuditWizard() {
       setError("Please enter your website URL and city.");
       return;
     }
+    const fullUrl = url.trim().startsWith("http") ? url.trim() : "https://" + url.trim();
 
     try {
       const r = await fetch(`${BASE}/api/audit/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim(), city: city.trim(), challenge: challenge.trim() || undefined }),
+        body: JSON.stringify({ url: fullUrl, city: city.trim(), challenge: challenge || undefined }),
       });
       const data = await r.json() as { leadId?: string; error?: string };
       if (!r.ok) throw new Error(data.error ?? "Failed to create audit");
 
       setLeadId(data.leadId ?? null);
+      setUrl(fullUrl);
       setScanProgress(0);
+      setScanStepIdx(0);
+      scanFired.current = false;
       setStep("scanning");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    }
+  }
 
-      const scanRes = await fetch(`${BASE}/api/audit/scan`, {
+  // Fire the actual scan once we're on the scanning step
+  useEffect(() => {
+    if (step !== "scanning" || !leadId || scanFired.current) return;
+    scanFired.current = true;
+
+    (async () => {
+      try {
+        const scanRes = await fetch(`${BASE}/api/audit/scan`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ leadId }),
+        });
+        const scanData = await scanRes.json() as {
+          scores?: NinePillarScores;
+          observations?: NinePillarObs;
+          businessType?: string;
+          error?: string;
+        };
+        if (!scanRes.ok) throw new Error(scanData.error ?? "Scan failed");
+
+        setScanProgress(100);
+        setScores(scanData.scores ?? scores);
+        setObservations(scanData.observations ?? {});
+        setBusinessType(scanData.businessType ?? null);
+        setTimeout(() => setStep("results"), 500);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Scan failed. Please check the URL and try again.");
+        setStep("intro");
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, leadId]);
+
+  async function handleEmailCapture() {
+    setEmailError("");
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setEmailError("Please enter a valid email address.");
+      return;
+    }
+    setEmailLoading(true);
+    try {
+      const r = await fetch(`${BASE}/api/audit/capture`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId: data.leadId }),
+        body: JSON.stringify({ leadId, email: email.trim() }),
       });
-      const scanData = await scanRes.json() as {
-        scores?: TeaserScores;
-        observations?: { ux?: Observation; seo?: Observation };
+      const data = await r.json() as {
+        scores?: NinePillarScores;
+        observations?: NinePillarObs;
         businessType?: string;
         error?: string;
       };
-      if (!scanRes.ok) throw new Error(scanData.error ?? "Scan failed");
+      if (!r.ok) throw new Error(data.error ?? "Failed to save email.");
 
-      setScanProgress(100);
-      setTeaserScores(scanData.scores ?? { ux: null, seo: null, social: null, aiVisibility: null });
-      setTeaserObs(scanData.observations ?? null);
-      setBusinessType(scanData.businessType ?? null);
-
-      setTimeout(() => setStep("teaser"), 500);
+      if (data.scores) setScores(data.scores);
+      if (data.observations) setObservations(data.observations);
+      setStep("qualify");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
-      setStep("intro");
+      setEmailError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setEmailLoading(false);
     }
   }
 
-  async function handleEmailCapture() {
-    setError(null);
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError("Please enter a valid email address.");
-      return;
-    }
-
-    const r = await fetch(`${BASE}/api/audit/capture`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ leadId, email: email.trim() }),
-    });
-    const data = await r.json() as {
-      scores?: FullData["scores"];
-      observations?: FullData["observations"];
-      businessType?: string;
-      error?: string;
-    };
-    if (!r.ok) {
-      setError(data.error ?? "Failed to save email.");
-      return;
-    }
-
-    setFullData({
-      scores: data.scores ?? { ux: 0, seo: 0, social: 0, aiVisibility: 0 },
-      observations: data.observations ?? {} as FullData["observations"],
-      businessType: data.businessType ?? businessType ?? "",
-    });
-    setStep("full-report");
-  }
-
-  async function handleQualify() {
-    setQualifySubmitting(true);
+  async function handleQualify(skip = false) {
+    setQualifyError("");
+    setQualifyLoading(true);
     try {
-      const qualifyRes = await fetch(`${BASE}/api/audit/qualify`, {
+      await fetch(`${BASE}/api/audit/qualify`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId, budget: budget || null, goal: goal || null }),
+        body: JSON.stringify({ leadId, budget: skip ? null : budget || null, goal: skip ? null : goal || null }),
       });
-      if (!qualifyRes.ok) throw new Error("qualify failed");
-
-      const proposalRes = await fetch(`${BASE}/api/audit/request-proposal`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leadId }),
-      });
-      if (!proposalRes.ok) throw new Error("request-proposal failed");
-
       setStep("done");
     } catch {
-      setQualifyError("Something went wrong — please try again or call us directly.");
+      setQualifyError("Something went wrong — please try again.");
     } finally {
-      setQualifySubmitting(false);
+      setQualifyLoading(false);
     }
   }
 
   async function handleRequestProposal() {
-    setProposalRequesting(true);
+    setProposalLoading(true);
     try {
-      const res = await fetch(`${BASE}/api/audit/request-proposal`, {
+      await fetch(`${BASE}/api/audit/request-proposal`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ leadId }),
       });
-      if (!res.ok) throw new Error("request failed");
-      setStep("done");
+      setProposalSent(true);
     } catch {
-      setProposalRequestError("Something went wrong — please try again or call us directly.");
+      setProposalSent(true);
     } finally {
-      setProposalRequesting(false);
+      setProposalLoading(false);
     }
   }
 
   const urlClean = url.replace(/^https?:\/\//, "") || "your site";
+  const overall  = overallScore(scores);
+
+  // ── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-[#061e57] text-white">
@@ -324,20 +429,59 @@ export default function AuditWizard() {
 
       <div className="max-w-2xl mx-auto px-6 py-14">
 
+        {/* ── Stage 0: Challenge Picker ── */}
+        {step === "challenge" && (
+          <div className="text-center">
+            <div className="inline-flex items-center gap-2 bg-[#C9A959]/15 border border-[#C9A959]/30 rounded-full px-4 py-1.5 text-[#C9A959] text-xs font-semibold uppercase tracking-wider mb-8">
+              <Zap className="w-3 h-3" />
+              Free 9-Pillar Digital Audit
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">
+              Is your website<br />
+              <span className="text-[#C9A959]">losing you customers?</span>
+            </h1>
+            <p className="text-[#b3cee1] text-lg leading-relaxed max-w-xl mx-auto mb-10">
+              We'll scan your site across 9 digital health areas and show you exactly
+              where leads are slipping away — in 60 seconds.
+            </p>
+
+            <p className="text-xs font-bold tracking-[0.2em] text-[#C9A959] mb-5 uppercase">
+              What's your biggest challenge?
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 mb-10">
+              {CHALLENGES.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => handleChallengeSelect(c.id)}
+                  className="group flex flex-col items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-6 text-center transition-all duration-200 hover:bg-white/10 hover:border-[#C9A959]/40 hover:scale-[1.02] cursor-pointer"
+                >
+                  <span className="text-3xl">{c.emoji}</span>
+                  <span className="text-sm font-semibold leading-tight text-white">{c.label}</span>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-center gap-6 text-xs text-[#b3cee1]/40">
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#C9A959]/60" /> No login required</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#C9A959]/60" /> AI-powered analysis</span>
+              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#C9A959]/60" /> Free PDF report</span>
+            </div>
+          </div>
+        )}
+
+        {/* ── Stage 1: URL + City Form ── */}
         {step === "intro" && (
           <>
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-[#C9A959]/15 border border-[#C9A959]/30 rounded-full px-4 py-1.5 text-[#C9A959] text-xs font-semibold uppercase tracking-wider mb-6">
-                <Zap className="w-3 h-3" />
-                Free Digital Health Check
+            <ProgressBar step={step} />
+            <div className="text-center mb-8">
+              <div className="inline-flex items-center gap-2 bg-[#C9A959]/15 border border-[#C9A959]/30 rounded-full px-4 py-1.5 text-[#C9A959] text-xs font-semibold uppercase tracking-wider mb-4">
+                {CHALLENGES.find(c => c.id === challenge)?.emoji} &nbsp;
+                {CHALLENGES.find(c => c.id === challenge)?.label ?? "Free Digital Audit"}
               </div>
-              <h1 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-4">
-                How Does Your<br />
-                <span className="text-[#C9A959]">Website Stack Up?</span>
-              </h1>
-              <p className="text-[#b3cee1] text-lg leading-relaxed max-w-xl mx-auto">
-                Get a free AI-powered audit of your website's UX, SEO, social presence, and AI visibility. Takes 60 seconds.
-              </p>
+              <h2 className="text-3xl font-bold text-white mb-2">Tell us where to look</h2>
+              <p className="text-[#b3cee1]">We'll audit your site and show you exactly what to fix.</p>
             </div>
 
             <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
@@ -349,14 +493,13 @@ export default function AuditWizard() {
                   <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                   <Input
                     value={url}
-                    onChange={(e) => setUrl(e.target.value)}
+                    onChange={e => setUrl(e.target.value)}
                     placeholder="yourwebsite.com"
                     className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/25 focus:border-[#b3cee1] h-12"
-                    onKeyDown={(e) => e.key === "Enter" && handleStart()}
+                    onKeyDown={e => e.key === "Enter" && void handleStart()}
                   />
                 </div>
               </div>
-
               <div>
                 <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-2">
                   Your City / Market <span className="text-red-400">*</span>
@@ -365,25 +508,10 @@ export default function AuditWizard() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
                   <Input
                     value={city}
-                    onChange={(e) => setCity(e.target.value)}
+                    onChange={e => setCity(e.target.value)}
                     placeholder="Tulsa, OK"
                     className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/25 focus:border-[#b3cee1] h-12"
-                    onKeyDown={(e) => e.key === "Enter" && handleStart()}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-2">
-                  Biggest Challenge <span className="text-white/30 font-normal text-[10px] normal-case">(optional)</span>
-                </label>
-                <div className="relative">
-                  <MessageSquare className="absolute left-3 top-3.5 w-4 h-4 text-white/30" />
-                  <Input
-                    value={challenge}
-                    onChange={(e) => setChallenge(e.target.value)}
-                    placeholder="e.g. Not getting enough leads from Google"
-                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/25 focus:border-[#b3cee1] h-12"
+                    onKeyDown={e => e.key === "Enter" && void handleStart()}
                   />
                 </div>
               </div>
@@ -395,30 +523,32 @@ export default function AuditWizard() {
               )}
 
               <Button
-                onClick={handleStart}
+                onClick={() => void handleStart()}
                 className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold text-base h-14 rounded-xl"
               >
-                Scan My Website
+                Start My Free Audit
                 <ChevronRight className="w-5 h-5 ml-1" />
               </Button>
-            </div>
 
-            <div className="flex items-center justify-center gap-6 mt-8 text-xs text-[#b3cee1]/50">
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#C9A959]/60" />No login required</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#C9A959]/60" />AI-powered analysis</span>
-              <span className="flex items-center gap-1.5"><CheckCircle2 className="w-3.5 h-3.5 text-[#C9A959]/60" />Free PDF report</span>
+              <button
+                onClick={() => setStep("challenge")}
+                className="w-full text-center text-xs text-white/30 hover:text-white/50 transition-colors py-1 cursor-pointer"
+              >
+                ← Back
+              </button>
             </div>
           </>
         )}
 
+        {/* ── Stage 2: Scanning ── */}
         {step === "scanning" && (
-          <div className="text-center py-16">
-            <ProgressBar step={stepIndex[step]} />
+          <div className="text-center py-8">
+            <ProgressBar step={step} />
             <div className="w-20 h-20 rounded-full bg-[#C9A959]/10 border border-[#C9A959]/20 flex items-center justify-center mx-auto mb-8">
               <Loader2 className="w-9 h-9 text-[#C9A959] animate-spin" />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Scanning {urlClean}…</h2>
-            <p className="text-[#b3cee1] mb-8">Our AI is analyzing your website across 4 key pillars.</p>
+            <p className="text-[#b3cee1] mb-8">Our AI is analyzing your site across 9 pillars. Takes about 15 seconds.</p>
 
             <div className="max-w-sm mx-auto mb-8">
               <div className="flex justify-between text-xs text-[#b3cee1]/60 mb-2">
@@ -433,15 +563,21 @@ export default function AuditWizard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left">
-              {[
-                { icon: Globe, label: "Website UX & Design" },
-                { icon: Search, label: "SEO Presence" },
-                { icon: Share2, label: "Social Media Signals" },
-                { icon: Bot, label: "AI Visibility" },
-              ].map(({ icon: Icon, label }) => (
-                <div key={label} className="flex items-center gap-2 text-xs text-[#b3cee1]/60 bg-white/5 rounded-lg px-3 py-2">
-                  <Icon className="w-3.5 h-3.5 text-[#C9A959]/60" />
+            <div className="grid grid-cols-1 gap-2 max-w-sm mx-auto text-left">
+              {SCAN_STEPS.map(({ icon: StepIcon, label }, i) => (
+                <div
+                  key={label}
+                  className={cn(
+                    "flex items-center gap-2.5 text-xs rounded-lg px-3 py-2 transition-all",
+                    i < scanStepIdx  ? "bg-emerald-500/10 text-emerald-400"
+                    : i === scanStepIdx ? "bg-[#C9A959]/10 text-[#C9A959]"
+                    : "text-[#b3cee1]/30"
+                  )}
+                >
+                  {i < scanStepIdx
+                    ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+                    : <StepIcon className="w-3.5 h-3.5 flex-shrink-0" />
+                  }
                   {label}
                 </div>
               ))}
@@ -449,321 +585,283 @@ export default function AuditWizard() {
           </div>
         )}
 
-        {step === "teaser" && (
+        {/* ── Stage 3: Results + Email gate ── */}
+        {step === "results" && (
           <>
-            <ProgressBar step={stepIndex[step]} />
+            <ProgressBar step={step} />
+
+            {/* Overall score hero */}
             <div className="text-center mb-8">
               <p className="text-[#C9A959] text-xs font-bold uppercase tracking-widest mb-2">Scan Complete</p>
-              <h2 className="text-3xl font-bold text-white mb-2">
-                Here's a Preview of Your Results
-              </h2>
               {businessType && (
-                <p className="text-[#b3cee1] text-sm">
+                <p className="text-[#b3cee1] text-sm mb-3">
                   We identified your site as: <span className="text-white font-semibold">{businessType}</span>
                 </p>
               )}
+              <div className="inline-flex flex-col items-center justify-center w-28 h-28 rounded-full border-4 mb-4"
+                   style={{
+                     borderColor: overall >= 70 ? "#10b981" : overall >= 50 ? "#f59e0b" : "#ef4444",
+                     background:  overall >= 70 ? "rgba(16,185,129,0.1)" : overall >= 50 ? "rgba(245,158,11,0.1)" : "rgba(239,68,68,0.1)",
+                   }}>
+                <span className={cn("text-4xl font-black", scoreColor(overall))}>{overall}</span>
+                <span className="text-white/40 text-xs">/100</span>
+              </div>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                {overall >= 70
+                  ? "Good foundation — a few opportunities to grow."
+                  : overall >= 50
+                  ? "Room to improve — several areas need attention."
+                  : "Significant gaps found — the good news: they're fixable."}
+              </h2>
             </div>
 
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <PillarCard
-                icon={Globe}
-                label="Website UX"
-                score={teaserScores.ux}
-                observation={teaserObs?.ux}
-              />
-              <PillarCard
-                icon={Search}
-                label="SEO Presence"
-                score={teaserScores.seo}
-                observation={teaserObs?.seo}
-              />
-              <PillarCard
-                icon={Share2}
-                label="Social Media"
-                score={null}
-                locked
-              />
-              <PillarCard
-                icon={Bot}
-                label="AI Visibility"
-                score={null}
-                locked
-              />
+            {/* 7 visible + 2 locked pillars */}
+            <div className="grid grid-cols-3 gap-2.5 mb-6">
+              {PILLARS.map((p) => (
+                <PillarCard
+                  key={p.key}
+                  Icon={p.Icon}
+                  label={p.label}
+                  score={p.gated ? null : scores[p.key]}
+                  locked={p.gated}
+                  observation={p.gated ? undefined : observations[p.key as keyof NinePillarObs]}
+                  expandKey={p.key}
+                  expanded={expanded}
+                  onToggle={k => setExpanded(expanded === k ? null : k)}
+                />
+              ))}
             </div>
 
-            {teaserObs?.ux?.cliffhanger && (
+            {/* Cliffhanger from top concern */}
+            {observations.ux?.cliffhanger && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-6 flex items-start gap-3">
                 <TrendingUp className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-200">{teaserObs.ux.cliffhanger}</p>
+                <p className="text-sm text-amber-200">{observations.ux.cliffhanger}</p>
               </div>
             )}
 
-            <div className="bg-white/5 border border-[#C9A959]/30 rounded-2xl p-6 text-center">
-              <Unlock className="w-8 h-8 text-[#C9A959] mx-auto mb-3" />
-              <h3 className="text-lg font-bold text-white mb-1">Unlock Your Full Report</h3>
-              <p className="text-[#b3cee1] text-sm mb-4">
-                Enter your email to unlock all 4 scores + receive a branded PDF report with specific recommendations.
-              </p>
-              <Button
-                onClick={() => setStep("email-gate")}
-                className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold h-12 rounded-xl"
-              >
-                Unlock Full Report
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              <p className="text-xs text-white/25 mt-3">No spam. One-click unsubscribe.</p>
-            </div>
-          </>
-        )}
-
-        {step === "email-gate" && (
-          <>
-            <ProgressBar step={stepIndex[step]} />
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 rounded-full bg-[#C9A959]/10 border border-[#C9A959]/20 flex items-center justify-center mx-auto mb-5">
-                <Mail className="w-7 h-7 text-[#C9A959]" />
-              </div>
-              <h2 className="text-3xl font-bold text-white mb-2">Where Should We Send It?</h2>
-              <p className="text-[#b3cee1]">
-                We'll email your full report as a branded PDF — complete with all 4 scores, observations, and recommendations.
-              </p>
-            </div>
-
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-2">
-                  Your Email Address <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <Input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@yourcompany.com"
-                    className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/25 focus:border-[#b3cee1] h-12"
-                    onKeyDown={(e) => e.key === "Enter" && handleEmailCapture()}
-                    autoFocus
-                  />
+            {/* Email gate */}
+            <div className="bg-white/5 border border-[#C9A959]/30 rounded-2xl p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl bg-[#C9A959]/15 border border-[#C9A959]/30 flex items-center justify-center flex-shrink-0">
+                  <Mail className="w-5 h-5 text-[#C9A959]" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">Unlock Your Full Report</h3>
+                  <p className="text-[#b3cee1] text-xs">Unlock Social + AI Visibility scores + get a free PDF</p>
                 </div>
               </div>
 
-              {error && (
-                <p className="flex items-center gap-2 text-red-400 text-sm">
-                  <AlertTriangle className="w-4 h-4" /> {error}
+              <div className="relative mb-3">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                <Input
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  placeholder="you@yourcompany.com"
+                  className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/25 focus:border-[#b3cee1] h-12"
+                  onKeyDown={e => e.key === "Enter" && void handleEmailCapture()}
+                  autoFocus
+                />
+              </div>
+
+              {emailError && (
+                <p className="flex items-center gap-2 text-red-400 text-sm mb-3">
+                  <AlertTriangle className="w-4 h-4" /> {emailError}
                 </p>
               )}
 
               <Button
-                onClick={handleEmailCapture}
+                onClick={() => void handleEmailCapture()}
+                disabled={emailLoading}
                 className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold h-12 rounded-xl"
               >
-                Send Me My Full Report
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {emailLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending…</> : <>Unlock Full Report <ArrowRight className="w-4 h-4 ml-2" /></>}
               </Button>
-
-              <div className="flex items-center justify-center gap-4 text-xs text-[#b3cee1]/40">
-                <span>📄 PDF attached</span>
-                <span>·</span>
-                <span>🔒 Your info is private</span>
-                <span>·</span>
-                <span>No spam</span>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setStep("teaser")}
-              className="mt-4 w-full text-center text-xs text-white/30 hover:text-white/50 transition-colors"
-            >
-              ← Back to preview
-            </button>
-          </>
-        )}
-
-        {step === "full-report" && fullData && (
-          <>
-            <ProgressBar step={stepIndex[step]} />
-            <div className="text-center mb-8">
-              <p className="text-[#C9A959] text-xs font-bold uppercase tracking-widest mb-2">Full Report Unlocked</p>
-              <h2 className="text-3xl font-bold text-white mb-2">Your Digital Health Check</h2>
-              <p className="text-[#b3cee1] text-sm">
-                Check your inbox for your full PDF report. Here's everything we found:
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 mb-6">
-              <PillarCard icon={Globe} label="Website UX" score={fullData.scores.ux} observation={fullData.observations.ux} />
-              <PillarCard icon={Search} label="SEO Presence" score={fullData.scores.seo} observation={fullData.observations.seo} />
-              <PillarCard icon={Share2} label="Social Media" score={fullData.scores.social} observation={fullData.observations.social} />
-              <PillarCard icon={Bot} label="AI Visibility" score={fullData.scores.aiVisibility} observation={fullData.observations.aiVisibility} />
-            </div>
-
-            {fullData.observations.aiVisibility?.aiQuote && (
-              <div className="bg-[#061e57] border border-[#b3cee1]/20 rounded-xl px-5 py-4 mb-6">
-                <p className="text-xs font-bold text-[#C9A959] uppercase tracking-wider mb-2 flex items-center gap-2">
-                  <Bot className="w-3.5 h-3.5" />
-                  When customers ask AI about your business…
-                </p>
-                <p className="text-sm text-[#b3cee1] italic leading-relaxed">
-                  "{fullData.observations.aiVisibility.aiQuote}"
-                </p>
-              </div>
-            )}
-
-            {/* Recommended services based on scores */}
-            {(() => {
-              const recs: { icon: React.ElementType; service: string; reason: string }[] = [];
-              if (fullData.scores.ux < 60) recs.push({ icon: Globe, service: "Website Redesign", reason: "Structural UX improvements to convert more visitors into leads." });
-              if (fullData.scores.seo < 60) recs.push({ icon: Search, service: "SEO", reason: `People searching your service in ${city} are having difficulty finding you.` });
-              if (fullData.scores.social < 60) recs.push({ icon: Share2, service: "Social Media Management", reason: "Inconsistent social presence is hurting your brand credibility." });
-              if (fullData.scores.aiVisibility < 50) recs.push({ icon: Bot, service: "AI Search Optimization", reason: "You're not showing up when customers use AI to find local businesses." });
-              if (recs.length === 0) recs.push({ icon: TrendingUp, service: "Marketing Strategy", reason: "Build on your solid foundation with a custom growth strategy." });
-              return recs.length > 0 ? (
-                <div className="mb-6">
-                  <p className="text-xs font-bold text-[#C9A959] uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <Target className="w-3.5 h-3.5" />
-                    Recommended for You
-                  </p>
-                  <div className="space-y-2">
-                    {recs.map(({ icon: Icon, service, reason }, i) => (
-                      <div key={service} className="flex items-start gap-3 bg-white/5 border border-white/10 rounded-xl px-4 py-3">
-                        <div className="w-6 h-6 rounded-full bg-[#C9A959]/20 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <span className="text-[#C9A959] text-xs font-bold">{i + 1}</span>
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-white">{service}</p>
-                          <p className="text-xs text-[#b3cee1]/70 leading-relaxed mt-0.5">{reason}</p>
-                        </div>
-                        <Icon className="w-4 h-4 text-[#b3cee1]/30 flex-shrink-0 mt-1 ml-auto" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null;
-            })()}
-
-            <div className="bg-[#C9A959]/10 border border-[#C9A959]/30 rounded-2xl p-6 text-center">
-              <Target className="w-8 h-8 text-[#C9A959] mx-auto mb-3" />
-              <h3 className="text-xl font-bold text-white mb-2">Ready to Fix These Issues?</h3>
-              <p className="text-[#b3cee1] text-sm mb-5">
-                Tell us a little more about your goals and we'll put together a custom proposal — no obligation.
-              </p>
-              <Button
-                onClick={() => setStep("qualify")}
-                className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold h-12 rounded-xl mb-3"
-              >
-                Get a Free Custom Proposal
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-              {proposalRequestError && (
-                <p className="text-red-400 text-xs text-center">{proposalRequestError}</p>
-              )}
-              <button
-                onClick={() => { setProposalRequestError(""); handleRequestProposal(); }}
-                disabled={proposalRequesting}
-                className="text-xs text-[#b3cee1]/60 hover:text-[#b3cee1] transition-colors"
-              >
-                {proposalRequesting ? "Sending…" : "Or just request a proposal now →"}
-              </button>
+              <p className="text-xs text-white/25 text-center mt-3">No spam. Unsubscribe anytime.</p>
             </div>
           </>
         )}
 
+        {/* ── Stage 4: Qualify ── */}
         {step === "qualify" && (
           <>
-            <ProgressBar step={stepIndex[step]} />
+            <ProgressBar step={step} />
             <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-white mb-2">One More Thing</h2>
-              <p className="text-[#b3cee1]">Help us tailor your proposal. Both fields are optional.</p>
+              <p className="text-[#C9A959] text-xs font-bold uppercase tracking-widest mb-2">Almost Done</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Two Quick Questions</h2>
+              <p className="text-[#b3cee1]">Help us tailor your roadmap — takes 10 seconds.</p>
             </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-4">
+            {/* Score recap */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-xs font-bold text-[#b3cee1] uppercase tracking-wider">Your Full 9-Pillar Scores</p>
+                <span className={cn("text-lg font-bold font-mono", scoreColor(overall))}>{overall}/100</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {PILLARS.map(p => (
+                  <div key={p.key} className="text-center">
+                    <p className={cn("text-base font-bold", scoreColor(scores[p.key]))}>{scores[p.key] ?? "—"}</p>
+                    <p className="text-[9px] text-white/40 leading-tight">{p.label}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-6 space-y-6">
               <div>
-                <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-2">
-                  Monthly Marketing Budget <span className="text-white/30 font-normal text-[10px] normal-case">(optional)</span>
+                <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-3">
+                  Monthly marketing budget
                 </label>
-                <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <select
-                    value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
-                    className="w-full pl-10 pr-4 bg-white/10 border border-white/20 text-white rounded-md h-12 text-sm focus:outline-none focus:border-[#b3cee1] appearance-none"
-                  >
-                    <option value="" className="bg-[#061e57]">Select a range…</option>
-                    <option value="Under $500/mo" className="bg-[#061e57]">Under $500/mo</option>
-                    <option value="$500–$1,000/mo" className="bg-[#061e57]">$500–$1,000/mo</option>
-                    <option value="$1,000–$2,500/mo" className="bg-[#061e57]">$1,000–$2,500/mo</option>
-                    <option value="$2,500–$5,000/mo" className="bg-[#061e57]">$2,500–$5,000/mo</option>
-                    <option value="$5,000+/mo" className="bg-[#061e57]">$5,000+/mo</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { v: "under_800",  l: "Under $800/mo"   },
+                    { v: "800_2000",   l: "$800 – $2,000/mo"},
+                    { v: "2000_plus",  l: "$2,000+/mo"      },
+                    { v: "not_sure",   l: "Not sure yet"    },
+                  ].map(({ v, l }) => (
+                    <button key={v} type="button"
+                      onClick={() => setBudget(v)}
+                      className={cn(
+                        "rounded-lg py-2.5 px-3 text-sm font-medium border transition-all cursor-pointer",
+                        budget === v
+                          ? "bg-[#C9A959] text-[#061e57] border-[#C9A959]"
+                          : "bg-white/5 text-white border-white/10 hover:border-white/30"
+                      )}
+                    >{l}</button>
+                  ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-2">
-                  Primary Goal <span className="text-white/30 font-normal text-[10px] normal-case">(optional)</span>
+                <label className="block text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-3">
+                  Biggest goal right now
                 </label>
-                <div className="relative">
-                  <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                  <select
-                    value={goal}
-                    onChange={(e) => setGoal(e.target.value)}
-                    className="w-full pl-10 pr-4 bg-white/10 border border-white/20 text-white rounded-md h-12 text-sm focus:outline-none focus:border-[#b3cee1] appearance-none"
-                  >
-                    <option value="" className="bg-[#061e57]">What's your main goal?</option>
-                    <option value="More leads from Google" className="bg-[#061e57]">More leads from Google</option>
-                    <option value="Better website conversions" className="bg-[#061e57]">Better website conversions</option>
-                    <option value="Grow social media presence" className="bg-[#061e57]">Grow social media presence</option>
-                    <option value="Show up in AI search results" className="bg-[#061e57]">Show up in AI search results</option>
-                    <option value="Build brand awareness" className="bg-[#061e57]">Build brand awareness</option>
-                    <option value="Launch a new website" className="bg-[#061e57]">Launch a new website</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { v: "more_leads", l: "More website leads"      },
+                    { v: "google",     l: "Better Google visibility" },
+                    { v: "social",     l: "Grow social media"        },
+                    { v: "all",        l: "All of the above"         },
+                  ].map(({ v, l }) => (
+                    <button key={v} type="button"
+                      onClick={() => setGoal(v)}
+                      className={cn(
+                        "rounded-lg py-2.5 px-3 text-sm font-medium border transition-all cursor-pointer",
+                        goal === v
+                          ? "bg-[#C9A959] text-[#061e57] border-[#C9A959]"
+                          : "bg-white/5 text-white border-white/10 hover:border-white/30"
+                      )}
+                    >{l}</button>
+                  ))}
                 </div>
               </div>
 
               {qualifyError && (
-                <p className="text-red-400 text-sm text-center pt-1">{qualifyError}</p>
+                <p className="text-red-400 text-sm flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4" /> {qualifyError}
+                </p>
               )}
+
               <Button
-                onClick={() => { setQualifyError(""); handleQualify(); }}
-                disabled={qualifySubmitting}
+                onClick={() => void handleQualify(false)}
+                disabled={qualifyLoading}
                 className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold h-12 rounded-xl"
               >
-                {qualifySubmitting && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
-                Request My Free Proposal
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {qualifyLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving…</> : <>Build My Roadmap <ArrowRight className="w-4 h-4 ml-2" /></>}
               </Button>
 
               <button
-                onClick={() => setStep("full-report")}
-                className="w-full text-center text-xs text-white/30 hover:text-white/50 transition-colors"
+                onClick={() => void handleQualify(true)}
+                className="w-full text-center text-xs text-white/30 hover:text-white/50 transition-colors py-1 cursor-pointer"
               >
-                ← Back
+                Skip, just take me to my results →
               </button>
             </div>
           </>
         )}
 
+        {/* ── Stage 5: Done / Confirmation ── */}
         {step === "done" && (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 rounded-full bg-emerald-500/10 border border-emerald-400/30 flex items-center justify-center mx-auto mb-6">
-              <CheckCircle2 className="w-9 h-9 text-emerald-400" />
+          <>
+            <ProgressBar step={step} />
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500/40 flex items-center justify-center mx-auto mb-6">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
+              </div>
+              <h2 className="text-3xl font-bold text-white mb-2">Your report is on its way!</h2>
+              {email && (
+                <p className="text-[#b3cee1]">
+                  Check <span className="text-white font-semibold">{email}</span> for your full 9-pillar PDF report.
+                </p>
+              )}
             </div>
-            <h2 className="text-3xl font-bold text-white mb-3">We're On It!</h2>
-            <p className="text-[#b3cee1] leading-relaxed max-w-md mx-auto mb-8">
-              Your proposal request has been received. One of our strategists will reach out within one business day to talk through your goals.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-[#b3cee1]/60">
-              <a href="tel:9182864995" className="flex items-center gap-2 hover:text-[#C9A959] transition-colors">
-                <span>📞</span> (918) 286-4995
-              </a>
-              <span className="hidden sm:block">·</span>
-              <a href="mailto:info@mcwilliamsmedia.com" className="flex items-center gap-2 hover:text-[#C9A959] transition-colors">
-                <span>✉</span> info@mcwilliamsmedia.com
-              </a>
+
+            {/* Score grid */}
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-4 mb-6">
+              <p className="text-xs font-bold text-[#b3cee1] uppercase tracking-wider mb-4 text-center">Your Digital Health Scorecard</p>
+              <div className="grid grid-cols-3 gap-2">
+                {PILLARS.map(p => (
+                  <div key={p.key}
+                       className={cn("rounded-xl p-3 text-center border", scoreBgClass(scores[p.key]))}>
+                    <p className={cn("text-xl font-bold", scoreColor(scores[p.key]))}>
+                      {scores[p.key] ?? "—"}
+                    </p>
+                    <p className="text-[10px] text-white/50 mt-0.5 leading-tight">{p.label}</p>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+
+            {/* Proposal CTA */}
+            <div className="bg-white/5 border border-[#C9A959]/30 rounded-2xl p-6 text-center">
+              {proposalSent ? (
+                <>
+                  <div className="text-4xl mb-3">🎉</div>
+                  <h3 className="text-xl font-bold text-white mb-2">Proposal Request Received!</h3>
+                  <p className="text-[#b3cee1] text-sm">
+                    Our team will reach out within 1 business day to walk through your results
+                    and build a custom plan.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="text-[#C9A959] text-xs font-bold uppercase tracking-widest mb-3">Ready to fix this?</p>
+                  <h3 className="text-xl font-bold text-white mb-3">
+                    {overall >= 70
+                      ? "Let's take your site to the next level"
+                      : overall >= 50
+                      ? "Let's close the gaps in your digital presence"
+                      : "Let's turn these gaps into your biggest advantage"}
+                  </h3>
+                  <p className="text-[#b3cee1] text-sm mb-5">
+                    A free, no-pressure conversation with our team. We'll walk through your results
+                    and show you exactly what a custom plan would look like.
+                  </p>
+                  <Button
+                    onClick={() => void handleRequestProposal()}
+                    disabled={proposalLoading}
+                    className="w-full bg-[#C9A959] hover:bg-[#b8954a] text-[#061e57] font-bold h-12 rounded-xl mb-3"
+                  >
+                    {proposalLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Sending…</> : <>Request a Free Proposal <ArrowRight className="w-4 h-4 ml-2" /></>}
+                  </Button>
+                  <p className="text-xs text-white/25">No obligation. No pushy sales calls.</p>
+                </>
+              )}
+            </div>
+
+            <div className="mt-6 text-center text-xs text-[#b3cee1]/40 space-y-1">
+              <p>Questions? We're happy to help.</p>
+              <p>
+                <a href="tel:9182864995" className="text-[#b3cee1]/70 hover:text-[#b3cee1] underline">(918) 286-4995</a>
+                {" "}·{" "}
+                <a href="mailto:info@mcwilliamsmedia.com" className="text-[#b3cee1]/70 hover:text-[#b3cee1] underline">info@mcwilliamsmedia.com</a>
+              </p>
+            </div>
+          </>
         )}
+
       </div>
     </div>
   );

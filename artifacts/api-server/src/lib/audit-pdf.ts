@@ -119,56 +119,62 @@ export function generateAuditPDF(lead: AuditLead): Promise<Buffer> {
     y += 20;
 
     const pillars = [
-      { key: "ux", label: "Website UX" },
-      { key: "seo", label: "SEO Presence" },
-      { key: "social", label: "Social Media" },
-      { key: "aiVisibility", label: "AI Visibility" },
+      { key: "ux",          label: "Website UX"              },
+      { key: "seo",         label: "SEO Presence"            },
+      { key: "gbp",         label: "Google Business Profile" },
+      { key: "reviews",     label: "Review Signals"          },
+      { key: "trust",       label: "Trust Signals"           },
+      { key: "content",     label: "Content Health"          },
+      { key: "leadCapture", label: "Lead Capture"            },
+      { key: "social",      label: "Social Media"            },
+      { key: "aiVisibility",label: "AI Visibility"           },
     ];
 
-    const cardW = (CONTENT_W - 18) / 4;
+    const cardW = (CONTENT_W - (pillars.length - 1) * 4) / pillars.length;
 
     pillars.forEach((p, i) => {
-      const cx = MARGIN + i * (cardW + 6);
+      const cx = MARGIN + i * (cardW + 4);
       const score = scores[p.key] ?? 0;
       const color = scoreColor(score);
 
-      rRect(doc, cx, y, cardW, 90, 6, LIGHT_GRAY);
+      rRect(doc, cx, y, cardW, 82, 5, LIGHT_GRAY);
 
       doc.font("Helvetica-Bold")
-        .fontSize(36)
+        .fontSize(22)
         .fillColor(color)
-        .text(score.toString(), cx, y + 12, { width: cardW, align: "center" });
+        .text(score.toString(), cx, y + 10, { width: cardW, align: "center" });
 
-      doc.font("Helvetica")
-        .fontSize(10)
-        .fillColor(SLATE)
-        .text("/100", cx, y + 50, { width: cardW, align: "center" });
+      scoreBar(doc, cx + 5, y + 44, cardW - 10, score, color);
 
-      scoreBar(doc, cx + 12, y + 66, cardW - 24, score, color);
-
+      const labelFontSize = cardW < 55 ? 5 : 6;
       doc.font("Helvetica-Bold")
-        .fontSize(8)
+        .fontSize(labelFontSize)
         .fillColor(NAVY)
-        .text(p.label.toUpperCase(), cx, y + 76, {
+        .text(p.label.toUpperCase(), cx, y + 54, {
           width: cardW,
           align: "center",
-          characterSpacing: 0.5,
+          characterSpacing: 0.2,
         });
+
+      doc.font("Helvetica")
+        .fontSize(6.5)
+        .fillColor(color)
+        .text(scoreLabel(score), cx, y + 66, { width: cardW, align: "center" });
     });
 
-    y += 108;
+    y += 98;
 
     doc.font("Helvetica")
-      .fontSize(9)
+      .fontSize(8.5)
       .fillColor(SLATE)
       .text(
-        "Industry average across small business websites: UX 61  ·  SEO 48  ·  Social 55  ·  AI Visibility 38",
+        "Industry avg: UX 61  ·  SEO 48  ·  GBP 52  ·  Reviews 55  ·  Trust 58  ·  Content 44  ·  Lead Capture 47  ·  Social 55  ·  AI Visibility 38",
         MARGIN,
         y,
         { width: CONTENT_W, align: "center" }
       );
 
-    y += 24;
+    y += 20;
     doc.moveTo(MARGIN, y).lineTo(PW - MARGIN, y).strokeColor(MID_GRAY).lineWidth(0.5).stroke();
     y += 20;
 
@@ -180,10 +186,15 @@ export function generateAuditPDF(lead: AuditLead): Promise<Buffer> {
     y += 18;
 
     const pillarMeta = [
-      { key: "ux", label: "Website UX", icon: "◈" },
-      { key: "seo", label: "SEO Presence", icon: "◎" },
-      { key: "social", label: "Social Media", icon: "◉" },
-      { key: "aiVisibility", label: "AI Visibility", icon: "◆" },
+      { key: "ux",          label: "Website UX",              icon: "◈" },
+      { key: "seo",         label: "SEO Presence",            icon: "◎" },
+      { key: "gbp",         label: "Google Business Profile", icon: "◉" },
+      { key: "reviews",     label: "Review Signals",          icon: "★" },
+      { key: "trust",       label: "Trust Signals",           icon: "◆" },
+      { key: "content",     label: "Content Health",          icon: "◇" },
+      { key: "leadCapture", label: "Lead Capture",            icon: "◐" },
+      { key: "social",      label: "Social Media",            icon: "◑" },
+      { key: "aiVisibility",label: "AI Visibility",           icon: "◊" },
     ];
 
     pillarMeta.forEach((p) => {

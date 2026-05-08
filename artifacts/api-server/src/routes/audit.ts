@@ -122,7 +122,10 @@ router.post("/audit/scan", rateLimit, async (req: Request, res: Response) => {
       .update(auditLeadsTable)
       .set({
         scores: scanResult.scores as unknown as typeof auditLeadsTable.$inferInsert["scores"],
-        scanData: scanResult.rawData as unknown as typeof auditLeadsTable.$inferInsert["scanData"],
+        scanData: {
+          observations: scanResult.observations,
+          rawData: scanResult.rawData,
+        } as unknown as typeof auditLeadsTable.$inferInsert["scanData"],
         businessType: scanResult.businessType,
         status: "scanned",
         updatedAt: new Date(),
@@ -132,14 +135,24 @@ router.post("/audit/scan", rateLimit, async (req: Request, res: Response) => {
     res.json({
       leadId,
       scores: {
-        ux: scanResult.scores.ux,
-        seo: scanResult.scores.seo,
-        social: null,
+        ux:          scanResult.scores.ux,
+        seo:         scanResult.scores.seo,
+        gbp:         scanResult.scores.gbp,
+        reviews:     scanResult.scores.reviews,
+        trust:       scanResult.scores.trust,
+        content:     scanResult.scores.content,
+        leadCapture: scanResult.scores.leadCapture,
+        social:      null,
         aiVisibility: null,
       },
       observations: {
-        ux: scanResult.observations.ux,
-        seo: scanResult.observations.seo,
+        ux:          scanResult.observations.ux,
+        seo:         scanResult.observations.seo,
+        gbp:         scanResult.observations.gbp,
+        reviews:     scanResult.observations.reviews,
+        trust:       scanResult.observations.trust,
+        content:     scanResult.observations.content,
+        leadCapture: scanResult.observations.leadCapture,
       },
       businessType: scanResult.businessType,
     });
