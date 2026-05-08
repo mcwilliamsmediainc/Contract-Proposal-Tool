@@ -13,8 +13,9 @@ import {
   Loader2, Search, BookUser, FileText, FileSignature, CheckSquare, ArrowRight,
   Mail, User, CreditCard, Copy, Check, ExternalLink, Link2,
   XCircle, Plus, Trash2, Building2, CalendarX, CheckCircle2, X,
+  LayoutList, ArrowUp, ArrowDown, ArrowUpDown, Download,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow, format } from "date-fns";
 
@@ -655,15 +656,399 @@ function CancellationsTab() {
   );
 }
 
+// ─── Master Clients tab ────────────────────────────────────────────────────────
+
+interface MasterClientRow {
+  id: string;
+  flag: string;
+  clientName: string;
+  strategist: string;
+  website: boolean; hosting: boolean; seo: boolean; adwords: boolean;
+  fbads: boolean; lsa: boolean; email: boolean; social: boolean;
+  blog: boolean; mailbox: boolean; photo: boolean;
+  tier: string; touchpoint: string; upsell: string; nextTarget: string; other: string;
+  sortOrder: number; createdAt: string; updatedAt: string;
+}
+
+const MC_FLAG_CYCLE = ["", "?", "-", "!"] as const;
+const MC_FLAG_STYLE: Record<string, string> = {
+  "?": "text-amber-500 bg-amber-50",
+  "-": "text-gray-400 bg-gray-50",
+  "!": "text-red-500 bg-red-50",
+};
+const MC_STRATS = ["Tiffany", "Rachelle", "Matt", "Elise", "Support"];
+const MC_TIERS = ["Tier 1", "Tier 2", "Tier 3"];
+const MC_SVCS: { key: keyof MasterClientRow; label: string }[] = [
+  { key: "website",  label: "Website" },
+  { key: "hosting",  label: "Hosting" },
+  { key: "seo",      label: "SEO" },
+  { key: "adwords",  label: "G.Ads" },
+  { key: "fbads",    label: "FB Ads" },
+  { key: "lsa",      label: "LSA" },
+  { key: "email",    label: "Email" },
+  { key: "social",   label: "Social" },
+  { key: "blog",     label: "Blog" },
+  { key: "mailbox",  label: "Mailbox" },
+  { key: "photo",    label: "Photo/Vid" },
+];
+
+async function mcApi(path: string, opts?: RequestInit) {
+  const r = await fetch(`/api${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...opts,
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json() as Promise<MasterClientRow>;
+}
+
+function SortIcon({ col, sortCol, sortDir }: { col: string; sortCol: string; sortDir: number }) {
+  if (sortCol !== col) return <ArrowUpDown className="w-2.5 h-2.5 opacity-30" />;
+  return sortDir === 1
+    ? <ArrowUp className="w-2.5 h-2.5 text-primary" />
+    : <ArrowDown className="w-2.5 h-2.5 text-primary" />;
+}
+
+function MasterClientsTab() {
+  const [rows, setRows] = useState<MasterClientRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const [filterStrat, setFilterStrat] = useState("all");
+  const [filterTier, setFilterTier] = useState("all");
+  const [filterSvc, setFilterSvc] = useState("all");
+  const [sortCol, setSortCol] = useState("");
+  const [sortDir, setSortDir] = useState(1);
+  const { toast } = useToast();
+  const newRowIdRef = useRef<string | null>(null);
+  const newRowInputRef = useRef<HTMLInputElement | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      const data = await fetch("/api/master-clients").then((r) => r.json()) as MasterClientRow[];
+      setRows(data);
+    } catch { toast({ title: "Failed to load clients", variant: "destructive" }); }
+    finally { setLoading(false); }
+  }, [toast]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    if (newRowIdRef.current && newRowInputRef.current) {
+      newRowInputRef.current.focus();
+      newRowInputRef.current.select();
+      newRowIdRef.current = null;
+    }
+  }, [rows]);
+
+  const patch = useCallback(async (uuid: string, data: Partial<MasterClientRow>) => {
+    setSaving((s) => new Set(s).add(uuid));
+    try {
+      const updated = await mcApi(`/master-clients/${uuid}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+      setRows((r) => r.map((row) => (row.id === uuid ? { ...row, ...updated } : row)));
+    } catch { toast({ title: "Failed to save", variant: "destructive" }); }
+    finally { setSaving((s) => { const n = new Set(s); n.delete(uuid); return n; }); }
+  }, [toast]);
+
+  const handleAdd = async () => {
+    try {
+      const created = await mcApi("/master-clients", {
+        method: "POST",
+        body: JSON.stringify({ clientName: "New client", strategist: "" }),
+      });
+      newRowIdRef.current = created.id;
+      setRows((r) => [...r, created]);
+    } catch { toast({ title: "Failed to add client", variant: "destructive" }); }
+  };
+
+  const handleDelete = async (uuid: string, name: string) => {
+    if (!confirm(`Remove "${name}" from the master client list? This cannot be undone.`)) return;
+    try {
+      await mcApi(`/master-clients/${uuid}`, { method: "DELETE" });
+      setRows((r) => r.filter((row) => row.id !== uuid));
+      toast({ title: "Client removed" });
+    } catch { toast({ title: "Failed to remove client", variant: "destructive" }); }
+  };
+
+  const cycleFlag = (uuid: string, current: string) => {
+    const idx = MC_FLAG_CYCLE.indexOf(current as typeof MC_FLAG_CYCLE[number]);
+    const next = MC_FLAG_CYCLE[(idx + 1) % MC_FLAG_CYCLE.length];
+    setRows((r) => r.map((row) => (row.id === uuid ? { ...row, flag: next } : row)));
+    void patch(uuid, { flag: next });
+  };
+
+  const toggleSort = (col: string) => {
+    if (sortCol === col) setSortDir((d) => d * -1);
+    else { setSortCol(col); setSortDir(1); }
+  };
+
+  const filtered = useMemo(() => {
+    let list = rows;
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      list = list.filter((r) =>
+        r.clientName.toLowerCase().includes(q) ||
+        r.strategist.toLowerCase().includes(q) ||
+        r.other.toLowerCase().includes(q) ||
+        r.upsell.toLowerCase().includes(q) ||
+        r.touchpoint.toLowerCase().includes(q)
+      );
+    }
+    if (filterStrat !== "all") list = list.filter((r) => r.strategist === filterStrat);
+    if (filterTier !== "all") list = list.filter((r) => r.tier === filterTier);
+    if (filterSvc !== "all") list = list.filter((r) => r[filterSvc as keyof MasterClientRow] === true);
+    if (sortCol) {
+      list = [...list].sort((a, b) => {
+        const av = a[sortCol as keyof MasterClientRow];
+        const bv = b[sortCol as keyof MasterClientRow];
+        if (typeof av === "boolean") return sortDir * (Number(av) - Number(bv));
+        return sortDir * String(av ?? "").localeCompare(String(bv ?? ""));
+      });
+    }
+    return list;
+  }, [rows, search, filterStrat, filterTier, filterSvc, sortCol, sortDir]);
+
+  const handleExportCSV = () => {
+    const headers = ["Flag", "Client", "Strategist", "Website/1x", "Hosting", "SEO", "Google Ads", "FB Ads", "LSA", "Email", "Social Media", "Blog", "Mailbox", "Photo/Video", "Tier", "Scheduled Touchpoint", "Potential Upsell", "Next Target", "Other"];
+    const csvRows = filtered.map((r) => [
+      r.flag, r.clientName, r.strategist,
+      r.website ? "✓" : "", r.hosting ? "✓" : "", r.seo ? "✓" : "", r.adwords ? "✓" : "",
+      r.fbads ? "✓" : "", r.lsa ? "✓" : "", r.email ? "✓" : "", r.social ? "✓" : "",
+      r.blog ? "✓" : "", r.mailbox ? "✓" : "", r.photo ? "✓" : "",
+      r.tier, r.touchpoint, r.upsell, r.nextTarget, r.other,
+    ]);
+    const csv = [headers, ...csvRows].map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    a.download = `master_client_list_${new Date().getFullYear()}.csv`;
+    a.click();
+    toast({ title: "Exported to CSV" });
+  };
+
+  const thCls = "px-2 py-2 text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground border-b border-border bg-muted/40 whitespace-nowrap select-none cursor-pointer hover:text-foreground";
+  const thSvcCls = `${thCls} text-center w-14 min-w-[56px]`;
+  const cellCls = "border-b border-border/60 border-r border-border/30 align-middle";
+  const inputCls = "w-full h-8 px-2 bg-transparent text-xs text-foreground placeholder:text-muted-foreground/40 border-none outline-none focus:bg-blue-50 focus:ring-2 focus:ring-blue-400 focus:ring-inset";
+
+  return (
+    <div>
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <div className="relative flex-1 min-w-40">
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          <Input placeholder="Search clients…" value={search} onChange={(e) => setSearch(e.target.value)}
+            className="pl-8 h-8 text-xs" />
+        </div>
+        <Select value={filterStrat} onValueChange={setFilterStrat}>
+          <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="All strategists" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All strategists</SelectItem>
+            {MC_STRATS.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterTier} onValueChange={setFilterTier}>
+          <SelectTrigger className="w-28 h-8 text-xs"><SelectValue placeholder="All tiers" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All tiers</SelectItem>
+            {MC_TIERS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterSvc} onValueChange={setFilterSvc}>
+          <SelectTrigger className="w-36 h-8 text-xs"><SelectValue placeholder="All services" /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All services</SelectItem>
+            {MC_SVCS.map((s) => <SelectItem key={s.key} value={s.key}>{s.label}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <span className="text-xs text-muted-foreground tabular-nums ml-1">
+          {filtered.length === rows.length ? `${rows.length} clients` : `${filtered.length} of ${rows.length}`}
+        </span>
+        <div className="flex items-center gap-2 ml-auto">
+          <Button variant="outline" size="sm" className="h-8 text-xs gap-1.5" onClick={handleExportCSV}>
+            <Download className="w-3 h-3" />Export CSV
+          </Button>
+          <Button size="sm" className="h-8 text-xs gap-1.5 bg-[#061e57] hover:bg-[#0a2a6e] text-white" onClick={handleAdd}>
+            <Plus className="w-3.5 h-3.5" />Add client
+          </Button>
+        </div>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div className="flex items-center justify-center py-20 text-muted-foreground">
+          <Loader2 className="w-5 h-5 animate-spin mr-2" />Loading clients…
+        </div>
+      ) : (
+        <div className="border border-border rounded-xl overflow-hidden">
+          <div className="overflow-x-auto max-h-[calc(100vh-280px)] overflow-y-auto">
+            <table className="border-collapse text-xs w-full" style={{ minWidth: 1400 }}>
+              <thead className="sticky top-0 z-10">
+                <tr>
+                  <th className={`${thCls} w-8 min-w-[32px] text-center`}>#</th>
+                  <th className={`${thCls} w-10 min-w-[40px] text-center`} onClick={() => toggleSort("flag")}>
+                    <span className="inline-flex items-center gap-0.5 justify-center">⚑<SortIcon col="flag" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className={`${thCls} min-w-[200px] w-48`} onClick={() => toggleSort("clientName")}>
+                    <span className="inline-flex items-center gap-1">Client<SortIcon col="clientName" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className={`${thCls} min-w-[100px] w-28`} onClick={() => toggleSort("strategist")}>
+                    <span className="inline-flex items-center gap-1">Strategist<SortIcon col="strategist" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  {MC_SVCS.map((s) => (
+                    <th key={s.key} className={thSvcCls} onClick={() => toggleSort(s.key)}>
+                      <span className="inline-flex flex-col items-center gap-0.5">{s.label}<SortIcon col={s.key} sortCol={sortCol} sortDir={sortDir} /></span>
+                    </th>
+                  ))}
+                  <th className={`${thCls} min-w-[80px] w-24`} onClick={() => toggleSort("tier")}>
+                    <span className="inline-flex items-center gap-1">Tier<SortIcon col="tier" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className={`${thCls} min-w-[140px] w-36`} onClick={() => toggleSort("touchpoint")}>
+                    <span className="inline-flex items-center gap-1">Sched. Touchpoint<SortIcon col="touchpoint" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className={`${thCls} min-w-[140px] w-36`} onClick={() => toggleSort("upsell")}>
+                    <span className="inline-flex items-center gap-1">Potential Upsell<SortIcon col="upsell" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className={`${thCls} min-w-[110px] w-28`} onClick={() => toggleSort("nextTarget")}>
+                    <span className="inline-flex items-center gap-1">Next Target<SortIcon col="nextTarget" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className={`${thCls} min-w-[160px]`} onClick={() => toggleSort("other")}>
+                    <span className="inline-flex items-center gap-1">Other<SortIcon col="other" sortCol={sortCol} sortDir={sortDir} /></span>
+                  </th>
+                  <th className="px-2 py-2 bg-muted/40 border-b border-border w-8 min-w-[32px]" />
+                </tr>
+              </thead>
+              <tbody>
+                {filtered.length === 0 ? (
+                  <tr>
+                    <td colSpan={19} className="text-center py-10 text-muted-foreground text-sm">
+                      {rows.length === 0 ? "No clients yet — click \"Add client\" to get started." : "No clients match the current filters."}
+                    </td>
+                  </tr>
+                ) : filtered.map((row, idx) => {
+                  const isSaving = saving.has(row.id);
+                  const isNew = newRowIdRef.current === row.id;
+                  return (
+                    <tr key={row.id} className="group hover:bg-muted/30 transition-colors">
+                      {/* # */}
+                      <td className={`${cellCls} text-center text-muted-foreground/50 font-mono w-8`}>{idx + 1}</td>
+
+                      {/* Flag */}
+                      <td className={`${cellCls} w-10 text-center`}>
+                        <button
+                          onClick={() => cycleFlag(row.id, row.flag)}
+                          title="Click to cycle flag"
+                          className={cn(
+                            "mx-auto w-6 h-6 rounded flex items-center justify-center text-xs font-bold transition-colors",
+                            row.flag ? MC_FLAG_STYLE[row.flag] : "text-muted-foreground/30 hover:bg-muted"
+                          )}>
+                          {row.flag || "⚑"}
+                        </button>
+                      </td>
+
+                      {/* Client name */}
+                      <td className={`${cellCls} min-w-[200px]`}>
+                        {isSaving && <Loader2 className="inline w-3 h-3 animate-spin mr-1 text-muted-foreground/40" />}
+                        <input
+                          ref={isNew ? newRowInputRef : undefined}
+                          className={inputCls}
+                          defaultValue={row.clientName}
+                          onBlur={(e) => { if (e.target.value !== row.clientName) void patch(row.id, { clientName: e.target.value }); }}
+                        />
+                      </td>
+
+                      {/* Strategist */}
+                      <td className={`${cellCls} min-w-[100px]`}>
+                        <select
+                          className={`${inputCls} cursor-pointer`}
+                          defaultValue={row.strategist}
+                          onChange={(e) => void patch(row.id, { strategist: e.target.value })}>
+                          <option value="">—</option>
+                          {MC_STRATS.map((s) => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </td>
+
+                      {/* Service checkboxes */}
+                      {MC_SVCS.map((s) => (
+                        <td key={s.key} className={`${cellCls} w-14 text-center`}>
+                          <div className="flex items-center justify-center h-8">
+                            <input
+                              type="checkbox"
+                              checked={row[s.key] as boolean}
+                              onChange={(e) => void patch(row.id, { [s.key]: e.target.checked })}
+                              className="w-3.5 h-3.5 rounded cursor-pointer accent-[#061e57]"
+                            />
+                          </div>
+                        </td>
+                      ))}
+
+                      {/* Tier */}
+                      <td className={`${cellCls} min-w-[80px]`}>
+                        <select
+                          className={`${inputCls} cursor-pointer`}
+                          defaultValue={row.tier}
+                          onChange={(e) => void patch(row.id, { tier: e.target.value })}>
+                          <option value="">—</option>
+                          {MC_TIERS.map((t) => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </td>
+
+                      {/* Touchpoint */}
+                      <td className={`${cellCls} min-w-[140px]`}>
+                        <input className={inputCls} defaultValue={row.touchpoint}
+                          onBlur={(e) => { if (e.target.value !== row.touchpoint) void patch(row.id, { touchpoint: e.target.value }); }} />
+                      </td>
+
+                      {/* Upsell */}
+                      <td className={`${cellCls} min-w-[140px]`}>
+                        <input className={inputCls} defaultValue={row.upsell}
+                          onBlur={(e) => { if (e.target.value !== row.upsell) void patch(row.id, { upsell: e.target.value }); }} />
+                      </td>
+
+                      {/* Next target */}
+                      <td className={`${cellCls} min-w-[110px]`}>
+                        <input className={inputCls} defaultValue={row.nextTarget}
+                          onBlur={(e) => { if (e.target.value !== row.nextTarget) void patch(row.id, { nextTarget: e.target.value }); }} />
+                      </td>
+
+                      {/* Other */}
+                      <td className={`${cellCls} min-w-[160px]`}>
+                        <input className={inputCls} defaultValue={row.other}
+                          onBlur={(e) => { if (e.target.value !== row.other) void patch(row.id, { other: e.target.value }); }} />
+                      </td>
+
+                      {/* Delete */}
+                      <td className={`${cellCls} w-8 border-r-0`}>
+                        <button
+                          onClick={() => void handleDelete(row.id, row.clientName)}
+                          title="Remove client"
+                          className="p-1 rounded text-muted-foreground/30 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all mx-auto flex">
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-type Tab = "clients" | "payment" | "cancellations";
+type Tab = "master" | "clients" | "payment" | "cancellations";
 
 export default function ClientHub() {
-  const [activeTab, setActiveTab] = useState<Tab>("clients");
+  const [activeTab, setActiveTab] = useState<Tab>("master");
 
   const tabs: { key: Tab; label: string; icon: React.ElementType }[] = [
-    { key: "clients",       label: "Clients",       icon: BookUser  },
+    { key: "master",        label: "Master Clients", icon: LayoutList },
+    { key: "clients",       label: "Pipeline",       icon: BookUser  },
     { key: "payment",       label: "Payment Info",   icon: CreditCard },
     { key: "cancellations", label: "Cancellations",  icon: XCircle   },
   ];
@@ -698,6 +1083,7 @@ export default function ClientHub() {
         ))}
       </div>
 
+      {activeTab === "master"        && <MasterClientsTab />}
       {activeTab === "clients"       && <ClientsTab />}
       {activeTab === "payment"       && <PaymentInfoTab />}
       {activeTab === "cancellations" && <CancellationsTab />}

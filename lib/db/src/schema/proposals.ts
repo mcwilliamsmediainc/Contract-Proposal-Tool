@@ -131,3 +131,32 @@ export const auditLeadsTable = pgTable("audit_leads", {
 });
 
 export type AuditLead = typeof auditLeadsTable.$inferSelect;
+
+export const masterClientsTable = pgTable("master_clients", {
+  id: serial("id").primaryKey(),
+  uuid: text("uuid").notNull().unique(),
+  flag: text("flag").notNull().default(""),
+  clientName: text("client_name").notNull(),
+  strategist: text("strategist").notNull().default(""),
+  website: boolean("website").notNull().default(false),
+  hosting: boolean("hosting").notNull().default(false),
+  seo: boolean("seo").notNull().default(false),
+  adwords: boolean("adwords").notNull().default(false),
+  fbads: boolean("fbads").notNull().default(false),
+  lsa: boolean("lsa").notNull().default(false),
+  email: boolean("email").notNull().default(false),
+  social: boolean("social").notNull().default(false),
+  blog: boolean("blog").notNull().default(false),
+  mailbox: boolean("mailbox").notNull().default(false),
+  photo: boolean("photo").notNull().default(false),
+  tier: text("tier").notNull().default(""),
+  touchpoint: text("touchpoint").notNull().default(""),
+  upsell: text("upsell").notNull().default(""),
+  nextTarget: text("next_target").notNull().default(""),
+  other: text("other").notNull().default(""),
+  sortOrder: integer("sort_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export type MasterClient = typeof masterClientsTable.$inferSelect;

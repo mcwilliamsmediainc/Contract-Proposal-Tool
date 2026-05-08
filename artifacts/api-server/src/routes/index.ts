@@ -8,6 +8,7 @@ import onboardingFormRouter from "./onboarding-form";
 import paymentUpdateRouter from "./payment-update";
 import cancellationsRouter from "./cancellations";
 import auditRouter from "./audit";
+import masterClientsRouter from "./master-clients";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -54,5 +55,6 @@ router.use(onboardingFormRouter);
 router.use(paymentUpdateRouter);
 router.use(cancellationsRouter);
 router.use(auditRouter);
+router.use(masterClientsRouter);
 
 export default router;
