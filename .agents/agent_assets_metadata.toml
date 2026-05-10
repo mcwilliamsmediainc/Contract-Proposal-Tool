@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "j4k3KD9gQgJKH0uMybNEA"
+uri = "file://mcwilliams-media.tar.gz"
+type = "unspecified"
+title = "mcwilliams-media.tar.gz"
