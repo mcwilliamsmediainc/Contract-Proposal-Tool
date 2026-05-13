@@ -40,6 +40,21 @@ export interface ProposalData {
   discountType?: string | null;
   discountValue?: number | null;
   discountLabel?: string | null;
+  paigeContent?: PaigeContent | null;
+}
+
+export interface PaigeContent {
+  personalNote: string;
+  whatWeFound: string;
+  recommendedTier: "pro" | "plus" | "platinum";
+  recommendedPrice: number;
+  tierRationale: string;
+  testimonialName: string;
+  testimonialBusiness: string;
+  testimonialQuote: string;
+  nextSteps: string;
+  includeWebsite: boolean;
+  websiteRationale: string | null;
 }
 
 function CheckItem({ children }: { children: React.ReactNode }) {

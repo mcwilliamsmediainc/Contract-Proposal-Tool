@@ -24,6 +24,13 @@ export default function ClientPortal() {
     if (id && !viewedRef.current) { viewedRef.current = true; recordView.mutate({ id }); }
   }, [id, recordView]);
 
+  // When Paige recommends a tier, pre-select it for the client (they can still override).
+  useEffect(() => {
+    if (!selectedTier && proposal?.paigeContent?.recommendedTier) {
+      setSelectedTier(proposal.paigeContent.recommendedTier as Tier);
+    }
+  }, [proposal?.paigeContent?.recommendedTier, selectedTier]);
+
   // If proposal is already accepted and has a linked contract, offer the contract link
   useEffect(() => {
     if (proposal?.status === "accepted" && proposal.contractUuid) {
@@ -83,6 +90,7 @@ export default function ClientPortal() {
             content: proposal.content,
             loomVideoUrl: proposal.loomVideoUrl,
             createdAt: proposal.createdAt,
+            paigeContent: proposal.paigeContent ?? null,
           }}
           selectedTier={selectedTier}
           onSelectTier={setSelectedTier}

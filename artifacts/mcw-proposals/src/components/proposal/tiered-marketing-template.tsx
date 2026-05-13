@@ -8,6 +8,7 @@ import {
   TestimonialSection,
 } from "./proposal-template";
 import type { ProposalData } from "./proposal-template";
+import { PaigeSections } from "./paige-sections";
 
 export type Tier = "pro" | "plus" | "platinum";
 
@@ -530,11 +531,23 @@ export function TieredMarketingTemplate({
         projectType="tiered"
         date={dateStr}
       />
-      <SectionIntro clientName={data.clientName} businessName={data.businessName} />
-      <TestimonialSection
-        quote="The results are apparent: In under a year, my business has more than tripled! This was by far the best advertising money I have spent... Everything else was a waste comparatively."
-        author="Chance Johnson"
-      />
+      {data.paigeContent ? (
+        <>
+          <PaigeSections paige={data.paigeContent} clientName={data.clientName} />
+          <TestimonialSection
+            quote={data.paigeContent.testimonialQuote}
+            author={`${data.paigeContent.testimonialName}, ${data.paigeContent.testimonialBusiness}`}
+          />
+        </>
+      ) : (
+        <>
+          <SectionIntro clientName={data.clientName} businessName={data.businessName} />
+          <TestimonialSection
+            quote="The results are apparent: In under a year, my business has more than tripled! This was by far the best advertising money I have spent... Everything else was a waste comparatively."
+            author="Chance Johnson"
+          />
+        </>
+      )}
       <TierSection selectedTier={selectedTier} onSelectTier={onSelectTier} />
       {data.brandShootEnabled !== false && (
         <BrandShootAddon text={data.brandShootText} />

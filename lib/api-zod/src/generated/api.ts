@@ -234,6 +234,24 @@ export const ListProposalsResponseItem = zod
       .describe(
         "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
       ),
+    paigeContent: zod
+      .object({
+        personalNote: zod.string(),
+        whatWeFound: zod.string(),
+        recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+        recommendedPrice: zod.number(),
+        tierRationale: zod.string(),
+        testimonialName: zod.string(),
+        testimonialBusiness: zod.string(),
+        testimonialQuote: zod.string(),
+        nextSteps: zod.string(),
+        includeWebsite: zod.boolean(),
+        websiteRationale: zod.string().nullish(),
+      })
+      .nullish()
+      .describe(
+        "Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -272,6 +290,24 @@ export const CreateProposalBody = zod.object({
   totalAmount: zod.number().optional(),
   specialContext: zod.string().nullish(),
   content: zod.string().nullish(),
+  paigeContent: zod
+    .object({
+      personalNote: zod.string(),
+      whatWeFound: zod.string(),
+      recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+      recommendedPrice: zod.number(),
+      tierRationale: zod.string(),
+      testimonialName: zod.string(),
+      testimonialBusiness: zod.string(),
+      testimonialQuote: zod.string(),
+      nextSteps: zod.string(),
+      includeWebsite: zod.boolean(),
+      websiteRationale: zod.string().nullish(),
+    })
+    .nullish()
+    .describe(
+      "Paige's structured proposal output. Mirrors the JSON shape Paige returns from Claude.",
+    ),
   loomVideoUrl: zod.string().nullish(),
   calendlyUrl: zod.string().nullish(),
   numberOfPages: zod.number().nullish(),
@@ -365,6 +401,24 @@ export const GetProposalResponse = zod
       .describe(
         "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
       ),
+    paigeContent: zod
+      .object({
+        personalNote: zod.string(),
+        whatWeFound: zod.string(),
+        recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+        recommendedPrice: zod.number(),
+        tierRationale: zod.string(),
+        testimonialName: zod.string(),
+        testimonialBusiness: zod.string(),
+        testimonialQuote: zod.string(),
+        nextSteps: zod.string(),
+        includeWebsite: zod.boolean(),
+        websiteRationale: zod.string().nullish(),
+      })
+      .nullish()
+      .describe(
+        "Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -389,6 +443,24 @@ export const UpdateProposalBody = zod.object({
   totalAmount: zod.number().optional(),
   status: zod.enum(["draft", "sent", "accepted", "archived"]).optional(),
   content: zod.string().nullish(),
+  paigeContent: zod
+    .object({
+      personalNote: zod.string(),
+      whatWeFound: zod.string(),
+      recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+      recommendedPrice: zod.number(),
+      tierRationale: zod.string(),
+      testimonialName: zod.string(),
+      testimonialBusiness: zod.string(),
+      testimonialQuote: zod.string(),
+      nextSteps: zod.string(),
+      includeWebsite: zod.boolean(),
+      websiteRationale: zod.string().nullish(),
+    })
+    .nullish()
+    .describe(
+      "Paige's structured proposal output. Mirrors the JSON shape Paige returns from Claude.",
+    ),
   specialContext: zod.string().nullish(),
   loomVideoUrl: zod.string().nullish(),
   calendlyUrl: zod.string().nullish(),
@@ -477,6 +549,24 @@ export const UpdateProposalResponse = zod
       .nullish()
       .describe(
         "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
+    paigeContent: zod
+      .object({
+        personalNote: zod.string(),
+        whatWeFound: zod.string(),
+        recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+        recommendedPrice: zod.number(),
+        tierRationale: zod.string(),
+        testimonialName: zod.string(),
+        testimonialBusiness: zod.string(),
+        testimonialQuote: zod.string(),
+        nextSteps: zod.string(),
+        includeWebsite: zod.boolean(),
+        websiteRationale: zod.string().nullish(),
+      })
+      .nullish()
+      .describe(
+        "Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.",
       ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
@@ -583,6 +673,24 @@ export const AcceptProposalResponse = zod
       .nullish()
       .describe(
         "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
+    paigeContent: zod
+      .object({
+        personalNote: zod.string(),
+        whatWeFound: zod.string(),
+        recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+        recommendedPrice: zod.number(),
+        tierRationale: zod.string(),
+        testimonialName: zod.string(),
+        testimonialBusiness: zod.string(),
+        testimonialQuote: zod.string(),
+        nextSteps: zod.string(),
+        includeWebsite: zod.boolean(),
+        websiteRationale: zod.string().nullish(),
+      })
+      .nullish()
+      .describe(
+        "Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.",
       ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
@@ -736,6 +844,24 @@ export const RecordProposalViewResponse = zod
       .describe(
         "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
       ),
+    paigeContent: zod
+      .object({
+        personalNote: zod.string(),
+        whatWeFound: zod.string(),
+        recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+        recommendedPrice: zod.number(),
+        tierRationale: zod.string(),
+        testimonialName: zod.string(),
+        testimonialBusiness: zod.string(),
+        testimonialQuote: zod.string(),
+        nextSteps: zod.string(),
+        includeWebsite: zod.boolean(),
+        websiteRationale: zod.string().nullish(),
+      })
+      .nullish()
+      .describe(
+        "Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.",
+      ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),
   })
@@ -772,10 +898,46 @@ export const GenerateProposalContentBody = zod.object({
   ]),
   totalAmount: zod.number().optional(),
   specialContext: zod.string().nullish(),
+  city: zod.string().nullish(),
+  industry: zod.string().nullish(),
+  budgetRange: zod.enum(["lean", "mid", "high"]).nullish(),
+  statedGoal: zod
+    .string()
+    .nullish()
+    .describe(
+      "traffic | leads | brand | all (free-form; these four values map to Paige's tier-recommendation logic)",
+    ),
+  auditScores: zod
+    .object({
+      ux: zod.number(),
+      seo: zod.number(),
+      social: zod.number(),
+      aiVisibility: zod.number(),
+    })
+    .nullish(),
+  notes: zod.string().nullish(),
 });
 
 export const GenerateProposalContentResponse = zod.object({
   content: zod.string(),
+  paigeContent: zod
+    .object({
+      personalNote: zod.string(),
+      whatWeFound: zod.string(),
+      recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+      recommendedPrice: zod.number(),
+      tierRationale: zod.string(),
+      testimonialName: zod.string(),
+      testimonialBusiness: zod.string(),
+      testimonialQuote: zod.string(),
+      nextSteps: zod.string(),
+      includeWebsite: zod.boolean(),
+      websiteRationale: zod.string().nullish(),
+    })
+    .nullish()
+    .describe(
+      "Paige's structured proposal output. Mirrors the JSON shape Paige returns from Claude.",
+    ),
 });
 
 /**
@@ -1157,6 +1319,24 @@ export const GetAdminProposalResponse = zod
       .nullish()
       .describe(
         "UUID of the linked contract, if one exists — used by client portal to navigate directly to signing",
+      ),
+    paigeContent: zod
+      .object({
+        personalNote: zod.string(),
+        whatWeFound: zod.string(),
+        recommendedTier: zod.enum(["pro", "plus", "platinum"]),
+        recommendedPrice: zod.number(),
+        tierRationale: zod.string(),
+        testimonialName: zod.string(),
+        testimonialBusiness: zod.string(),
+        testimonialQuote: zod.string(),
+        nextSteps: zod.string(),
+        includeWebsite: zod.boolean(),
+        websiteRationale: zod.string().nullish(),
+      })
+      .nullish()
+      .describe(
+        "Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.",
       ),
     createdAt: zod.coerce.date(),
     updatedAt: zod.coerce.date(),

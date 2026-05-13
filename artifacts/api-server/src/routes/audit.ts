@@ -1,7 +1,7 @@
 import { Router, type Request, type Response } from "express";
-import { desc, eq, isNull, isNotNull } from "drizzle-orm";
+import { desc, eq, and, isNull, isNotNull } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, auditLeadsTable } from "@workspace/db";
+import { db, auditLeadsTable, leadsTable } from "@workspace/db";
 import { scanWebsite } from "../lib/audit-scanner.js";
 import { sendReportEmail, notifyTeamNewLead, notifyTeamProposalRequest } from "../lib/audit-email.js";
 
@@ -199,6 +199,63 @@ router.post("/audit/capture", async (req: Request, res: Response) => {
   });
 });
 
+function extractHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Promote a qualified audit_leads row into the agency `leads` table so Finn
+ * (and the rest of the agent system) can read from a single source of truth.
+ * The audit_leads row stays as the raw funnel record.
+ *
+ * Idempotent on (email, source='audit_tool') — safe to call twice.
+ */
+async function promoteAuditLeadToLeads(audit: DbLead, req: Request): Promise<void> {
+  if (!audit.email) {
+    req.log.warn({ auditUuid: audit.uuid }, "Skipping lead promotion — no email captured");
+    return;
+  }
+
+  const existing = await db
+    .select({ uuid: leadsTable.uuid })
+    .from(leadsTable)
+    .where(and(eq(leadsTable.email, audit.email), eq(leadsTable.source, "audit_tool")))
+    .limit(1);
+
+  if (existing[0]) {
+    req.log.info({ auditUuid: audit.uuid, leadUuid: existing[0].uuid }, "Lead already promoted — skipping");
+    return;
+  }
+
+  const scores = getScores(audit);
+  const businessName = audit.businessType?.trim() || extractHostname(audit.url) || audit.url;
+
+  await db.insert(leadsTable).values({
+    uuid: randomUUID(),
+    businessName,
+    email: audit.email,
+    website: audit.url,
+    city: audit.city,
+    auditScore: scores,
+    goal: audit.goal,
+    budgetRange: audit.budget,
+    status: "new",
+    source: "audit_tool",
+  });
+
+  // Console-log a Slack-style notification. Maxwell will post the real
+  // message once SLACK_BOT_TOKEN is configured.
+  const s = scores ?? {};
+  const fmt = (v: unknown) => (typeof v === "number" ? String(v) : "—");
+  console.log(
+    `New lead: ${businessName} — Audit score: UX ${fmt(s["ux"])} / SEO ${fmt(s["seo"])} / Social ${fmt(s["social"])} / AI ${fmt(s["ai_visibility"])} — Goal: ${audit.goal ?? "—"} — Budget: ${audit.budget ?? "—"}`,
+  );
+}
+
 router.post("/audit/qualify", async (req: Request, res: Response) => {
   const { leadId, budget, goal } = req.body as {
     leadId?: string;
@@ -226,6 +283,8 @@ router.post("/audit/qualify", async (req: Request, res: Response) => {
     res.status(404).json({ error: "Lead not found." });
     return;
   }
+
+  await promoteAuditLeadToLeads(updated, req);
 
   res.json({ success: true });
 });

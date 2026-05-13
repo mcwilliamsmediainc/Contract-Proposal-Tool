@@ -21,6 +21,7 @@ export const proposalsTable = pgTable("proposals", {
   status: text("status").notNull().default("draft"),
   totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
   content: text("content"),
+  paigeContent: jsonb("paige_content"),
   specialContext: text("special_context"),
   loomVideoUrl: text("loom_video_url"),
   calendlyUrl: text("calendly_url"),

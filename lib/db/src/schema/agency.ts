@@ -60,6 +60,8 @@ export const clientsTable = pgTable("clients", {
   businessName: text("business_name").notNull(),
   // pro | plus | platinum | custom
   planTier: text("plan_tier").notNull(),
+  // active | paused | churned
+  status: text("status").notNull().default("active"),
   // JSON-encoded string array, matching onboarding_clients.services
   services: text("services").notNull().default("[]"),
   monthlyValue: numeric("monthly_value", { precision: 10, scale: 2 }),

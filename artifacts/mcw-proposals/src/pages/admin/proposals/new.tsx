@@ -12,8 +12,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Loader2, Sparkles } from "lucide-react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const STRATEGISTS = ["Elise Johnson", "Rachelle Hoover", "Tiffany King", "Matt McWilliams", "Ashlea Mortenson"];
+
+const auditScoresSchema = z.object({
+  ux: z.coerce.number().int().min(0).max(100),
+  seo: z.coerce.number().int().min(0).max(100),
+  social: z.coerce.number().int().min(0).max(100),
+  aiVisibility: z.coerce.number().int().min(0).max(100),
+});
 
 const formSchema = z.object({
   clientName: z.string().min(2, "Client name is required"),
@@ -25,9 +33,29 @@ const formSchema = z.object({
   pageNames: z.string().optional(),
   specialContext: z.string().optional(),
   content: z.string().optional(),
+  city: z.string().optional(),
+  industry: z.string().optional(),
+  budgetRange: z.enum(["lean", "mid", "high"]).optional(),
+  statedGoal: z.enum(["traffic", "leads", "brand", "all"]).optional(),
+  auditScores: auditScoresSchema.partial().optional(),
+  notes: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
+
+type PaigeOutput = {
+  personalNote: string;
+  whatWeFound: string;
+  recommendedTier: "pro" | "plus" | "platinum";
+  recommendedPrice: number;
+  tierRationale: string;
+  testimonialName: string;
+  testimonialBusiness: string;
+  testimonialQuote: string;
+  nextSteps: string;
+  includeWebsite: boolean;
+  websiteRationale: string | null;
+};
 
 export default function NewProposal() {
   const [, setLocation] = useLocation();
@@ -50,17 +78,24 @@ export default function NewProposal() {
       clientName: prefillName,
       businessName: prefillName,
       clientEmail: prefillEmail,
-      projectType: "web",
+      projectType: "tiered",
       clientStrategist: "",
       numberOfPages: undefined,
       pageNames: "",
       specialContext: prefillContext,
       content: "",
+      city: prefillCity,
+      industry: "",
+      budgetRange: undefined,
+      statedGoal: undefined,
+      auditScores: { ux: undefined, seo: undefined, social: undefined, aiVisibility: undefined },
+      notes: "",
     },
   });
 
   const createProposal = useCreateProposal();
   const generateContent = useGenerateProposalContent();
+  const [paige, setPaige] = useState<PaigeOutput | null>(null);
 
   const watched = form.watch();
   const isWebsite = watched.projectType === "web";
@@ -68,6 +103,14 @@ export default function NewProposal() {
 
   const handleGenerate = async () => {
     const values = form.getValues();
+    const scores = values.auditScores;
+    const hasAllScores =
+      scores &&
+      typeof scores.ux === "number" &&
+      typeof scores.seo === "number" &&
+      typeof scores.social === "number" &&
+      typeof scores.aiVisibility === "number";
+
     try {
       const res = await generateContent.mutateAsync({
         data: {
@@ -75,10 +118,26 @@ export default function NewProposal() {
           businessName: values.businessName,
           projectType: values.projectType,
           specialContext: values.specialContext || undefined,
+          city: values.city || undefined,
+          industry: values.industry || undefined,
+          budgetRange: values.budgetRange,
+          statedGoal: values.statedGoal,
+          auditScores: hasAllScores
+            ? {
+                ux: scores!.ux as number,
+                seo: scores!.seo as number,
+                social: scores!.social as number,
+                aiVisibility: scores!.aiVisibility as number,
+              }
+            : undefined,
+          notes: values.notes || undefined,
         },
       });
       form.setValue("content", res.content);
-      toast({ title: "Generated", description: "AI intro content ready." });
+      if (res.paigeContent) {
+        setPaige(res.paigeContent as PaigeOutput);
+      }
+      toast({ title: "Generated", description: "Paige drafted the proposal." });
     } catch {
       toast({ title: "Failed", description: "Could not generate content.", variant: "destructive" });
     }
@@ -88,12 +147,16 @@ export default function NewProposal() {
     try {
       const proposal = await createProposal.mutateAsync({
         data: {
-          ...values,
+          clientName: values.clientName,
+          businessName: values.businessName,
+          clientEmail: values.clientEmail,
+          projectType: values.projectType,
           clientStrategist: values.clientStrategist || null,
           numberOfPages: values.numberOfPages ?? null,
           pageNames: values.pageNames || null,
           specialContext: values.specialContext || null,
           content: values.content || null,
+          paigeContent: paige ?? null,
         },
       });
       toast({ title: "Draft Saved", description: "Proposal draft created successfully." });
@@ -112,7 +175,7 @@ export default function NewProposal() {
         </div>
       </div>
 
-      <div className="max-w-xl space-y-6">
+      <div className="max-w-2xl space-y-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
@@ -264,6 +327,149 @@ export default function NewProposal() {
                       </FormItem>
                     )}
                   />
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Paige Context — feed her the audit + budget + goal so the proposal is genuinely custom */}
+            <Card style={{ borderColor: "#b3cee1" }} className="bg-card/50 backdrop-blur border">
+              <CardHeader>
+                <CardTitle
+                  className="font-mono text-sm uppercase tracking-wider"
+                  style={{ color: "#061e57" }}
+                >
+                  Paige Context
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  More context = a more custom proposal. Audit scores drive Paige's tier recommendation.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="city" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl><Input placeholder="Tulsa, Oklahoma" {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="industry" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Industry</FormLabel>
+                      <FormControl><Input placeholder="Carpet cleaning, dental, etc." {...field} /></FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="budgetRange" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Budget Range</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select budget..." /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          <SelectItem value="lean">Lean</SelectItem>
+                          <SelectItem value="mid">Mid</SelectItem>
+                          <SelectItem value="high">High</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                  <FormField control={form.control} name="statedGoal" render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Stated Goal</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value ?? ""}>
+                        <FormControl><SelectTrigger><SelectValue placeholder="Select goal..." /></SelectTrigger></FormControl>
+                        <SelectContent>
+                          <SelectItem value="traffic">More Traffic</SelectItem>
+                          <SelectItem value="leads">More Leads</SelectItem>
+                          <SelectItem value="brand">Better Brand</SelectItem>
+                          <SelectItem value="all">All of the Above</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )} />
+                </div>
+
+                <div>
+                  <FormLabel className="text-sm">Audit Scores (0-100)</FormLabel>
+                  <div className="grid grid-cols-4 gap-3 mt-2">
+                    {(["ux", "seo", "social", "aiVisibility"] as const).map((key) => (
+                      <FormField key={key} control={form.control} name={`auditScores.${key}` as const} render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs uppercase tracking-wider text-muted-foreground">
+                            {key === "aiVisibility" ? "AI Vis." : key.toUpperCase()}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              placeholder="0-100"
+                              value={field.value ?? ""}
+                              onChange={(e) => field.onChange(e.target.value === "" ? undefined : Number(e.target.value))}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )} />
+                    ))}
+                  </div>
+                </div>
+
+                <FormField control={form.control} name="notes" render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Anything else Paige should know — sales conversation context, differentiators, competitors..."
+                        className="min-h-[80px] resize-y text-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )} />
+
+                <Button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={generateContent.isPending || !watched.clientName || !watched.businessName}
+                  className="w-full"
+                  style={{ backgroundColor: "#061e57", color: "#f5f0eb" }}
+                >
+                  {generateContent.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Sparkles className="w-4 h-4 mr-2" />}
+                  Generate with Paige
+                </Button>
+
+                {paige && (
+                  <div
+                    className="p-4 rounded-md text-sm space-y-3"
+                    style={{ backgroundColor: "#f5f0eb", border: "1px solid #d8bfa7" }}
+                  >
+                    <div>
+                      <p className="text-xs uppercase tracking-wider font-mono" style={{ color: "#7c370c" }}>
+                        Recommended Tier
+                      </p>
+                      <p className="font-bold text-base" style={{ color: "#061e57" }}>
+                        {paige.recommendedTier.toUpperCase()} — ${paige.recommendedPrice}/mo
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1">{paige.tierRationale}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs uppercase tracking-wider font-mono" style={{ color: "#7c370c" }}>What We Found</p>
+                      <p className="text-slate-700">{paige.whatWeFound}</p>
+                    </div>
+                    {paige.includeWebsite && (
+                      <div>
+                        <p className="text-xs uppercase tracking-wider font-mono" style={{ color: "#7c370c" }}>Website Recommendation</p>
+                        <p className="text-slate-700">{paige.websiteRationale}</p>
+                      </div>
+                    )}
+                  </div>
                 )}
               </CardContent>
             </Card>
