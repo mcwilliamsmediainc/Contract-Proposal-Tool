@@ -1,0 +1,16 @@
+{
+  "name": "@workspace/integrations-claude",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./prompts/paige": "./src/prompts/paige.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.78.0"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:"
+  }
+}
