@@ -23,6 +23,10 @@ import {
 } from "@workspace/api-zod";
 import { ai } from "@workspace/integrations-gemini-ai";
 import {
+  generateProposalContent as generateProposalContentClaude,
+  type ProposalContext as PaigeProposalContext,
+} from "@workspace/integrations-claude";
+import {
   sendProposalViewedEmail,
   sendProposalAcceptedEmail,
   sendProposalAcceptedClientEmail,
@@ -202,6 +206,24 @@ router.post("/proposals/generate", async (req, res) => {
 
   const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : projectType === "print" ? "print & brand" : "project";
 
+  // Primary: Claude (Paige) — generates structured proposal content.
+  // We surface `what_we_found` as the section text returned to the editor,
+  // matching the existing response contract `{ content: string }`.
+  const paigeContext: PaigeProposalContext = {
+    business_name: businessName,
+    contact_name: clientName,
+    notes: specialContext ?? undefined,
+  };
+
+  try {
+    const paige = await generateProposalContentClaude(paigeContext);
+    res.json({ content: paige.what_we_found });
+    return;
+  } catch (claudeErr) {
+    req.log.warn({ err: claudeErr }, "Claude (Paige) generation failed — falling back to Gemini");
+  }
+
+  // Fallback: Gemini — keeps the endpoint working if Claude is unavailable.
   const userPrompt = `You are writing the opening section of a ${projectLabel} proposal for ${clientName} at ${businessName}, on behalf of McWilliams Media.
 
 This section is called "The Problem / Their Situation." It is the highest-converting part of the proposal — it shows the client we truly heard them.
@@ -227,7 +249,7 @@ Write 2–3 sentences that:
     const content = response.text ?? "";
     res.json({ content });
   } catch (err) {
-    req.log.error({ err }, "Gemini generation failed");
+    req.log.error({ err }, "Gemini fallback generation failed");
     res.status(500).json({ error: "AI generation failed" });
   }
 });

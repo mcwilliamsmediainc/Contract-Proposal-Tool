@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
+    "test:paige": "tsx ./src/test-paige.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@workspace/integrations-claude": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",
