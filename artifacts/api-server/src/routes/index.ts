@@ -9,6 +9,7 @@ import paymentUpdateRouter from "./payment-update";
 import cancellationsRouter from "./cancellations";
 import auditRouter from "./audit";
 import masterClientsRouter from "./master-clients";
+import maxwellRouter from "./agents/maxwell";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -36,6 +37,8 @@ function isPublicPath(path: string, method: string): boolean {
   if (path.startsWith("/audit/capture")) return true;
   if (path.startsWith("/audit/qualify")) return true;
   if (path.startsWith("/audit/request-proposal")) return true;
+  // Maxwell daily briefing trigger — gated by x-api-key inside the handler
+  if (path === "/agents/maxwell/briefing" && method === "POST") return true;
   return false;
 }
 
@@ -56,5 +59,6 @@ router.use(paymentUpdateRouter);
 router.use(cancellationsRouter);
 router.use(auditRouter);
 router.use(masterClientsRouter);
+router.use(maxwellRouter);
 
 export default router;

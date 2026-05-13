@@ -21,6 +21,9 @@
     },
     {
       "path": "../../lib/integrations-claude"
+    },
+    {
+      "path": "../../lib/integrations-slack"
     }
   ]
 }

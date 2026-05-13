@@ -187,6 +187,9 @@ importers:
       '@workspace/integrations-gemini-ai':
         specifier: workspace:*
         version: link:../../lib/integrations-gemini-ai
+      '@workspace/integrations-slack':
+        specifier: workspace:*
+        version: link:../../lib/integrations-slack
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
