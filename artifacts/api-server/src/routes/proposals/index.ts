@@ -57,6 +57,7 @@ function formatProposalPublic(p: typeof proposalsTable.$inferSelect, contractUui
     status: p.status,
     totalAmount: Number(p.totalAmount),
     content: p.content ?? null,
+    paigeContent: (p.paigeContent ?? null) as Record<string, unknown> | null,
     specialContext: p.specialContext ?? null,
     loomVideoUrl: p.loomVideoUrl ?? null,
     calendlyUrl: p.calendlyUrl ?? null,
@@ -203,21 +204,47 @@ router.post("/proposals/generate", async (req, res) => {
   }
 
   const { clientName, businessName, projectType, specialContext } = parsed.data;
+  const { city, industry, budgetRange, statedGoal, auditScores, notes } = parsed.data;
 
   const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : projectType === "print" ? "print & brand" : "project";
 
-  // Primary: Claude (Paige) — generates structured proposal content.
-  // We surface `what_we_found` as the section text returned to the editor,
-  // matching the existing response contract `{ content: string }`.
+  // Translate the camelCase API wire format to Paige's snake_case prompt input.
   const paigeContext: PaigeProposalContext = {
     business_name: businessName,
     contact_name: clientName,
-    notes: specialContext ?? undefined,
+    city: city ?? undefined,
+    industry: industry ?? undefined,
+    stated_goal: statedGoal ?? undefined,
+    budget_range: (budgetRange ?? undefined) as PaigeProposalContext["budget_range"],
+    audit_scores: auditScores
+      ? {
+          ux: auditScores.ux,
+          seo: auditScores.seo,
+          social: auditScores.social,
+          ai_visibility: auditScores.aiVisibility,
+        }
+      : undefined,
+    notes: notes ?? specialContext ?? undefined,
   };
 
   try {
     const paige = await generateProposalContentClaude(paigeContext);
-    res.json({ content: paige.what_we_found });
+    res.json({
+      content: paige.what_we_found,
+      paigeContent: {
+        personalNote: paige.personal_note,
+        whatWeFound: paige.what_we_found,
+        recommendedTier: paige.recommended_tier,
+        recommendedPrice: paige.recommended_price,
+        tierRationale: paige.tier_rationale,
+        testimonialName: paige.testimonial_name,
+        testimonialBusiness: paige.testimonial_business,
+        testimonialQuote: paige.testimonial_quote,
+        nextSteps: paige.next_steps,
+        includeWebsite: paige.include_website,
+        websiteRationale: paige.website_rationale ?? null,
+      },
+    });
     return;
   } catch (claudeErr) {
     req.log.warn({ err: claudeErr }, "Claude (Paige) generation failed — falling back to Gemini");
@@ -297,6 +324,7 @@ router.post("/proposals", async (req, res) => {
       projectType: data.projectType,
       totalAmount: String(data.totalAmount ?? 0),
       content: data.content ?? null,
+      paigeContent: data.paigeContent ?? null,
       specialContext: data.specialContext ?? null,
       loomVideoUrl: data.loomVideoUrl ?? null,
       calendlyUrl: data.calendlyUrl ?? null,
@@ -470,6 +498,7 @@ router.patch("/proposals/:id", async (req, res) => {
   if (data.totalAmount !== undefined) updateData.totalAmount = String(data.totalAmount);
   if (data.status !== undefined) updateData.status = data.status;
   if (data.content !== undefined) updateData.content = data.content;
+  if (data.paigeContent !== undefined) updateData.paigeContent = data.paigeContent ?? null;
   if (data.specialContext !== undefined) updateData.specialContext = data.specialContext;
   if (data.loomVideoUrl !== undefined) updateData.loomVideoUrl = data.loomVideoUrl;
   if (data.calendlyUrl !== undefined) updateData.calendlyUrl = data.calendlyUrl;

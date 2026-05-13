@@ -1288,6 +1288,10 @@ components:
           type: string
           nullable: true
           description: UUID of the linked contract, if one exists — used by client portal to navigate directly to signing
+        paigeContent:
+          $ref: "#/components/schemas/PaigeContent"
+          nullable: true
+          description: Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null.
         createdAt:
           type: string
           format: date-time
@@ -1350,6 +1354,9 @@ components:
         content:
           type: string
           nullable: true
+        paigeContent:
+          $ref: "#/components/schemas/PaigeContent"
+          nullable: true
         loomVideoUrl:
           type: string
           nullable: true
@@ -1409,6 +1416,9 @@ components:
           enum: [draft, sent, accepted, archived]
         content:
           type: string
+          nullable: true
+        paigeContent:
+          $ref: "#/components/schemas/PaigeContent"
           nullable: true
         specialContext:
           type: string
@@ -1480,6 +1490,32 @@ components:
         specialContext:
           type: string
           nullable: true
+        city:
+          type: string
+          nullable: true
+        industry:
+          type: string
+          nullable: true
+        budgetRange:
+          type: string
+          enum: [lean, mid, high]
+          nullable: true
+        statedGoal:
+          type: string
+          nullable: true
+          description: "traffic | leads | brand | all (free-form; these four values map to Paige's tier-recommendation logic)"
+        auditScores:
+          type: object
+          nullable: true
+          properties:
+            ux: { type: number }
+            seo: { type: number }
+            social: { type: number }
+            aiVisibility: { type: number }
+          required: [ux, seo, social, aiVisibility]
+        notes:
+          type: string
+          nullable: true
       required:
         - clientName
         - businessName
@@ -1490,8 +1526,42 @@ components:
       properties:
         content:
           type: string
+        paigeContent:
+          $ref: "#/components/schemas/PaigeContent"
+          nullable: true
       required:
         - content
+
+    PaigeContent:
+      type: object
+      description: Paige's structured proposal output. Mirrors the JSON shape Paige returns from Claude.
+      properties:
+        personalNote: { type: string }
+        whatWeFound: { type: string }
+        recommendedTier:
+          type: string
+          enum: [pro, plus, platinum]
+        recommendedPrice: { type: number }
+        tierRationale: { type: string }
+        testimonialName: { type: string }
+        testimonialBusiness: { type: string }
+        testimonialQuote: { type: string }
+        nextSteps: { type: string }
+        includeWebsite: { type: boolean }
+        websiteRationale:
+          type: string
+          nullable: true
+      required:
+        - personalNote
+        - whatWeFound
+        - recommendedTier
+        - recommendedPrice
+        - tierRationale
+        - testimonialName
+        - testimonialBusiness
+        - testimonialQuote
+        - nextSteps
+        - includeWebsite
 
     OnboardingFormState:
       type: object

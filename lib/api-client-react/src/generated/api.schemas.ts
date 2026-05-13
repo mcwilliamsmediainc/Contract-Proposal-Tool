@@ -189,6 +189,32 @@ export const PublicProposalDiscountType = {
   fixed: "fixed",
 } as const;
 
+export type PaigeContentRecommendedTier =
+  (typeof PaigeContentRecommendedTier)[keyof typeof PaigeContentRecommendedTier];
+
+export const PaigeContentRecommendedTier = {
+  pro: "pro",
+  plus: "plus",
+  platinum: "platinum",
+} as const;
+
+/**
+ * Paige's structured proposal output. Mirrors the JSON shape Paige returns from Claude.
+ */
+export interface PaigeContent {
+  personalNote: string;
+  whatWeFound: string;
+  recommendedTier: PaigeContentRecommendedTier;
+  recommendedPrice: number;
+  tierRationale: string;
+  testimonialName: string;
+  testimonialBusiness: string;
+  testimonialQuote: string;
+  nextSteps: string;
+  includeWebsite: boolean;
+  websiteRationale?: string | null;
+}
+
 /**
  * Public-facing proposal shape — excludes internal notes (safe for client portal)
  */
@@ -226,6 +252,8 @@ export interface PublicProposal {
   lastViewedAt?: string | null;
   /** UUID of the linked contract, if one exists — used by client portal to navigate directly to signing */
   contractUuid?: string | null;
+  /** Structured proposal sections from Paige. Portal renders these when present; falls back to markdown `content` when null. */
+  paigeContent?: PaigeContent | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -275,6 +303,7 @@ export interface CreateProposalBody {
   totalAmount?: number;
   specialContext?: string | null;
   content?: string | null;
+  paigeContent?: PaigeContent | null;
   loomVideoUrl?: string | null;
   calendlyUrl?: string | null;
   numberOfPages?: number | null;
@@ -328,6 +357,7 @@ export interface UpdateProposalBody {
   totalAmount?: number;
   status?: UpdateProposalBodyStatus;
   content?: string | null;
+  paigeContent?: PaigeContent | null;
   specialContext?: string | null;
   loomVideoUrl?: string | null;
   calendlyUrl?: string | null;
@@ -362,16 +392,41 @@ export const GenerateProposalBodyProjectType = {
   project: "project",
 } as const;
 
+export type GenerateProposalBodyBudgetRange =
+  | (typeof GenerateProposalBodyBudgetRange)[keyof typeof GenerateProposalBodyBudgetRange]
+  | null;
+
+export const GenerateProposalBodyBudgetRange = {
+  lean: "lean",
+  mid: "mid",
+  high: "high",
+} as const;
+
+export type GenerateProposalBodyAuditScores = {
+  ux: number;
+  seo: number;
+  social: number;
+  aiVisibility: number;
+} | null;
+
 export interface GenerateProposalBody {
   clientName: string;
   businessName: string;
   projectType: GenerateProposalBodyProjectType;
   totalAmount?: number;
   specialContext?: string | null;
+  city?: string | null;
+  industry?: string | null;
+  budgetRange?: GenerateProposalBodyBudgetRange;
+  /** traffic | leads | brand | all (free-form; these four values map to Paige's tier-recommendation logic) */
+  statedGoal?: string | null;
+  auditScores?: GenerateProposalBodyAuditScores;
+  notes?: string | null;
 }
 
 export interface GeneratedProposalContent {
   content: string;
+  paigeContent?: PaigeContent | null;
 }
 
 export type OnboardingFormStateStatus =
