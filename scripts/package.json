@@ -8,6 +8,7 @@
     "test:paige": "tsx ./src/test-paige.ts",
     "test:maxwell": "tsx ./src/test-maxwell.ts",
     "import:clients": "tsx ./src/import-clients.ts",
+    "test:maxwell-endpoint": "tsx ./src/test-maxwell-endpoint.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

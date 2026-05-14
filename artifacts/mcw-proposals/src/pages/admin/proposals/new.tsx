@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProposal, useGenerateProposalContent } from "@workspace/api-client-react";
+import { useCreateProposal, useGenerateProposalContent, lookupLead, type LeadLookupResult } from "@workspace/api-client-react";
 import { AdminLayout } from "@/components/layout/admin-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -97,6 +97,47 @@ export default function NewProposal() {
   const generateContent = useGenerateProposalContent();
   const [paige, setPaige] = useState<PaigeOutput | null>(null);
 
+  // Lead Lookup state
+  const [leadQuery, setLeadQuery] = useState("");
+  const [loadedLead, setLoadedLead] = useState<{ id: string; businessName: string } | null>(null);
+  const [leadError, setLeadError] = useState<string | null>(null);
+  const [leadLoading, setLeadLoading] = useState(false);
+
+  const handleLoadLead = async () => {
+    const q = leadQuery.trim();
+    if (!q) return;
+    setLeadError(null);
+    setLeadLoading(true);
+    try {
+      const lead: LeadLookupResult = await lookupLead({ q });
+
+      form.setValue("clientName", lead.contactName ?? lead.businessName);
+      form.setValue("businessName", lead.businessName);
+      form.setValue("clientEmail", lead.email ?? "");
+      form.setValue("city", lead.city ?? "");
+      if (lead.budgetRange) form.setValue("budgetRange", lead.budgetRange);
+      if (lead.goal && (["traffic", "leads", "brand", "all"] as const).includes(lead.goal as "traffic" | "leads" | "brand" | "all")) {
+        form.setValue("statedGoal", lead.goal as "traffic" | "leads" | "brand" | "all");
+      }
+      if (lead.auditScores) {
+        form.setValue("auditScores", {
+          ux: lead.auditScores.ux ?? undefined,
+          seo: lead.auditScores.seo ?? undefined,
+          social: lead.auditScores.social ?? undefined,
+          aiVisibility: lead.auditScores.aiVisibility ?? undefined,
+        });
+      }
+
+      setLoadedLead({ id: lead.id, businessName: lead.businessName });
+      toast({ title: "Lead loaded", description: lead.businessName });
+    } catch {
+      setLeadError("No lead found for that email or UUID.");
+      setLoadedLead(null);
+    } finally {
+      setLeadLoading(false);
+    }
+  };
+
   const watched = form.watch();
   const isWebsite = watched.projectType === "web";
   const isProject = watched.projectType === "project";
@@ -117,6 +158,7 @@ export default function NewProposal() {
           clientName: values.clientName,
           businessName: values.businessName,
           projectType: values.projectType,
+          leadId: loadedLead?.id,
           specialContext: values.specialContext || undefined,
           city: values.city || undefined,
           industry: values.industry || undefined,
@@ -178,6 +220,54 @@ export default function NewProposal() {
       <div className="max-w-2xl space-y-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+
+            {/* Lead Lookup — auto-populates the form from a leads table row */}
+            <Card style={{ borderColor: "#d8bfa7" }} className="bg-card/50 backdrop-blur border">
+              <CardHeader>
+                <CardTitle
+                  className="font-mono text-sm uppercase tracking-wider"
+                  style={{ color: "#7c370c" }}
+                >
+                  Load Lead (optional)
+                </CardTitle>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Paste a lead's email or UUID to auto-populate the form from the leads table.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="email@example.com or lead UUID"
+                    value={leadQuery}
+                    onChange={(e) => setLeadQuery(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); handleLoadLead(); } }}
+                    disabled={leadLoading}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleLoadLead}
+                    disabled={!leadQuery.trim() || leadLoading}
+                    style={{ backgroundColor: "#061e57", color: "#f5f0eb" }}
+                  >
+                    {leadLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Load Lead"}
+                  </Button>
+                </div>
+                {loadedLead && (
+                  <div
+                    className="text-xs px-3 py-2 rounded-md flex items-center gap-2"
+                    style={{ backgroundColor: "#b3cee1", color: "#061e57" }}
+                  >
+                    <span>✓</span>
+                    Lead loaded — <strong>{loadedLead.businessName}</strong>
+                  </div>
+                )}
+                {leadError && (
+                  <div className="text-xs px-3 py-2 rounded-md bg-red-50 text-red-700 border border-red-200">
+                    {leadError}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Client Details */}
             <Card className="bg-card/50 backdrop-blur border-border/50">
