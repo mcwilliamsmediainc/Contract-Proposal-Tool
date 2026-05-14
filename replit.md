@@ -106,13 +106,31 @@ lib/
 
 ## Environment Variables
 
+All values live in Replit Secrets — never commit them.
+
+### Core
 - `DATABASE_URL` — PostgreSQL connection string (Replit-managed)
 - `SESSION_SECRET` — Express session secret
 - `CLERK_SECRET_KEY` — Clerk backend key
 - `CLERK_PUBLISHABLE_KEY` — Clerk publishable key
 - `VITE_CLERK_PUBLISHABLE_KEY` — Clerk key for frontend
+
+### AI integrations
 - `AI_INTEGRATIONS_GEMINI_BASE_URL` — Gemini AI proxy base URL
 - `AI_INTEGRATIONS_GEMINI_API_KEY` — Gemini AI proxy key
+- `AI_INTEGRATIONS_ANTHROPIC_BASE_URL` — Anthropic AI proxy base URL (used by Paige)
+- `AI_INTEGRATIONS_ANTHROPIC_API_KEY` — Anthropic AI proxy key (used by Paige)
+
+### Slack / Maxwell
+- `SLACK_BOT_TOKEN` — Slack bot OAuth token (`xoxb-…`). Required for Maxwell
+  to post briefings to `#ops-daily`. See [docs/make-maxwell-setup.md](docs/make-maxwell-setup.md)
+  for Slack app setup.
+- `MAXWELL_API_KEY` — Shared secret protecting `POST /api/agents/maxwell/briefing`.
+  Generate with `openssl rand -hex 32` and paste both into Replit Secrets and
+  the Make.com HTTP module's `x-api-key` header.
+- `REPLIT_APP_URL` — The live Replit app URL (e.g. `https://your-repl.replit.app`).
+  Used by `scripts/src/test-maxwell-endpoint.ts` to hit the live Maxwell
+  endpoint as a smoke test before configuring Make.com.
 
 ## Codegen
 
