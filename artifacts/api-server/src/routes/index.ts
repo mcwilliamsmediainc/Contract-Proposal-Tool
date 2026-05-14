@@ -10,6 +10,7 @@ import cancellationsRouter from "./cancellations";
 import auditRouter from "./audit";
 import masterClientsRouter from "./master-clients";
 import maxwellRouter from "./agents/maxwell";
+import leadsRouter from "./leads";
 import { requireAuth } from "../middlewares/requireAuth";
 
 const router: IRouter = Router();
@@ -60,5 +61,6 @@ router.use(cancellationsRouter);
 router.use(auditRouter);
 router.use(masterClientsRouter);
 router.use(maxwellRouter);
+router.use(leadsRouter);
 
 export default router;
