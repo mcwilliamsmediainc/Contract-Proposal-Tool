@@ -1,7 +1,10 @@
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
-import * as XLSX from "xlsx";
+// SheetJS's `xlsx` is a CJS package — in Node ESM (`tsx`), a namespace import
+// nests its real exports under `.default` and `XLSX.readFile` ends up undefined
+// at runtime. Default import gives us the module.exports object directly.
+import XLSX from "xlsx";
 import { eq } from "drizzle-orm";
 import { db, clientsTable } from "@workspace/db";
 
