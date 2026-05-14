@@ -81,6 +81,38 @@ export const RequestAuditProposalResponse = zod.object({
 });
 
 /**
+ * @summary Find a lead by email or UUID
+ */
+export const LookupLeadQueryParams = zod.object({
+  q: zod.coerce
+    .string()
+    .describe("Email address or lead UUID (exact match either way)"),
+});
+
+export const LookupLeadResponse = zod
+  .object({
+    id: zod.string().describe("Lead UUID"),
+    businessName: zod.string(),
+    contactName: zod.string().nullish(),
+    email: zod.string().nullish(),
+    website: zod.string().nullish(),
+    city: zod.string().nullish(),
+    auditScores: zod
+      .object({
+        ux: zod.number().nullish(),
+        seo: zod.number().nullish(),
+        social: zod.number().nullish(),
+        aiVisibility: zod.number().nullish(),
+      })
+      .nullish(),
+    goal: zod.string().nullish(),
+    budgetRange: zod.enum(["lean", "mid", "high"]).nullish(),
+    status: zod.string(),
+    source: zod.string().nullish(),
+  })
+  .describe("A lead record, shaped for the proposal builder's pre-fill UI.");
+
+/**
  * @summary List all audit leads (admin)
  */
 export const ListAuditLeadsResponseItem = zod.object({
@@ -898,6 +930,12 @@ export const GenerateProposalContentBody = zod.object({
   ]),
   totalAmount: zod.number().optional(),
   specialContext: zod.string().nullish(),
+  leadId: zod
+    .string()
+    .nullish()
+    .describe(
+      "UUID or email of a row in the leads table. When provided, Paige's\ninput context is hydrated from that lead (business name, city,\naudit scores, goal, budget) and matching request-body fields are\nignored. Returns 404 if no lead matches.\n",
+    ),
   city: zod.string().nullish(),
   industry: zod.string().nullish(),
   budgetRange: zod.enum(["lean", "mid", "high"]).nullish(),

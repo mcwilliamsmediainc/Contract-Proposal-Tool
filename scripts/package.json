@@ -7,13 +7,15 @@
     "hello": "tsx ./src/hello.ts",
     "test:paige": "tsx ./src/test-paige.ts",
     "test:maxwell": "tsx ./src/test-maxwell.ts",
+    "import:clients": "tsx ./src/import-clients.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@workspace/db": "workspace:*",
     "@workspace/integrations-claude": "workspace:*",
     "@workspace/integrations-slack": "workspace:*",
-    "drizzle-orm": "catalog:"
+    "drizzle-orm": "catalog:",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "catalog:",

@@ -415,6 +415,12 @@ export interface GenerateProposalBody {
   projectType: GenerateProposalBodyProjectType;
   totalAmount?: number;
   specialContext?: string | null;
+  /** UUID or email of a row in the leads table. When provided, Paige's
+input context is hydrated from that lead (business name, city,
+audit scores, goal, budget) and matching request-body fields are
+ignored. Returns 404 if no lead matches.
+ */
+  leadId?: string | null;
   city?: string | null;
   industry?: string | null;
   budgetRange?: GenerateProposalBodyBudgetRange;
@@ -628,6 +634,41 @@ export interface AuditObservation {
   aiQuote?: string | null;
 }
 
+export type LeadLookupResultAuditScores = {
+  ux?: number | null;
+  seo?: number | null;
+  social?: number | null;
+  aiVisibility?: number | null;
+} | null;
+
+export type LeadLookupResultBudgetRange =
+  | (typeof LeadLookupResultBudgetRange)[keyof typeof LeadLookupResultBudgetRange]
+  | null;
+
+export const LeadLookupResultBudgetRange = {
+  lean: "lean",
+  mid: "mid",
+  high: "high",
+} as const;
+
+/**
+ * A lead record, shaped for the proposal builder's pre-fill UI.
+ */
+export interface LeadLookupResult {
+  /** Lead UUID */
+  id: string;
+  businessName: string;
+  contactName?: string | null;
+  email?: string | null;
+  website?: string | null;
+  city?: string | null;
+  auditScores?: LeadLookupResultAuditScores;
+  goal?: string | null;
+  budgetRange?: LeadLookupResultBudgetRange;
+  status: string;
+  source?: string | null;
+}
+
 export type AuditLeadStatus =
   (typeof AuditLeadStatus)[keyof typeof AuditLeadStatus];
 
@@ -711,6 +752,13 @@ export type QualifyAuditLead200 = {
 
 export type RequestAuditProposal200 = {
   success?: boolean;
+};
+
+export type LookupLeadParams = {
+  /**
+   * Email address or lead UUID (exact match either way)
+   */
+  q: string;
 };
 
 export type ListProposalsParams = {

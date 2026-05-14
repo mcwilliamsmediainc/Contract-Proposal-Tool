@@ -150,6 +150,27 @@ paths:
                   success:
                     type: boolean
 
+  /admin/leads/lookup:
+    get:
+      operationId: lookupLead
+      tags: [admin]
+      summary: Find a lead by email or UUID
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema: { type: string }
+          description: Email address or lead UUID (exact match either way)
+      responses:
+        "200":
+          description: Lead found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LeadLookupResult"
+        "404":
+          description: No matching lead
+
   /admin/audit-leads:
     get:
       operationId: listAuditLeads
@@ -1490,6 +1511,14 @@ components:
         specialContext:
           type: string
           nullable: true
+        leadId:
+          type: string
+          nullable: true
+          description: |
+            UUID or email of a row in the leads table. When provided, Paige's
+            input context is hydrated from that lead (business name, city,
+            audit scores, goal, budget) and matching request-body fields are
+            ignored. Returns 404 if no lead matches.
         city:
           type: string
           nullable: true
@@ -1965,6 +1994,33 @@ components:
         aiQuote:
           type: string
           nullable: true
+
+    LeadLookupResult:
+      type: object
+      description: A lead record, shaped for the proposal builder's pre-fill UI.
+      properties:
+        id: { type: string, description: "Lead UUID" }
+        businessName: { type: string }
+        contactName: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        website: { type: string, nullable: true }
+        city: { type: string, nullable: true }
+        auditScores:
+          type: object
+          nullable: true
+          properties:
+            ux: { type: number, nullable: true }
+            seo: { type: number, nullable: true }
+            social: { type: number, nullable: true }
+            aiVisibility: { type: number, nullable: true }
+        goal: { type: string, nullable: true }
+        budgetRange:
+          type: string
+          enum: [lean, mid, high]
+          nullable: true
+        status: { type: string }
+        source: { type: string, nullable: true }
+      required: [id, businessName, status]
 
     AuditLead:
       type: object

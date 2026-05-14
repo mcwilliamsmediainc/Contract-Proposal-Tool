@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { eq, desc, asc, inArray } from "drizzle-orm";
+import { eq, desc, asc, inArray, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
-import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable, onboardingFormResponsesTable, contractsTable } from "@workspace/db";
+import { db, proposalsTable, onboardingTasksTable, onboardingClientsTable, onboardingFormResponsesTable, contractsTable, leadsTable } from "@workspace/db";
 import {
   CreateProposalBody,
   UpdateProposalBody,
@@ -204,14 +204,48 @@ router.post("/proposals/generate", async (req, res) => {
   }
 
   const { clientName, businessName, projectType, specialContext } = parsed.data;
-  const { city, industry, budgetRange, statedGoal, auditScores, notes } = parsed.data;
+  // Mutable so the lead-hydration block below can override them.
+  let { city, industry, budgetRange, statedGoal, auditScores, notes } = parsed.data;
+  let effectiveClientName = clientName;
+  let effectiveBusinessName = businessName;
+
+  // Lead lookup: when leadId is provided, hydrate Paige's context from the
+  // leads table. Lead values win over the matching request-body fields.
+  if (parsed.data.leadId) {
+    const [lead] = await db
+      .select()
+      .from(leadsTable)
+      .where(or(eq(leadsTable.uuid, parsed.data.leadId), eq(leadsTable.email, parsed.data.leadId)))
+      .limit(1);
+
+    if (!lead) {
+      res.status(404).json({ error: "No lead found for that leadId." });
+      return;
+    }
+
+    effectiveBusinessName = lead.businessName;
+    effectiveClientName = lead.contactName ?? clientName;
+    city = lead.city ?? city;
+    budgetRange = (lead.budgetRange as typeof budgetRange) ?? budgetRange;
+    statedGoal = lead.goal ?? statedGoal;
+
+    const ls = (lead.auditScore ?? null) as Record<string, unknown> | null;
+    if (ls) {
+      auditScores = {
+        ux: typeof ls["ux"] === "number" ? ls["ux"] : 0,
+        seo: typeof ls["seo"] === "number" ? ls["seo"] : 0,
+        social: typeof ls["social"] === "number" ? ls["social"] : 0,
+        aiVisibility: typeof ls["ai_visibility"] === "number" ? ls["ai_visibility"] : 0,
+      };
+    }
+  }
 
   const projectLabel = projectType === "web" ? "website" : projectType === "marketing" ? "marketing strategy" : projectType === "print" ? "print & brand" : "project";
 
   // Translate the camelCase API wire format to Paige's snake_case prompt input.
   const paigeContext: PaigeProposalContext = {
-    business_name: businessName,
-    contact_name: clientName,
+    business_name: effectiveBusinessName,
+    contact_name: effectiveClientName,
     city: city ?? undefined,
     industry: industry ?? undefined,
     stated_goal: statedGoal ?? undefined,

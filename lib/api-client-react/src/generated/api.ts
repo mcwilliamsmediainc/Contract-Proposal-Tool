@@ -47,8 +47,10 @@ import type {
   GenerateProposalBody,
   GeneratedProposalContent,
   HealthStatus,
+  LeadLookupResult,
   ListContractsParams,
   ListProposalsParams,
+  LookupLeadParams,
   OnboardingClient,
   OnboardingFormState,
   OnboardingTask,
@@ -505,6 +507,100 @@ export const useRequestAuditProposal = <
 > => {
   return useMutation(getRequestAuditProposalMutationOptions(options));
 };
+
+/**
+ * @summary Find a lead by email or UUID
+ */
+export const getLookupLeadUrl = (params: LookupLeadParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/admin/leads/lookup?${stringifiedParams}`
+    : `/api/admin/leads/lookup`;
+};
+
+export const lookupLead = async (
+  params: LookupLeadParams,
+  options?: RequestInit,
+): Promise<LeadLookupResult> => {
+  return customFetch<LeadLookupResult>(getLookupLeadUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getLookupLeadQueryKey = (params?: LookupLeadParams) => {
+  return [`/api/admin/leads/lookup`, ...(params ? [params] : [])] as const;
+};
+
+export const getLookupLeadQueryOptions = <
+  TData = Awaited<ReturnType<typeof lookupLead>>,
+  TError = ErrorType<void>,
+>(
+  params: LookupLeadParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof lookupLead>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getLookupLeadQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof lookupLead>>> = ({
+    signal,
+  }) => lookupLead(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof lookupLead>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type LookupLeadQueryResult = NonNullable<
+  Awaited<ReturnType<typeof lookupLead>>
+>;
+export type LookupLeadQueryError = ErrorType<void>;
+
+/**
+ * @summary Find a lead by email or UUID
+ */
+
+export function useLookupLead<
+  TData = Awaited<ReturnType<typeof lookupLead>>,
+  TError = ErrorType<void>,
+>(
+  params: LookupLeadParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof lookupLead>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getLookupLeadQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
 
 /**
  * @summary List all audit leads (admin)
